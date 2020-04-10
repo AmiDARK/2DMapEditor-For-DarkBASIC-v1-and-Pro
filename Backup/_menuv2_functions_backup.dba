@@ -1,0 +1,118 @@
+
+REMSTART
+_Prepare_Menu(LANGAGE$)
+_MENU_SELECTED=_Display_Menu(_OPTION_SELECTED)
+_OPTION_SELECTED=_select_submenu(_MENU_SELECTED)
+_aftersync_menu
+_disable_option(_menu,_option)
+_enable_option(_menu,_option)
+RemEND
+
+Rem
+Rem Fonction qui permet de créer les menus à partir de fichiers sur disque . . .
+Rem
+function _prepare_menu(file$)
+  _loaded=file exist(file$)
+  if _loaded=1
+    open to read 1,file$
+    read string 1,_how_many$ : _menu_options(0)=val(_how_many$) : Rem Combien de menus différents existe t-il ?
+    read string 1,_st$ : Rem Text Transitoire
+    for boucle=1 to _menu_options(0)
+      read string 1,_menu_name$(boucle,0) : Rem On lit le nom du menu
+      read string 1,_opt$ : _menu_options(boucle)=val(_opt$) : Rem On lit combien il y a d'options dans le menu
+      if _menu_options(boucle)>_menu_sys(3) then _menu_sys(3)=_menu_options(boucle)
+      for sousboucle=1 to _menu_options(boucle)
+        read string 1,_menu_name$(boucle,sousboucle) : Rem On lit les options du menu
+        _option_state(boucle,sousboucle)=1
+       next sousboucle
+      read string 1,_st$ : Rem Text transitoire
+     next boucle
+    close file 1
+    load image _FilesPath$(1)+"\editor\menu_item.jpg",_menu_sys(1)
+   endif
+ endfunction _loaded
+Rem
+Rem Fonction qui affiche le menu principal si nécessaire.
+Rem
+function _display_menu(option_selected)
+  if option_selected=0
+    if _menu_sys(4)=1 then get image _menu_sys(2),0,0,_menu_options(0)*128,(_menu_sys(3)+1)*16
+    menu_selected=0
+   endif
+  Rem on rentre dans la boucle
+  xm=mousex() : ym=mousey()
+  if ym<16 and xm<(128*_menu_options(0))
+    menu_selected=(xm/128)+1
+    for boucle=1 to _menu_options(0)
+      if boucle=menu_selected then ink rgb(255,255,255),0 else ink rgb(32,32,32),0
+      paste image _menu_sys(1),(boucle-1)*128,0
+      set cursor ((boucle-1)*128)+4,1 : print _menu_name$(boucle,0)
+     next boucle
+    for boucle=1 to _menu_options(menu_selected)
+     paste image _menu_sys(1),(menu_selected-1)*128,(boucle*16)
+      set cursor ((menu_selected-1)*128)+4,(boucle*16)+1
+      if _option_state(menu_selected,boucle)=1 then ink rgb(32,32,32),0 else ink rgb(128,128,128),0
+      print _menu_name$(menu_selected,boucle)
+     next boucle
+   endif
+ endfunction menu_selected
+Rem
+Rem Fonction qui affiche les sous-menu si nécessaire
+Rem
+function _select_submenu(menu_selected)
+  option_selected=0
+  if menu_selected=0 and _menu_sys(4)=1 then get image _menu_sys(2),0,0,_menu_options(0)*128,(_menu_sys(3)+1)*16
+  xm=mousex() : ym=mousey()
+  if ym<(16*(_menu_options(menu_selected)+1)) and ym>15
+    if xm>=(menu_selected-1)*128 and xm<menu_selected*128
+      option_selected=(ym/16)
+      for boucle=1 to _menu_options(0)
+        if boucle=menu_selected then ink rgb(255,255,255),0 else ink rgb(32,32,32),0
+        paste image _menu_sys(1),(boucle-1)*128,0
+        set cursor ((boucle-1)*128)+4,1 : print _menu_name$(boucle,0)
+       next boucle
+      for boucle=1 to _menu_options(menu_selected)
+        if _option_state(menu_selected,boucle)=0
+          ink rgb(128,128,128),0
+         else
+          if boucle=option_selected then ink rgb(255,255,255),0 else ink rgb(32,32,32),0
+         endif
+        paste image _menu_sys(1),(menu_selected-1)*128,(boucle*16)
+        set cursor ((menu_selected-1)*128)+4,(boucle*16)+1 : print _menu_name$(menu_selected,boucle)
+      next boucle
+    endif
+  endif
+ endfunction option_selected
+Rem
+Rem Synchro pour le menu .
+Rem
+function _aftersync_menu
+  if image exist(_menu_sys(2) )=1 and _menu_sys(4)=1 then paste image _menu_sys(2),0,0
+ endfunction
+Rem
+Rem On désactive une option si elle est active . . .
+Rem
+function _disable_option(_menu,_option)
+  if _menu_options(0)>=_menu and _menu>0
+    if _menu_options(_menu)>=_option and _option>0
+      _option_state(_menu,_option)=0
+     endif
+   endif
+ endfunction
+Rem
+Rem On active une option si elle est inactive . . .
+Rem
+function _enable_option(_menu,_option)
+  if _menu_options(0)>=_menu and _menu>0
+    if _menu_options(_menu)>=_option and _option>0
+      _option_state(_menu,_option)=1
+     endif
+   endif
+ endfunction
+Rem
+Rem On efface les buffers si ils sont utilisés.
+Rem
+function _clear_menu
+  if image exist(_menu_sys(1) )=1 then delete image _menu_sys(1)
+  if image exist(_menu_sys(2) )=1 then delete image _menu_sys(2)
+ endfunction

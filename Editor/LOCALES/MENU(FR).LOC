@@ -1,0 +1,71 @@
+5
+----------------
+DISQUE
+13
+Charger Map
+Sauver Map
+Effacer Map
+Charger Texture
+Effacer Texture
+Charger Objet 3D
+Sélection Objet 3D
+Effacer Objet 3D
+Charger Son 3D
+Sélection Son 3D
+Effacer Son 3D
+Mode Preview
+Quitter
+---------------
+OBJETS
+17
+Ajout Lumière
+Ajout Objet 3D
+Ajout Son 3D
+Ajout Sphère
+Ajout Cube
+Ajout Boîte
+Ajout Cylindre
+Ajout Cône
+Ajout Plan
+Copier Objet
+Déplacer Objet
+Dimension Objet
+Rotation Objet
+Changer objet
+Attributs d'Objet
+Efface Objet
+Optimise Position
+--------------
+ENVIRONNEMENT
+3
+Attributs Ambiance
+Direction Ambiance
+Propriétés Lumière
+--------------
+EXTRAS 1 ZONES
+16
+Ajout Zone
+Déplacer Zone
+Dimension Zone
+Sélection Zone
+Propriété Zone
+Effacer Zone
+EXTRAS 2 MATRIX
+Ajout Matrice
+Déplacer Matrice
+Editer Hauteurs
+Editer Tiles
+Sélection Matrice
+Propriété Matrice
+Effacer Matrice
+Matrix Rnd(y)
+MAtrix Terrain
+---------------
+AIDES
+4
+Fonctions
+Infos
+Site HTTP
+Enregistrement
+---------------
+ENDMENU

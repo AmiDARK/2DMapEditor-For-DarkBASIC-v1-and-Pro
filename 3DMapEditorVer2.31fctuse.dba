@@ -1,0 +1,3752 @@
+Rem ***************************************************************************
+Rem *                                                                         *
+Rem * 33333 DDDD  M   M  AAA  PPPP        EEEEE DDDD  IIIII TTTTT  OOO  RRRR  *
+Rem *     3 D   D MM MM A   A P   P       E   E D   D   I   T T T O   O R   R *
+Rem *   33  D   D M M M AAAAA PPPP  ----- EEE   D   D   I     T   O   O RRRR  *
+Rem *     3 D   D M   M A   A P           E   E D   D   I     T   O   O R R   *
+Rem * 3333  DDDD  M   M A   A P           EEEEE DDDD  IIIII   T    OOO  R  R  *
+Rem *                                                                         *
+Rem ***************************************************************************
+Rem Version/Revision  : 2.40dbp
+Rem Date              : 27.08.08
+Rem Auteur            : Frédéric Cordier
+Rem Map Ver/Rev       : 1.12
+Rem
+_Ver$="Ver 2.40(27.08.08)"
+Rem                                                                  ********************************************
+Rem                                                                   **
+Rem                                                                     ***
+Rem ************************************************************************ COMMENTAIRES / MISES à JOUR .
+Rem ****************************************************************************
+Rem Adaptation des fonctions vers Magic-Windows :
+Rem ---------------------------------------------
+Rem Files patchées pour Magic-Windows :
+Rem _editor_language_functions.dba       Ok!
+Rem _editor_synchro_functions.dba        PATCHED !
+Rem _editor_objects_functions.dba        PATCHED ! 100% Real-Time : Objects-Properties
+Rem _editor_miscellaneous_functions.dba  Ok!
+Rem _editor_fileselector_function.dba    PATCHED !
+Rem _editor_zones_functions.dba          Ok!
+Rem _menuv2_functions.dba                Ok!
+Rem _editor_matrix_functions.dba         PATCHED ! 100% Real-Time : Matrixes-Properties
+Rem _user_collision_system.dba           Ok!
+Rem _MW_functions.dba                    SYSTEM !
+Rem _3DMe_Magic_Windows.dba              Ok!
+Rem _MAIN_PROGRAM_FILE.dba               PATCHED !
+
+Rem
+Rem STILL TO DO :
+Rem -------------
+REM MATRICES :
+REM - fonction "Matrix Terrain" ( fonction inactive en ver 2.30 )
+REM - fonction "Matrix Noise" ( fonction inactive en ver 2.30 )
+Rem - Matrix WATER slow-motion
+REM OBJETS 3D :
+REM - amélioration du système de scaling de texture sur les objets :
+Rem                                    MODE AUTO-SCALING / NO SCALINGS / MANUAL SCALING
+REM - déplacement d'un membre d'un objet
+REM - rotation d'un membre d'un objet
+REM - texturage d'un membre d'un objet
+REM ZONES D'ACTION :
+REM - nouvelle zone d'action " Zone de pluie - particules emulation "
+REM - nouvelle zone d'action " Zone de neige - particules emulation "
+REM - nouvelle zone d'action " Zone de feu - particules emulation - Objet 3D "
+REM SONS 3D :
+REM - Panneau de configuration pour les sons 3D ( replay , delay , etc . . . )
+REM SOURCES LUMINEUSES :
+REM - Panneau de configuration pour les lumières ( point light , lights effects )
+REM - Effets lumineux surprises ( stroboscopes , variables , torche , etc . . . )
+REM - Sélection des lumières
+REM DIVERS :
+REM - Simplification du système d'utilisation des .maps de 3DMe
+REM - Aide " Build IN "
+REM - Aide " Iconographique " ( doc détaillée dans le logiciel sur les icones )
+REM EDITOR :
+REM - Changement de résolution d'écran
+REM - Mode fenétré
+Rem - Project Manager : Permettra de sauver une carte ainsi que tout les fichiers nécessaires dans 1 dossier.
+Rem - Textures pack : sélection d'un pack de texture dans une liste , puis d'une texture dans un pack.
+Rem - Objects Pack : Sélection d'un pack d'objets 3D dans une liste , puis d'1 objet précis pour l'ajouter.
+
+Rem ****************************************************************************
+Rem 20.12.02 / Ver 2.31
+Rem   - Mise en place de Magic-Windows et des systèmes de fenêtres
+Rem   - Fix du pas de rotation par défaut à 45° .
+Rem   - Sauvegarde des positions des fenêtres pour chargement en début d'utilisation.
+Rem   - Icones sélectionnés en Surbrillance.
+Rem   - Mode De texturage augmenté. ( mode AUTO-SCALING / SCALING )
+Rem   - Fix du bug de la barre de menu qui fait clignoter les fenêtres.
+Rem ****************************************************************************
+Rem 20.11.02 / Ver 2.30
+Rem   - Fix d'un bug sur le Skin par défaut si le fichier est effacé.
+Rem   - Fix d'un bug dans la lumière ambiante après chargement d'une map.
+Rem   - Mise en place du système de menus Ver2.00+.
+Rem   - Mise en place des commentaires dans la sélection des options de menus.
+Rem   - Mise en place du nouveau SKIN editeur 100%
+Rem   - Mise en place du système de matrices 3DGC complet + collisions dans le mode démo .
+Rem   - ( Map revision 1.12 : Gestion des matrices ) .
+Rem ****************************************************************************
+Rem 07.07.02 / Ver 2.29
+Rem   - Fix du flash pendant le file selecteur pour charger les maps.
+Rem   - Ajout des menus déroulants 1,2,3 et 4.
+Rem   - Fix d'un bug dans le chargement de nouveaux sons 3D.
+Rem   - Fix pour utiliser les valeurs définies de la couleur Ambiante
+Rem   - Mise en place de SKINS pour customiser l'éditeur ! ( changer le look graphique de l'éditeur )
+Rem   - Ajout des fonctions :
+Rem          _Create_Zone / _Move_Zone / _Scale_Zone / _Refresh_Zone / _Select_Zone / _Kill_Zone / _Zone_Properties
+Rem   - Les zones sont sauvegardées et chargés des fichiers map.
+Rem   - Les zones sont cachés dans la démo.
+Rem   - Les utilisateurs non-enregistrés ne pourront créer qu'un maximum de 16 zones ( au lieu de 256 )
+Rem   - Zone 0 à 6 prêtes à 100%
+Rem   - Mise en place du scaling de texture pour des valeur de 0.01 à 0.99 par pas de 0.01 minimum.
+Rem   - Optimisation du code source de l'éditeur utilisant maintenant des "Fonctions" au lieu de "sous-programmes"
+Rem   - L'éditeur accepte les chemins de dossier relatifs dans le fichier 3DMapEdit.cfg
+Rem ****************************************************************************
+Rem 13.06.02 / Ver 2.28
+Rem   - Fix du QUIT de l'éditeur , maintenant , tout est éffacé correctement.
+Rem ****************************************************************************
+Rem 06.06.02 / Ver 2.27 Beta r1
+Rem   - Ajout d'une nouvelle fonction : OBJET CACHE
+Rem   - Ajout d'une nouvelle fonction : COLLISION D'OBJET.
+Rem   - Changement : Mode preview est maintenant un mode exploration 3D complet ( démo jouable )
+Rem   - Fix des bugs d'affichage des sprites de la souris et des cases de sélection.
+Rem ****************************************************************************
+Rem 11.05.02 / Ver 2.26 Beta r1
+Rem   - Rajout de la fonction de sélection d'objet 3D DirectX.
+Rem   - Rajout de la fonction de sélection d'un son 3D.
+Rem   - Fix d'un bug dans le file-loader sur les filtres de fichiers.
+Rem   - L'éditeur n'utilise plus la mémoire vidéo et la compression de texture.(options à activer dans le fichier 3DMAPEDIT.CFG)
+Rem   - Fix d'un bug qui empechait de charger les cartes dans le dossier "tutorials_maps"
+Rem   - Création d'une fonction de WaitSynchro pour toutes les routines ( avec mouvements de la souris )
+Rem   - Fix du bug de la camera lorsqu'on ajoute un objet 3D DirectX.
+Rem   - Matrice de calage evoluée
+Rem ****************************************************************************
+Rem 25.04.02 - 26.04.02 / Ver 2.25
+Rem   - Finition de la routine de _Kill Texture ( ajout des aperçus de textures + utilisation de chaque texture )
+Rem   - Nouvelle fonction routine _Kill_DirectXObject ( copie de _Kill_Texture mais pour les objets directX )
+Rem   - le code source de 3DMapEditor dépasse les 3000 lignes !!!!
+Rem   - Nouvelle fonction routine _Kill_3DSound !!! ( copie de _Kill_DirectXObject ) NON TESTEE !!!
+Rem   - Fix d'un bug : lorsque l'on effaçais unt object 3DSOUND , le son restait . Fixé.
+Rem   - Protection des routines contre les appels inutiles.
+Rem   - Ajout du support pour l'affichage dans le file-selector des SNAPSHOTS-MINIATURES des cartes
+Rem   - Toutes les fonction quittables par la barre d'espace le sont aussi par le bouton droit de la souris.
+Rem   - Les objets 3D du type 3DS sont gérés.
+Rem ****************************************************************************
+Rem 24.04.02 / Ver 2.24
+Rem   - Mise en place de la gestion des attributs WIREFRAME,TRANSPARENCY,CULL,FILTER,LIGHT,FOG,AMBIENT
+Rem   - Mise en place de l'aperçu rapide et information de format de textures dans le file-selector.
+Rem   - Nouvelle organisation de l'interface de l'éditeur.
+Rem   - Nouvelle fonction : Destruction d'une texture de la liste.
+Rem   - modification des raccourcis clavier
+Rem ****************************************************************************
+Rem 15.04.02 / Ver 2.22
+Rem   - Mise en place de mon file selector pour le chargement de cartes 3D ( inspiré de celui de Dobro ).
+Rem   - Idem pour le chargement de textures et des sons 3D
+Rem   - Mise en place des dossiers de travail MAPS / TEXTURES / OBJECTS_LIBRARY / 3DSOUND.
+Rem   - Rectification d'un bug qui mettait tout en noir apres chargement de carte.
+Rem ****************************************************************************
+Rem 12.04.02 / Ver 2.21
+Rem   - Les lampes sont vues comme des lampes en object 3D transparent ( DirectX object )
+Rem   - Optimisations des créations des objets ( interne à l'éditeur )
+Rem   - Chargement et mise en place de sons 3D. ( vus comme une note musicale )
+Rem   - Maintenant langages sont 100% selon la sélection.
+Rem   - Les Sons 3D sont sauvés et chargés dans les maps.
+Rem   - Ré-organisation de la position des routines de l'éditeur. ( optimisations )
+Rem ****************************************************************************
+Rem 10.04.02 / Ver 2.20
+Rem   - Correction d'un bug qui faisait doubler le dernier objet après effacement d'objets.
+Rem   - Ajout de la fonction d'optimisation des objets 3D par rapport aux distances respectives.
+Rem ****************************************************************************
+Rem 08.04.02 / Ver 2.19
+Rem   - SET OBJECT COLLISION OFF xxx , pour rendre un peu plus fluide .
+Rem 09.04.02 / Ver 2.19b
+Rem   - HTML documentation en ANGLAIS !!!
+Rem   - Ajout de la gestion du langage ANGLAIS dans l'éditeur.
+Rem   - Ajout de l'aide rapide lors de la sélection d'un icone.
+Rem   - Fonction de suppression d'objet ( et de lumière aussi ) active
+Rem   - Fix d'un bug de rafraichissement d'objet en mode "selection objet"
+Rem ****************************************************************************
+Rem 07.04.02 / Ver 2.18
+Rem   - Mise en place de la gestion du numero d'utilisateur
+Rem   - Correction d'un bug du chargement de cartes.
+Rem   - Mise en place du spy dans la map
+Rem ****************************************************************************
+Rem 06.04.02 / Ver 2.17
+Rem   - Ajout de la gestion du SCALING de TEXTURES : Ok!
+Rem ****************************************************************************
+Rem 03.04.02 / Ver 2.16 .
+Rem   - Improvements sur la gestion des objets 3D DirectX.
+Rem ****************************************************************************
+Rem 01.04.02 / Ver 2.15 .
+Rem   - Ajout du chargement et de la mise en place des objets 3D.   Ok!
+Rem   - Type de mémoire utilisée par les textures ( +compression )
+Rem ****************************************************************************
+Rem 25.03.02 / Ver 2.14 .
+Rem   - Minor improvements.
+Rem ****************************************************************************
+Rem 24.03.02 / Ver 2.12 - 2.13 :
+Rem   - Corrected a bug un texture_modify                           Working !
+Rem   - Scaling Object kind 1,2,3 are now fully optionnal           Working !
+Rem   - NEW OPTION : Copy Object fully fonctionnal                  Ok !
+Rem   - Optimisation de la routine de rafraichissement d'objets.    Ok !
+Rem   - Correction d'un bug qui effaçait la matrice.                Ok !
+Rem ****************************************************************************
+Rem 19.03.02 / Ver 2.10 - 2.11 :
+Rem   - Ajout de la lumière d'ambiance EDITEUR/SAVE/LOAD            Working !
+Rem   - Ajout de l'angle de la lumière ambiante.                    Working !
+Rem   - Ajout de la gestion des lumières !                          Working !
+Rem   - Paramètres de lumière actifs !                              Working !
+Rem ****************************************************************************
+Rem 18.03.02 / Ver 2.00 - 2.01 - 2.02 :
+Rem   - Restructuration complète de l'éditeur !                     Working !
+Rem   - Optimisations liées aux choix.                              Working !
+Rem   - Fast-Debugging : all functions tested.                      Ok !
+Rem   - Corrections mineures.                                       Ok !
+Rem   - Il est à nouveau possible de rentrer les noms de fichiers.  Working !
+Rem   - Affichage de 4 textures sur la barre et décalage.           Working !
+Rem   - Les textures sont directement selectionnables par clics     Working !
+Rem ****************************************************************************
+
+Rem Fonctions à ajouter :
+Rem   - Pouvoir modifier les paramètres d'une lumière deja créee et n'étant pas la dernière en cours.
+Rem   - Utilisation des matrices .
+Rem   - Gestion de scripts pour les objets 3D.
+Rem ****************************************************************************
+Rem
+Rem                                                                  ********************************************
+Rem                                                                   **
+Rem                                                                     ***
+Rem ************************************************************************ INITIALISATIONS / VARIABLES .
+Rem Définition des variables principales.
+MapVersion=1
+MapRevision=12
+rem Variables temporaires ( initiales ).
+_FADEOBJECT=3000
+_keyboard=1
+plandetravail=16
+defaultsizex=128
+defaultsizey=128
+defaultsizez=128
+defaulttexture=0
+defaultboxsize=160
+defaultrot=45
+lastx=0
+lasty=0
+lastz=0
+newobj=1
+lastobject=newobj
+defaultstep=32
+movespeed=16
+movespeedneg=0-movespeed
+Rem CONFIGURATION INITIALE SI LE FICHIER 3DMAPEDIT.CFG N'EXISTE PAS !
+_BgdRedRGB=0
+_BgdGreenRGB=16
+_BgdBlueRGB=64
+cd "."
+_EdPath$=get dir$()
+_MapPath$=_EdPath$+"\Maps\"
+_TutorialMapPath$=_MapPath$+"Tutorials_Maps\"
+_TexturePath$=_EdPath$+"\Textures\"
+_3DObjectPath$=_EdPath$+"\Objects_Library\"
+_3DSoundPath$=_EdPath$+"\3DSound\"
+_muspath$=_edpath$+"\musics\"
+_soundpath$=_edpath$+"\sounds\"
+Dim _obj(16383,27) : Rem NEW DIMENSION !!! 27 Values for objects Ver 2.27
+Dim _ObjTemp(25)
+Dim _Textures$(256)
+Dim _Config$(256)
+Dim _Lights(256,16) : Rem Défini les 256 lumières qui peuvent virtuellement être crées.
+Dim _LightActive(8) : Rem Défini les 7 lumières qui peuvent être actives en même temps.
+Dim _DirectXObject$(256)
+Dim _3DSound$(256)
+Dim comp(16)
+Dim _Dialogue$(100)
+dim _text$(32)
+Rem Variables nécessaires à Magic-windows
+Rem Variables nécessaires à Magic-windows
+Dim _Windows_sys(32) : Dim _Windows_Order(24)
+Dim _Windows_Data(24,32) : Dim _Windows_Title$(24) : Dim _Windows_Font$(24)
+Dim _Windows_Gadget(24,32,8) : Dim _Windows_Gadget_Text$(24,32) : Dim _Windows_Text$(64)
+Dim _Windows_Default(32,2)
+Dim _Windows_Gadget_Value(24,32)
+Dim _Windows_Default(24,2) : Rem Sauvegarde des positions initialies des fenêtres magic-windows.
+Dim _buttons(2)
+Rem ************************************************************************************
+Rem Gestion des matrices Ver 1.0
+Dim _Matrix(256,16) : Rem Variables système aux matrices.
+Dim _Matrix_Height(256,64,64) : Rem Store all points height
+Dim _Matrix_Tile(256,64,64) : Rem Store which texture are used on matrix.
+Dim _Matrix_RealTile(256,64,64) : Rem Store which texture-tile will really be used on matrix.
+Dim _matrix_tilelist(64) : Rem stoque la liste des images à utiliser pour faire les tiles.
+Dim _Image_X(65535)
+Dim _Image_Y(65535)
+Rem
+Rem ************************************************************************************
+Rem FILE SELECTOR VER 2.0 NEEDED VALUES
+Rem ************************************************************************************
+ dim fileselector$(9)
+ dim fileselectordata(12)
+ dim _filespath$(7)
+ dim _fichier$(256)
+ fileselector$(1)=get dir$()
+ fileselector$(2)="Charger une map"
+ fileselectordata(1)=150
+ fileselectordata(2)=80
+ fileselectordata(11)=65535
+ fileselectordata(12)=65534
+Rem ************************************************************************************
+Rem Variables du système de menu v2.00+
+dim _menu_name$(5,20) : Rem            Stoque les noms des différents menus et options de menu.
+dim _menu_options(16) : Rem             Définit combien il existe d'option par menu.
+dim _option_state(16,32) : Rem          Status des options ACTIVES/INACTIVES
+dim _menu_sys(16) : Rem                 Définition de valeurs système pour le menu.
+dim _menu_value(16,32) : Rem            Stoque les valeurs pour CHOICE.
+ Rem Initialisation du système de menu v2.00+
+_menu_sys(1)=65532 : Rem numéro de l'image ou stoquer l'image du menu
+_menu_sys(2)=65533 : Rem numéro de l'image ou stoquer le fond d'écran.
+_menu_sys(3)=0 : Rem Cette variable est réservée , ne pas la toucher ou la modifier !
+_menu_sys(4)=1 : Rem 1=Utilisation de déssins 2D ( et/ou 3D )  dans l'écran / 0=3D seule dans l'écran.
+Rem ************************************************************************************
+Rem
+Dim _EditorPath$(8)
+Dim _skin_data$(50)
+Rem INFORMATIONS LIES A LA GESTION DES ZONES.
+dim _zone_info(256,17) : Rem Les Zones d'action.
+dim _zone_filename$(256)
+dim _zone_gravity$(2)
+dim _zone_type$(6)
+dim _zone_inside(256) : Rem définit si on est ou pas dans une zone précise.
+dim _zone_sortance(256) : Rem définit si l'on viens juste de sortir d'une zone précise.
+dim _zone_entrance(256) : Rem définit si l'on viens juste de rentrer dans une zone précise.
+dim _zone_active(256) : Rem définit si une zone est active ou non.
+dim _zone_data(16) : Rem store certaines valeurs
+dim _skybox_object(16)
+dim _3dme_temp(256)
+
+_DirectXObject=0
+_LightsNum=0
+_TextureNum=0
+_FirstTexture=1
+_TextureType=0
+_FirstTextureImage=200
+_3dme_temp(12)=_FirstTextureImage
+Rem values are scancode() keyboards values.
+pageupkey=201
+pagedownkey=209
+inserkey=210
+supprkey=211
+defaultkey=199
+ _Registered=0
+Rem From Demo
+humanwalk=0
+walkspeed=10
+player=1
+
+Rem                                                                  ********************************************
+Rem                                                                   **
+Rem                                                                     ***
+Rem ************************************************************************ CHARGEMENT DE LA CONFIGURATION .
+Set Display Mode 640,480,16
+sync rate 75 :sync on
+cls rgb(0,0,0) :sync : cls rgb(0,0,0) :sync
+hide mouse
+autocam off
+configuration_load:
+ink rgb(255,240,128),rgb(0,0,0)
+boucle=0
+fichier$="editor\3DMapEdit.cfg"
+if file exist(fichier$)=1
+  Open to read 1,fichier$
+  Repeat
+    inc boucle
+    Read String 1,_Config$(boucle)
+   until _Config$(boucle)="[CONFIGURATION ENDING]"
+   arguments=boucle
+  close file 1
+Rem Analyse file to take known arguments.
+For boucle=1 to arguments
+  if _config$(boucle)="[MATRIXSIZE]"
+    plandetravail=Val(_Config$(boucle+1))
+   endif
+  if _config$(boucle)="[FOG]"
+    _FogRedRGB=Val(_Config$(Boucle+1))
+    _FogGreenRGB=Val(_Config$(Boucle+2))
+    _FogBlueRGB=Val(_Config$(Boucle+3))
+    _fogdistance=Val(_config$(boucle+4))
+   endif
+  if _config$(boucle)="[BACKGROUND]"
+    _BgdRedRGB=Val(_Config$(Boucle+1))
+    _BgdGreenRGB=Val(_Config$(Boucle+2))
+    _BgdBlueRGB=Val(_Config$(Boucle+3))
+   endif
+rem  If _Config$(boucle)="[PATH]" then _EdPath$=_Config$(boucle+1)
+  if _Config$(boucle)="[RESOLUTION]" then _res$=_Config$(boucle+1)
+  If _Config$(boucle)="[MAPPATH]"
+    if mid$(_Config$(boucle+1),2)=":" then _MapPath$=_Config$(boucle+1) else _MapPath$=_edpath$+_Config$(boucle+1)
+   endif
+  If _Config$(boucle)="[TEXTUREPATH]"
+    if mid$(_Config$(boucle+1),2)=":" then _TexturePath$=_Config$(boucle+1) else _TexturePath$=_edpath$+_Config$(boucle+1)
+   endif
+  If _Config$(boucle)="[3DOBJECTPATH]"
+    if mid$(_Config$(boucle+1),2)=":" then _3DObjectPath$=_Config$(boucle+1) else _3DObjectPath$=_edpath$+_Config$(boucle+1)
+   endif
+  If _Config$(boucle)="[3DSOUNDPATH]"
+    if mid$(_Config$(boucle+1),2)=":" then _3DSoundPath$=_Config$(boucle+1) else _3DSoundPath$=_edpath$+_Config$(boucle+1)
+   endif
+  If _Config$(boucle)="[TEXTUREMEM]"
+    If _Config$(boucle+1)="VIDEORAM"
+      _TextureType=1
+     else
+      _TextureType=0
+     endif
+   endif
+  if _Config$(boucle)="[DEBUGMODE]" and _Config$(boucle+1)="TRUE" then _Debug_Mode=1
+  If _Config$(boucle)="[TEXTURETYPE]" and _Config$(boucle+1)="TRUE" and _TextureType=1 then _TextureType=2
+  If _Config$(boucle)="[REGISTERED USER]" then _RegisteredUser$=_Config$(boucle+1)
+  If _Config$(boucle)="[REGISTERED ID]" then _RegisteredID$=_Config$(boucle+1)
+  if _Config$(boucle)="[LANGUAGE]" then _LANGUAGE$=_Config$(boucle+1)
+  if _Config$(boucle)="[SKIN]" then _skin$=_Config$(boucle+1)
+ next boucle
+if _res$="800x600" then xs=800 : ys=600
+if _res$="1024x768" then xs=1024 : ys=768
+if _res$="1280x1024" then xs=1280 : ys=1024
+if xs>0
+  if check display mode(xs,ys,16)=1
+    Set display mode xs,ys,16
+    sync rate 75 :sync on
+    cls rgb(0,0,0) :sync : cls rgb(0,0,0) :sync
+   Endif
+ Endif
+gosub _Set_Language : Rem Vérification du langage selectionné !
+hide mouse
+Rem
+  Print _Dialogue$(1) : Rem CONFIG LOADED
+ else
+  ink rgb(128,192,255),rgb(0,0,0)
+  print _Dialogue$(2) : Rem \ CONFIG NOT LOADED .
+  print _Dialogue$(3) : Rem /
+ endif
+Print "3DMap Editor "+_Ver$
+Print "_____________________"
+Print " "
+Print "Please wait loading configuration ..."
+   ink rgb(128,192,255),rgb(0,0,0)
+print " "
+Rem Définition des chemins d'acces GLOBALS
+ _FilesPath$(1)=_edpath$ : _FilesPath$(2)=_mappath$ : _FilesPath$(3)=_TexturePath$
+ _FilesPath$(4)=_3DObjectPath$ : _FilesPath$(5)=_3DSoundPath$ : _FilesPath$(6)=_muspath$
+ _FilesPath$(7)=_soundpath$
+_EditorPath$(1)=_EdPath$ : _EditorPath$(2)=_MapPath$ : _EditorPath$(3)=_TutorialMapPath$
+_EditorPath$(4)=_TexturePath$ : _EditorPath$(5)=_3DObjectPath$ : _EditorPath$(6)=_3DSoundPath$
+_EditorPath$(7)=_muspath$ : _EditorPath$(8)=_soundpath$
+Rem
+Rem On prépare le menu à partir d'un fichier .txt
+Rem
+if _LANGUAGE$="FRANCAIS"
+  _file$=_edpath$+"\editor\locales\menu(fr).loc"
+ else
+  _file$=_edpath$+"\editor\locales\menu(us).loc"
+ endif
+_menu_charge=_prepare_menu(_file$)
+Rem Initialisation des valeurs pour les menus
+Restore menus_values:
+repeat
+  read _dat1 : read _dat2 : read _dat3
+  if _dat1>0 then _menu_value(_dat1,_dat2)=_dat3
+ until _dat1=0
+_disable_option(4,7)
+Rem
+Rem *****************************************
+Rem *                                       *
+Rem * Vérification de l'enregistrement !!!! *
+Rem *                                       *
+Rem *****************************************
+Rem
+gosub _Registration_Check
+If _Registered=0
+  ink rgb(128,192,255),rgb(0,0,0)
+  Print _Dialogue$(4)
+  Print _Dialogue$(5)
+  Print _Dialogue$(6)
+  print " "
+  print _Dialogue$(7)
+  print _Dialogue$(8)
+  print " "
+  print _Dialogue$(9)
+  sync
+  wait 9000
+ else
+  Print _Dialogue$(10)
+  print _RegisteredUser$
+ endif
+print
+print _Dialogue$(75)
+if _TextureType=0 then print _Dialogue$(72)
+if _TextureType>0 then print _Dialogue$(73)
+if _TextureType=2 then print _Dialogue$(74)
+wait 1000
+Rem Affichage de la fenêtre correspondante à l'état
+Rem
+Rem                                                                  ********************************************
+Rem                                                                   **
+Rem                                                                     ***
+Rem ************************************************************************ INITIALISATION DE L'INTERFACE GFX() .
+Rem                                                                  VER 2.31 CREATION DE TOUT LES ICONES.
+Rem Initialisation des couleurs de fond
+Rem On définit le skin à utiliser
+gosub _MAKE_SKIN
+Rem Chargement des graphiques de l'éditeur.
+_Load_Image(_skin_data$(5),1,_TextureType)
+_Load_Image(_skin_data$(6),2,_TextureType)
+_Load_Image(_skin_data$(7),3,_TextureType)
+_Load_Image(_skin_data$(8),4,_TextureType)
+Rem Chargement de la texture du plan de travail.
+_Load_Image(_skin_data$(9),5,_TextureType)
+if _LANGUAGE$="ENGLISH"
+  _Load_Image(_skin_data$(13),6,_TextureType)
+  _Load_Image(_skin_data$(14),7,_TextureType)
+  _Load_Image(_skin_data$(15),10,_TextureType)
+  _Load_Image(_skin_data$(16),11,_TextureType)
+  _Load_Image(_skin_data$(17),12,_TextureType)
+  _Load_Image(_skin_data$(18),22,_TextureType)
+  _Load_Image(_skin_data$(19),23,_TextureType)
+  _Load_Image(_skin_data$(20),24,_TextureType)
+ else
+  _Load_Image(_skin_data$(22),6,_TextureType)
+  _Load_Image(_skin_data$(23),7,_TextureType)
+  _Load_Image(_skin_data$(24),10,_TextureType)
+  _Load_Image(_skin_data$(25),11,_TextureType)
+  _Load_Image(_skin_data$(26),12,_TextureType)
+  _Load_Image(_skin_data$(27),22,_TextureType)
+  _Load_Image(_skin_data$(28),23,_TextureType)
+  _Load_Image(_skin_data$(29),24,_TextureType)
+ endif
+_Load_Image(_skin_data$(10),8,_TextureType)
+_Load_Image(_skin_data$(11),9,_TextureType)
+Rem MISE EN PLACE DES OBJETS POUR LE MENU DEROULANT
+create bitmap 7,800,600
+set current bitmap 7
+paste image 12,0,0
+delete image 12
+get image 13,0,0,128,16
+get image 14,0,224,128,240
+get image 15,128,0,256,16
+get image 16,128,64,256,80
+get image 17,0,16,128,224
+get image 18,0,240,128,512
+get image 19,128,16,256,64
+get image 20,128,80,256,176
+xpos=256 : ypos=0
+_firstmenuimage=80
+for boucle=_firstmenuimage to _firstmenuimage+44
+  get image boucle,xpos,ypos,xpos+128,ypos+16
+  ypos=ypos+16
+  if ypos=512
+    ypos=0 : xpos=xpos+128
+   endif
+ next boucle
+delete bitmap 7
+Rem On crée les icones graphiques qui servirons aux boutons
+Rem Initialization
+_tiles=30
+MW_Initialize_Tiles(_tiles)
+MW_Auto_Refresh_Off()
+MW_Disable_RealTime_Scaling()
+Rem MW_DBPro_Mode_On()
+_icons_images=38
+_3DMeMW_Make_Icon_Graphics(_icons_images)
+Rem On crée toutes les fenêtres voulues
+MW_Load_Default_Positions()
+Fct_Windows_Title(_LANGUAGE$)
+_3DMeMW_Create_All_windows(_icons_images)
+Rem
+gosub _define_gadgets_values
+set current bitmap 0
+REM IMAGE 10 IS USED FOR TEMPORARY TEXTURE DISPLAY SUB-PROGRAM.
+Rem Mise en place de l'interface intuitive.
+rem set camera view 0,12,bitmap width(0),bitmap height(0)
+set camera view 0,12,bitmap width(0),bitmap height(0)
+cls rgb(0,0,0) :sync : cls rgb(0,0,0) :sync : cls rgb(0,0,0) :sync
+paste image 1,0,0,0 :sync : paste image 1,0,0,0 :sync
+rem if bitmap width(0)>640 then copy bitmap 0,512,0,639,14,0,640,0,bitmap width(0)-1,14
+Rem ink rgb(32,32,32),rgb(0,0,0) : box 1,457,574,478
+Rem Création du plan de travail.
+make object plain 1,(64*plandetravail),(64*plandetravail)
+position object 1,-4,-1,-4
+texture object 1,5
+rotate object 1,90,0,0
+scale object texture 1,plandetravail,plandetravail
+ghost object on 1
+rotate camera 0,45.0,45.0
+position camera 0,512,-512
+color backdrop rgb(_BgdRedGRB,_BgdGreenRGB,_BgdBlueRGB)
+_set_fog(_FogRedRGB,_FogGreenRGB,_FogBlueRGB,_fogdistance)
+Rem Initialisation des textes pour les Zones D'Action.
+  Fct_SetZoneLanguage(_LANGUAGE$)
+  gosub _Force_Clear_Map
+
+Rem                                                                  ********************************************
+Rem                                                                   **
+Rem                                                                     ***
+Rem ************************************************************************ BOUCLE PRINCIPALE DE L'EDITEUR 3D .
+Rem On désactive les options qui ne sont pas encore réalisées.
+_disable_option(5,1) : _disable_option(5,2)
+_disable_option(5,3) : _disable_option(5,4)
+_disable_option(4,16)
+repeat
+  choice=0
+Rem                                                              Ver 2.31 CALCUL TEMPS-REEL DES FENËTRES
+  MW_Background_Task()
+  paste image 1,0,0,0
+  _wnd=MW_Current_Window()
+  if _DEBUG_MODE=1
+    MW_Cls(12,32,32,32)
+    MW_Ink(12,255,192,160)
+    MW_Set_Cursor(12,0,0)
+    MW_Print(12,"DEBUG INFO")
+    MW_Print(12,"WIN:"+str$(_wnd))
+    if _wnd>0
+      XM=MW_Window_Position_X() : YM=MW_Window_Position_Y()
+      MW_Print(12,"XPOS:"+str$(xm)) : MW_Print(12,"YPOS:"+str$(ym))
+      GDG=MW_Current_Gadget()
+      MW_Print(12,"GADGET:"+str$(GDG))
+     endif
+   endif
+  Rem
+  ycurs=mousey() : xcurs=mousex()
+  sprite 2,xcurs,ycurs,3
+Rem On check si un icone est sélectionné .
+  _window=MW_Current_Window()
+  _gadget=MW_Current_gadget()
+  if _window>0 and _gadget>0
+    choice2=_Windows_Gadget_Value(_window,_gadget)
+    MW_Ink(13,192,192,192)
+    if choice2<42 then MW_Print(13,_dialogue$(choice2+10))
+    if choice2>41 and choice2<48 then MW_Print(13,_dialogue$(choice2+36))
+    if choice2>47 then MW_Print(13,_dialogue$(choice2+36))
+   Endif
+  if mouseclick()=1
+    if _window>0 and _gadget>0 then choice=_Windows_Gadget_Value(_window,_gadget)
+    if _window=2 and _gadget=4 then choice=22
+    if _window=24 and MW_Window_Position_Y()>1 then choice=41
+    if _window=0
+      xm=mousex() : ym=mousey()
+      hide sprite 2
+      Repeat
+        if upkey()=1 then move camera 10
+        if downkey()=1 then move camera 0-10
+        xc#=camera position x()
+        zc#=camera position z()
+        x=xc#/64 : z=zc#/64
+        position object 1,-1.75+(x*64),-1,-1.75+(z*64)
+        yadd=xm-mousex() : xadd=ym-mousey()
+        xangle=wrapvalue(camera angle x()-xadd)
+        yangle=wrapvalue(camera angle y()-yadd)
+        rotate camera xangle,yangle,0
+        _CheckFor7Lights()
+        MW_Sync(0)
+        position mouse xm,ym
+       sync
+       until mouseclick()=0
+Rem      position mouse xm,ym
+      show sprite 2
+     endif
+   endif
+Rem  if ycurs<13 and xcurs<640 then gosub _displaying_menu
+Rem
+  Rem MISE EN PLACE DES RACCOURCIS CLAVIER.
+  fastmenu=0 : keyb=0
+rem  if _keyboard=1 then inc acceptkeys
+  inc acceptkeys
+  if acceptkeys=30
+    acceptkeys=0 : Gosub _Scan_For_Shortcuts
+   endif
+  Rem L'UTILISATEUR FAIT APPEL AUX ICONES POUR UTILISER LES FONCTIONS DE L'EDITEUR.
+Rem                                                        PREMIERE LIGNE D'ICONES !!!!
+  if Choice>0 then gosub _active_choice
+  if MW_Window_Exist(15)=1 then Fct_Object_Properties(newobj)
+  if MW_Window_Exist(17)=1 then _Matrix_Properties(_CurrentMatrix)
+  Rem AFFICHAGE DU NOMBRE d'OBJETS PRESENTS
+  MW_Cls(14,32,32,32)
+  MW_Print(14,str$(lastobject-1))
+Rem on déplace la matrice pour la garder sous le joueur.
+  Rem on positionne l'écouteur sonore
+  position listener camera position x(),camera position y(),camera position z()
+  rotate listener camera angle x(),camera angle y(),camera angle z()
+Rem ON VERIFIE LES LUMIèRES
+  _CheckFor7Lights()
+  xc#=camera position x()
+  zc#=camera position z()
+  x=xc#/64 : z=zc#/64
+  position object 1,-1.75+(x*64),-1,-1.75+(z*64)
+  if upkey()=1 then move camera 10
+  if downkey()=1 then move camera 0-10
+Rem synchro . . .
+  MW_Sync(0)
+  sync
+  MW_Cls(13,32,32,32)
+ until choice=22
+Rem
+Rem                                                                  ********************************************
+Rem                                                                   **
+Rem                                                                     ***
+Rem ************************************************************************ FIN DE L'EDITEUR , ON QUITTE , BYE.
+Rem On efface les bitmaps utilisés.
+Rem
+Rem On ferme toute les fenêtres actives pour sauvegarder leurs positions.
+For bcl=1 to 24 step 1
+  If MW_window_Exist(bcl)=1 then MW_Close_Window(bcl)
+ Next Boucle
+MW_Save_Default_Positions()
+Rem On efface les objets 3D crées.
+gosub _Force_Clear_Map
+Rem On Sauvegarde les positions de toutes les fenetres Magic-Windows.
+MW_Release_All()
+_3DMeMW_Clear_Icon_Graphics()
+for boucle=1 to 65535
+  if object exist(boucle)=1 then delete object boucle
+  if image exist(boucle)=1 then delete image boucle
+ next boucle
+Sync
+flush video memory
+Rem cls
+End
+Rem
+Rem
+Rem                     FIN DU PROGRAMME DE L'EDITEUR 3DMAPEDITOR.
+Rem
+Rem
+_define_gadgets_values:
+  Restore gadgets_values
+  read _winmax
+  for _window=1 to _winmax
+    read _winnum : read _gadquant
+    for _gadget=1 to _gadquant
+      read _value
+      _Windows_Gadget_Value(_winnum,_gadget)=_value
+     next _gadget
+   next _window
+ Return
+_active_choice:
+  if choice=1 then gosub _Load_Map
+  if choice=2 then gosub _clear_map
+  if choice=3 then gosub _charge_texture
+  if choice=4 then gosub _kill_texture
+  if choice=5 then gosub _charge_directx
+  if choice=6 then gosub _Select_3DObject
+  if choice=7 then gosub _kill_3DObject
+  if choice=8 then gosub _light_intensity
+  if ( choice>8 and choice<18 )
+    xc#=camera position x() : yc#=camera position y() : zc#=camera position z()
+    xa#=camera angle x() : ya#=camera angle y() : za#=camera angle z()
+    inc lastobject
+    _obj(1,1)=lastobject
+    newobj=lastobject
+    _obj(newobj,19)=1 : Rem WIREFRAME
+    _obj(newobj,20)=1 : Rem ACTIVE BLACK IS TRANSPARENCY OR NOT
+    _obj(newobj,21)=0 : Rem CULL ( SHOW HIDDEN FACES )
+    _obj(newobj,22)=1 : Rem TEXTURE FILTERING
+    _obj(newobj,23)=1 : Rem SENSITIVE TO LIGHTS
+    _obj(newobj,24)=1 : Rem SENSITIVE TO FOG
+    _obj(newobj,25)=1 : Rem SENSITIVE TO AMBIENT LIGHT
+    _obj(newobj,26)=0 : Rem HIDDEN OBJECT
+    _obj(newobj,27)=1 : Rem OBJECT COLLISION
+rem    if object exist(newobj) then delete object(newobj)
+    If choice=9 then gosub _Create_Light
+    If choice=10 then gosub _create_directx
+    if choice=11 then gosub _create_3dsound
+    If choice=12 then gosub _Create_Sphere
+    If choice=13 then gosub _Create_Cube
+    If choice=14 then gosub _Create_Box
+    If choice=15 then gosub _Create_Cylinder
+    If choice=16 then gosub _Create_Cone
+    If choice=17 then gosub _Create_Plain
+    position camera xc#,yc#,zc#
+    rotate camera xa#,ya#,za#
+   endif
+  if choice=18 then gosub _scale_texture
+  if choice=19 or choice=20 then gosub _modify_texture
+Rem                                                        SECONDE LIGNE D'ICONES !!!!
+  if choice=21 then gosub _Save_Map
+  REM If choice=22 then QUIT EDITOR.
+  if choice=23 then gosub _save_camera_view
+  if choice=24 then gosub _fogtest
+  if choice=25 then gosub _charge_3dsound
+  if choice=26 then gosub _select_3dsound
+  if choice=27 then gosub _kill_3dsound : Rem NOT TESTED
+  if choice=28 then gosub _ambient_light
+  if choice=29 then gosub _ambient_orientation
+  if choice=30 then gosub _Kill_Object
+  if choice=31 then gosub _Select_Object
+  if choice=32 then gosub _copy_object
+  If choice=33 then gosub _Move_Object
+  If choice=34 then gosub _Scale_Object
+  If choice=35 then gosub _Rotate_Object
+  if choice=36 then gosub _object_properties
+  if choice=37 then gosub _optimize_objects
+  if choice=38 then gosub _Ghost_Mode
+  if choice=39 then gosub _decrease_texture_view
+  if choice=40 then gosub _increase_texture_view
+  if choice=41 then gosub _apply_selected_texture
+REM  if xcurs>577 and ycurs>87 and ycurs<328 then choice=41
+Rem NEWS FUNCTIONS FROM VER 2.29
+  if choice=42 then gosub _create_zone
+  if choice=43 then gosub _move_zone
+  if choice=44 then gosub _scale_zone
+  if choice=45 then gosub _select_zone
+  if choice=46 then gosub _zone_properties
+  if choice=47 then gosub _kill_zone
+Rem News Functions from 2.30+
+  if choice=49 then gosub _create_new_matrix
+  if choice=50 then gosub _Move_Matrix
+  if choice=51 then gosub _change_point_height
+  if choice=52 then gosub _texture_matrix_tile
+  if choice=53 then gosub _select_another_matrix
+  if choice=54 then gosub _define_matrix_properties
+  if choice=55 then gosub _Delete_Current_Matrix
+  if choice=56 then gosub _make_random_height
+  Repeat
+   Until mouseclick()=0
+ Return
+Rem
+Rem
+Rem
+_displaying_menu:
+  if spr1=1
+Rem    spr1=0 : delete sprite 1
+   endif
+  Repeat
+    ycurs=mousey() : xcurs=mousex()
+    sprite 2,xcurs,ycurs,3
+    option_choisie=_select_submenu(menu_choisi)
+    menu_choisi=_display_menu(option_choisie)
+    if menu_choisi>0 and option_choisie>0
+      rc=_menu_value(menu_choisi,option_choisie)
+      tmpchoice=_menu_value(menu_choisi,option_choisie)
+     else
+      rc=0
+     endif
+    if menu_choisi>3 and rc>0 then inc rc,26
+    if rc>0
+      MW_Ink(13,192,192,192)
+      MW_Print(13,_dialogue$(rc+10))
+     endif
+    sync
+    MW_Sync(0)
+    MW_Cls(13,32,32,32)
+Rem    if _menu_sys(4)=1 then _aftersync_menu()
+    if _menu_sys(4)=1 then paste image 1,0,0
+    mc=mouseclick()
+   until mc<>0 or (option_choisie=0 and menu_choisi=0)
+  if mc=1 then choice=_menu_value(menu_choisi,option_choisie)
+  _Wait_MouseClick0()
+ return
+Rem
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *                                 CHARGER UN CARTE SAUVEGARDEE SUR DISQUE                                   *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_Load_Map:
+Rem  Set Current Bitmap 1
+  MW_Background_Task() : MW_sync(0) : sync
+  choice=0
+  Rem Ouverture du fichier cible et de son Header ( entête ).
+Rem  map$="default.map" : rem on recupere le nom du chemin et du fichier choisi
+  ink rgb(128,128,128),rgb(1,1,1)
+  set cursor 5,460
+rem  printc _Dialogue$(52)
+rem  input " ";map$
+  title$=_Dialogue$(52)
+REM FILE SELECTOR FUNCTION USE
+  fileselector$(2)=title$
+  _loaderpath$=_MapPath$
+  filter1$=".map" : filter2$=""
+  Fct_File_Selector_v1(_loaderpath$,filter1$,filter2$)
+  _dossierfinal$=fileselector$(8)
+  _fichierfinal$=fileselector$(9)
+REM
+  if file exist(_MapPath$+_fichierfinal$)
+    map$=_MapPath$+_fichierfinal$
+   else
+    if file exist(_dossierfinal$+_fichierfinal$)
+      map$=_dossierfinal$+_fichierfinal$
+     else
+      map$=_fichierfinal$
+     endif
+   endif
+  maploaded$=_fichierfinal$
+rem   if map$="" then map$="default.map"
+  if file exist(map$)=1
+    Rem on efface tout les objets 3D existants.
+    sel$="O"
+Rem   sync :sync
+    MW_Print(13,"Loading : Opening File")
+    MW_Background_Task() : MW_sync(0) : sync
+    gosub _Force_Clear_Map
+    MW_Background_Task() : MW_sync(0) : sync
+    MW_Ink(13,255,255,255)
+    _loaded=true
+    Open to read 1,map$
+Rem Définition de carte et de versions de l'éditeur.
+    read string 1,file1$
+    read byte 1,MapVersionFile
+    read byte 1,MapRevisionFile
+    read string 1,file2$
+Rem définition de la carte.
+    For boucle=1 to 16
+      read file 1,_obj(1,boucle)
+     next boucle
+Rem Debut header
+    read string 1,file3$
+Rem Définition des objets.
+    newobj=_obj(1,1)
+    lastobject=newobj
+Rem    MW_Print(13,"Loading map in progress : Objects datas")
+    MW_Print(13,"Loading : Load All Objects")
+    for boucle=2 to newobj
+      for sousboucle=1 to 16
+        read file 1,_obj(boucle,sousboucle)
+       next sousboucle
+      If MapVersionFile>0 and MapRevisionFile>4
+        read file 1,_obj(boucle,17)
+        read file 1,_obj(boucle,18)
+       endif
+      If MapVersionFile>0 and MapRevisionFile>6
+        for sousboucle=19 to 25
+          read file 1,_obj(boucle,sousboucle)
+         next sousboucle
+       else
+        _obj(boucle,19)=1 : Rem WIREFRAME
+        _obj(boucle,20)=1 : Rem ACTIVE BLACK IS TRANSPARENCY OR NOT
+        _obj(boucle,21)=0 : Rem CULL ( SHOW HIDDEN FACES )
+        _obj(boucle,22)=1 : Rem TEXTURE FILTERING
+        _obj(boucle,23)=1 : Rem SENSITIVE TO LIGHTS
+        _obj(boucle,24)=1 : Rem SENSITIVE TO FOG
+        _obj(boucle,25)=1 : Rem SENSITIVE TO AMBIENT LIGHT
+       endif
+Rem AJOUT DES DEUX DERNIERES OPTIONS DES ATTRIBUTS DES OBJETS 3D.
+      if MapVersionFile>0 and MapRevisionFile>7
+        read file 1,_Obj(boucle,26)
+        read file 1,_Obj(boucle,27)
+       else
+        _Obj(boucle,26)=0 : Rem OBJET CACHE = FALSE
+        _Obj(boucle,27)=1 : Rem OBJET COLLISIONS = TRUE
+       endif
+      MW_Background_Task() : MW_sync(0) : sync
+     next boucle
+    MW_Background_Task() : MW_sync(0) : sync
+Rem 2ème version de la carte , GESTION DES TEXTURES.
+    If MapVersionFile>0 and MapRevisionFile>1
+      MW_Print(13,"Loading : Textures data")
+      read string 1,file4$
+      _TextureNum=_obj(1,8)
+      For bouclet=1 to _TextureNum
+        read string 1,_Textures$(bouclet)
+       next bouclet
+     endif
+    MW_Background_Task() : MW_sync(0) : sync
+Rem Ver 1.3 Gestion des lumières
+    If MapVersionFile>0 and MapRevisionFile>2
+      MW_Print(13,"Loading : Lights datas")
+      read string 1,file5$
+      _LightNum=_Obj(1,16)
+      if _LightNum>0
+        For boucle=1 to _LightNum
+          for sousboucle=1 to 16
+            read file 1,_Lights(boucle,sousboucle)
+           next sousboucle
+         next boucle
+       endif
+     endif
+    MW_Background_Task() : MW_sync(0) : sync
+Rem Ver 1.4 Gestion des objets 3D Direct X ( .x )
+    If MapVersionFile>0 and MapRevisionFile>3
+      MW_Print(13,"Loading : Imported Objects Datas")
+      read string 1,file6$
+      read file 1,_DirectXObject
+      if _DirectXObject>0
+        For boucle=1 to _DirectXObject
+          read string 1,_DirectXObject$(boucle)
+         next boucle
+       endif
+     endif
+    MW_Background_Task() : MW_sync(0) : sync
+Rem Ver 1.6 Gestion des sons 3D.
+    If MapVersionFile>0 and MapRevisionFile>5
+      MW_Print(13,"Loading : 3DSounds datas")
+      read string 1,file7$
+      read file 1,_3DSoundObject
+      if _3DSoundObject>0
+        For boucle=1 to _3DSoundObject
+          read string 1,_3DSound$(boucle)
+         next boucle
+       endif
+     endif
+    MW_Background_Task() : MW_sync(0) : sync
+Rem Ver 1.9 Gestions des zones d'action.
+    if MapVersionFile>0 and MapRevisionFile>8
+      MW_Print(13,"Loading : Action Zones datas")
+      read string 1,file8$
+      read file 1,_last_zone
+      _zone_data(1)=_last_zone
+      _current_zone=_last_zone
+      if _last_zone>0
+        for boucle=1 to _last_zone
+          for sousboucle=1 to 16
+            read long 1,_Zone_Info(boucle,sousboucle)
+           next sousboucle
+          if MapVersionFile>0 and MapRevisionFile>9 then read long 1,_Zone_Info(boucle,17)
+          if MapVersionFile>0 and MapRevisionFile>10 then read string 1,_Zone_Filename$(boucle)
+         next boucle
+       endif
+     endif
+Rem
+    MW_Background_Task() : MW_sync(0) : sync
+    If MapVersionFile>0 and MapRevisionFile>11
+      MW_Print(13,"Loading : Matrixes datas")
+      read string 1,file9$
+      read file 1,_LastMatrix
+      _Matrix(0,0)=_LastMatrix : _CurrentMatrix=_LastMatrix
+      if _LastMatrix>0
+        For Boucle=1 to _LastMatrix
+          for _mdat=1 to 16
+            read long 1,_Matrix(Boucle,_mdat)
+           next _mdat
+          for zbcl=0 to _Matrix(Boucle,5)
+            for xbcl=0 to _Matrix(Boucle,4)
+              read long 1,_Matrix_Height(Boucle,Xbcl,Zbcl)
+              read long 1,_Matrix_Tile(boucle,xbcl,zbcl)
+             next xbcl
+           next zbcl
+         next boucle
+       Endif
+     Endif
+    MW_Background_Task() : MW_sync(0) : sync
+Rem END OF .MAP FILE
+    read string 1,file10$
+    close file 1
+    MW_Background_Task() : MW_sync(0) : sync
+    if _TextureNum>0
+      MW_Print(13,"Loading : Loading Textures . . .")
+      for bouclet=1 to _TextureNum+1
+        if image exist(_FirstTextureImage+bouclet)=1
+          delete image (_FirstTextureImage+bouclet)
+          MW_Background_Task() : MW_sync(0) : sync
+         endif
+        if file exist(_texturepath$+_textures$(bouclet))=1
+          _Load_Image(_texturepath$+_Textures$(bouclet),(_FirstTextureImage+bouclet),_TextureType)
+          MW_Background_Task() : MW_sync(0) : sync
+         else
+          if file exist(_textures$(bouclet))=1
+            _Load_Image(_Textures$(bouclet),(_FirstTextureImage+bouclet),_TextureType)
+            MW_Background_Task() : MW_sync(0) : sync
+           endif
+         endif
+       next bouclet
+     endif
+    MW_Background_Task() : MW_sync(0) : sync
+    MW_Print(13,"Loading : Refresh All Objects")
+    for boucle=2 to newobj
+      Fct_Refresh_Object(boucle)
+      MW_Background_Task() : MW_sync(0) : sync
+     next boucle
+    MW_Background_Task() : MW_sync(0) : sync
+Rem                                Ver 2.29 RAFRAICHISSEMENT DES ZONES APRES CHARGEMENT DE MAPS !!!!!
+    if _last_zone>0
+      MW_Print(13,"Loading : Refresh Zones")
+      for _zone_ref=1 to _last_zone
+        gosub _refresh_zone
+        MW_Background_Task() : MW_sync(0) : sync
+       next _zone_ref
+     endif
+    MW_Background_Task() : MW_sync(0) : sync
+    xcam=_obj(1,2)
+    ycam=_obj(1,3)
+    zcam=_obj(1,4)
+    xang=_obj(1,5)
+    yang=_obj(1,6)
+    zang=_obj(1,7)
+    position camera xcam,ycam,zcam
+    rotate camera xang,yang,zang
+   endif
+Rem                               Ver 2.30 Mise en place des matrices sauvées .
+  if _LastMatrix>0
+    MW_Print(13,"Loading : Refresh Matrixes")
+    for boucle=1 to _lastmatrix
+      _3DMe_Refresh_Matrix(boucle,_FirstTextureImage,_texturenum)
+      MW_Background_Task() : MW_sync(0) : sync
+     next boucle
+   endif
+Rem Mise en place de la couleur d'ambiance après le chargement de la carte.
+Rem  MW_Print(13,"Loading map in progress : Restore Lights Datas")
+  _AmbientRed=_Obj(1,9)
+  _AmbientGreen=_Obj(1,10)
+  _AmbientBlue=_Obj(1,11)
+  _AmbientLight=_Obj(1,12)
+  _AmbientX=_Obj(1,13)
+  _AmbientY=_Obj(1,14)
+  _AmbientZ=_Obj(1,15)
+rem  if _loaded=true
+  color ambient light Rgb(_AmbientRed,_AmbientGreen,_AmbientBlue)
+  set ambient light _AmbientLight
+  set directional light 0,_AmbientX,_AmbientY,_AmbientZ
+  _3dme_temp(4)=_AmbientRed : _3dme_temp(5)=_AmbienGreen : _3dme_temp(6)=_AmbientBlue
+  _3dme_temp(7)=_AmbientLight
+  _checkFor7Lights()
+  MW_Background_Task() : MW_sync(0) : sync
+  gosub _display_texture
+  Set Current Bitmap 0
+ Return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *                                   SAUVER LA CARTE EN MEMOIRE SUR DISQUE                                   *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_Save_Map:
+  choice=0
+  if lastobject=1 and _lastmatrix=0 then return
+Rem Ver 2.17 Version ENREGISTREE ou version DEMO !
+  if _Registered=1
+    lastobject2=lastobject
+   else
+    lastobject2=128
+    if lastobject2>lastobject then lastobject2=lastobject
+   endif
+  _obj(1,1)=lastobject2
+  _obj(1,8)=_TextureNum
+  Rem Sauvegarde du nombre de lumières crées.
+  _Obj(1,16)=_LightNum
+  Rem Création du fichier cible et de son Header ( entête ).
+Rem  ink rgb(128,128,128),rgb(1,1,1)
+Rem  set cursor 5,461
+Rem  printc _Dialogue$(53)
+Rem  input " ";map$
+  Repeat
+    MW_Background_Task()
+    d$=inkey$()
+    if d$<>""
+      repeat
+        MW_Background_Task() : MW_Sync(0) : sync
+       until inkey$()=""
+      if _text<32 and asc(d$)<>13 and asc(d$)<>8
+        inc _text,1
+        _text$(_text)=d$
+       endif
+      if asc(d$)=8 and _text>0 then dec _text,1
+     endif
+    map$=""
+    if _text>0
+      for boucle=1 to _text
+        map$=map$+_text$(boucle)
+       next boucle
+     endif
+    MW_Ink(13,128,128,128)
+    MW_Set_Cursor(13,0,0)
+    MW_Print(13,_Dialogue$(53)+" "+map$)
+    MW_Sync(0)
+    sync
+    MW_Cls(13,32,32,32)
+   Until asc(d$)=13
+  if map$<>"" and right$(map$,4)<>".map" then map$=map$+".map"
+  if map$="" then map$=maploaded$
+  if map$="" then map$="default.map"
+  rem  if map$="" then map$="default2.map"
+  ink rgb(32,32,32),rgb(32,32,32)
+  box 3,462,573,477
+  hide mouse
+  if file exist(_MapPath$+map$)=1 then delete file _MapPath$+map$
+  Open to write 1,_MapPath$+map$
+Rem Définition de carte et de versions de l'éditeur.
+  Write string 1,"FLXMap. "
+  Write byte 1,MapVersion
+  Write byte 1,MapRevision
+  Write string 1,"definition"
+Rem définition de la carte.
+  For boucle=1 to 16
+    write file 1,_obj(1,boucle)
+   next boucle
+Rem Debut header
+  write string 1,"objects"
+Rem Définition des objets.
+  for boucle=2 to lastobject2
+    for sousboucle=1 to 27
+      write file 1,_obj(boucle,sousboucle)
+     next sousboucle
+   next boucle
+Rem Ver 1.2 Gestion des textures.
+  write string 1,"textures"
+  For boucle=1 to _TextureNum
+    write string 1,_Textures$(boucle)
+   next boucle
+Rem Ver 1.3 Gestion des lumières
+  write string 1,"light_sources"
+  if _LightNum>0
+    For boucle=1 to _LightNum
+      for sousboucle=1 to 16
+        write file 1,_Lights(boucle,sousboucle)
+       next sousboucle
+     next boucle
+   endif
+Rem Ver 1.4 Gestion des objets 3D Direct X ( .x )
+  write string 1,"Direct X Objects"
+  write file 1,_DirectXObject
+  if _DirectXObject>0
+    For boucle=1 to _DirectXObject
+      write string 1,_DirectXObject$(boucle)
+     next boucle
+   endif
+Rem   endif
+Rem Ver 1.6 Gestion des sons 3D (.wav/.mp3)
+  write string 1,"3D Sounds"
+  write file 1,_3DSoundObject
+  if _3DSoundObject>0
+    For boucle=1 to _3DSoundObject
+      write string 1,_3DSound$(boucle)
+     next boucle
+   endif
+Rem   endif
+Rem Ver 1.9 Gestion des Zones d'action ( zones )
+  write string 1,"Action Zones"
+  write file 1,_last_zone
+  if _last_zone>0
+    for boucle=1 to _last_zone
+      for sousboucle=1 to 17
+        write long 1,_Zone_Info(boucle,sousboucle)
+       next sousboucle
+      write string 1,_Zone_Filename$(boucle)
+     next boucle
+   endif
+Rem Ver 1.12 Gestion des matrices .
+  write string 1,"Matrixes"
+  write file 1,_LastMatrix
+  if _LastMatrix>0
+    For Boucle=1 to _LastMatrix
+      for _mdat=1 to 16
+        write long 1,_Matrix(Boucle,_mdat)
+       next _mdat
+      for zbcl=0 to _Matrix(Boucle,5)
+        for xbcl=0 to _Matrix(Boucle,4)
+          write long 1,_Matrix_Height(Boucle,Xbcl,Zbcl)
+          write long 1,_Matrix_Tile(boucle,xbcl,zbcl)
+         next xbcl
+       next zbcl
+     next boucle
+   Endif
+   Rem Fin de fichier.
+    write string 1,"endofdatas"
+Rem MISE EN PLACE DE L'ESPION DE L'UTILISATEUR
+  if _Registered=1
+    _RegisteredUser2$=""
+    For boucle=1 to 16
+      char=asc(mid$(_RegisteredUser$,boucle))
+      if char>0 then inc char,25
+      write byte 1,char
+     next boucle
+   endif
+  close file 1
+  maploaded$=map$
+ Return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *                                 EFFACER ENTIEREMENT LA CARTE EN COURS                                     *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_Clear_Map:
+  choice=0
+  MW_Ink(13,128,128,128)
+  MW_Print(13,_dialogue$(54))
+  Repeat
+    _key=scancode()
+    MW_Background_Task() : MW_sync(0) : sync
+   until _key<>0
+  sel$=str$(_key)
+  MW_Cls(13,32,32,32)
+  _Force_Clear_Map:
+  ink rgb(32,32,32),rgb(32,32,32)
+  _texturefirst=1
+  sel$=upper$(sel$)
+  box 2,462,573,477
+  if sel$<>"N" or sel$<>"NON"
+Rem on efface tout les objets 3D existants.
+    if newobj<lastobject then newobj=lastobject
+    for newobj=lastobject to 1 step -1
+      gosub _Kill_Object
+     next newobj
+    lastobject=1
+      MW_Background_Task() : MW_sync(0) : sync
+Rem On efface toute les textures chargées.
+    for boucle=1 to _TextureNum
+      if image exist(boucle+_FirstTextureImage) then delete image boucle+_FirstTextureImage
+      _textures$(boucle)=""
+     next boucle
+    MW_Background_Task() : MW_sync(0) : sync
+    _TextureNum=0
+    _Obj(1,8)=0
+    lastobject=1
+    newobj=1
+    MW_Cls(24,32,32,32)
+Rem On efface aussi toute les lumières
+    MW_Background_Task() : MW_sync(0) : sync
+    For boucle=1 to _LightNum
+      for sousboucle=1 to 16
+        _Lights(boucle,sousboucle)=0
+       next sousboucle
+     next boucle
+    _LightNum=0
+    For boucle=1 to 7
+      if light exist(boucle) then delete light boucle
+     next boucle
+    MW_Background_Task() : MW_sync(0) : sync
+    if _3DSoundObject>0
+      for boucle=1 to _3DSoundObject
+        _3DSound$(boucle)=""
+       next boucle
+      _3DSoundObject=0
+     endif
+    MW_Background_Task() : MW_sync(0) : sync
+    if _last_zone>0
+      for boucle=1 to _last_zone
+        if object exist(65536-boucle)=1 then delete object 65536-boucle
+        for sousboucle=1 to 16
+          _zone_info(boucle,sousboucle)=0
+          _zone_filename$(boucle)=""
+         next sousboucle
+       next boucle
+      _last_zone=0 : _current_zone=0
+     endif
+    _Obj(1,9)=128
+    _Obj(1,10)=128
+    _Obj(1,11)=128
+    _Obj(1,12)=64
+    _Obj(1,13)=0
+    _Obj(1,14)=0
+    _Obj(1,15)=0
+    MW_Background_Task() : MW_sync(0) : sync
+    color ambient light Rgb(128,128,128)
+    set ambient light 64
+    set directional light 0,0,0,0
+  Rem Efface les textures affichées à droite de l'écran.
+    ink rgb(32,32,32),rgb(32,32,32)
+    box 578,88,637,327
+  Rem Ver 2.30+ Suppression de toute les matrices crées.
+    If _LastMatrix>0
+      for boucle=_lastmatrix to 1 step -1
+        _3DME_Delete_Matrix(boucle)
+       next boucle
+      _lastmatrix=0 : _currentmatrix=0
+     Endif
+    _Matrix(0,0)=_LastMatrix
+    MW_Background_Task() : MW_sync(0) : sync
+   endif
+ return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *                   CHARGER UN NOUVEL OBJET 3D DIRECT-X A PARTIR D'UN FICHIER SUR DISQUE                    *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_Charge_DirectX:
+  choice=0
+  _loaderpath$=_3DObjectPath$
+  title$=_Dialogue$(63)
+REM FILE SELECTOR FUNCTION USE
+  fileselector$(2)=title$
+  filter1$=".x" : filter2$=".3ds"
+  Fct_File_Selector_v1(_loaderpath$,filter1$,filter2$)
+  _dossierfinal$=fileselector$(8)
+  _fichierfinal$=fileselector$(9)
+REM
+  if right$(_fichierfinal$,4)=".3DS"
+    3ds2x _fichierfinal$,left$(_fichierfinal$,len(_fichierfinal$)-4)+".x"
+    _fichierfinal2$=left$(_fichierfinal$,len(_fichierfinal$)-4)+".x"
+    _fichierfinal$=_fichierfinal2$
+   endif
+  if file exist(_3DObjectPath$+_fichierfinal$)
+    txt$=_fichierfinal$
+   else
+    txt$=_dossierfinal$+_fichierfinal$
+   endif
+  inc _DirectXObject
+  _DirectXObject$(_DirectXObject)=txt$
+  _current3dobject=_DirectXObject
+ return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *                     CHARGER UN NOUVEAU SON 3D A PARTIR D'UN FICHIER SUR DISQUE                            *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_Charge_3DSound:
+  choice=0
+  _loaderpath$=_3DSoundPath$
+  title$=_Dialogue$(66)
+  filter1$=".wav"
+  filter2$=".mp3"
+REM FILE SELECTOR FUNCTION USE
+  fileselector$(2)=title$
+  Fct_File_Selector_v1(_loaderpath$,filter1$,filter2$)
+  _dossierfinal$=fileselector$(8)
+  _fichierfinal$=fileselector$(9)
+REM
+  if file exist(_3DSoundPath$+_fichierfinal$)
+    txt$=_fichierfinal$
+   else
+    txt$=_dossierfinal$+_fichierfinal$
+   endif
+  if file exist(txt$) or file exist(_3DSoundPath$+txt$)
+    inc _3DSoundObject
+    _3DSound$(_3DSoundObject)=txt$
+   endif
+  _Current_3dsound=_3DSoundObject
+ return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *                        CHARGER UNE NOUVELLE TEXTURE A PARTIR D'UN FICHIER SUR DISQUE                      *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_Charge_Texture:
+  choice=0
+  _loaderpath$=_TexturePath$
+  title$=_Dialogue$(55)
+  filter1$=".bmp"
+  filter2$=".jpg"
+REM FILE SELECTOR FUNCTION USE
+  fileselector$(2)=title$
+  Fct_File_Selector_v1(_loaderpath$,filter1$,filter2$)
+  _dossierfinal$=fileselector$(8)
+  _fichierfinal$=fileselector$(9)
+REM
+  if file exist(_TexturePath$+_fichierfinal$)
+    txt$=_fichierfinal$
+   else
+    txt$=_dossierfinal$+_fichierfinal$
+   endif
+  if file exist(txt$)
+    inc _TextureNum
+    _Textures$(_TextureNum)=txt$
+    if image exist(_FirstTextureImage+_Texturenum) then delete image (_FirstTextureImage+_Texturenum)
+    _Load_Image(txt$,(_FirstTextureImage+_TextureNum),_TextureType)
+   else
+    if file exist(_TexturePath$+txt$)
+      inc _TextureNum
+      _Textures$(_TextureNum)=txt$
+      if image exist(_FirstTextureImage+_Texturenum) then delete image (_FirstTextureImage+_Texturenum)
+      _Load_Image(_TexturePath$+txt$,(_FirstTextureImage+_TextureNum),_TextureType)
+     endif
+   endif
+  _Obj(1,8)=_numtexture
+  REM return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *                               AFFICHER LES TEXTURES DE L'APERCU RAPIDE                                    *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_Display_Texture:
+  choice=0
+  MW_Cls(24,32,32,32)
+  if _TextureNum>0
+    MW_Background_Task()
+    yp=0
+    _texturefirst=_firsttexture
+    if _texturefirst>_TextureNum then _texturefirst=_TextureNum
+    _texturelast=_texturefirst+3
+    if _texturelast>_TextureNum then _texturelast=_TextureNum
+    if bitmap exist(1)=1 then delete bitmap 1
+    create bitmap 1,640,480 : MW_Sync(0) : sync
+    for boucle=_texturefirst to _texturelast step 1
+      _img=boucle+_FirstTextureImage
+      if image exist(_img)=1
+        set current bitmap 1
+        paste image _img,0,0
+        MW_Copy_Bitmap2Window(1,0,0,_image_x(_img),_image_y(_img),24,0,yp,63,yp+60)
+       endif
+      inc yp,60
+     next boucle
+    if bitmap exist(1)=1 then delete bitmap 1
+    set current bitmap 0
+    MW_Background_Task()
+    MW_Sync(0) : sync
+    endif
+  return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *              APPLIQUER LA TEXTURE SELECTIONNE DANS L'APERCU RAPIDE SUR L'OBJET COURANT                    *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_Apply_Selected_Texture:
+  choice=0
+  if lastobject=1 then return
+  if newobj>lastobject then newobj=lastobject
+  _window=MW_Current_Window()
+  if _window=24
+    yp=MW_Window_Position_Y()
+    if yp>0
+      _textur=_firsttexture+(yp/60)
+      if _textur>_texturenum then _textur=_texturenum
+      if _TextureNum>0 and newobj>1 then texture object newobj,(_textur+_FirstTextureImage)
+      _obj(newobj,10)=_textur
+     endif
+   endif
+ return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *                       CHANGER LES DIMENSIONS D'UNE TEXTURE APPLIQUEE SUR L'OBJET COURANT                  *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_Scale_Texture:
+  choice=0
+  if lastobject=1 then return
+  defaultstep2=1
+    xscaletinit=_obj(newobj,17)
+    yscaletinit=_obj(newobj,18)
+  repeat
+    MW_Background_Task()
+    xc#=camera position x()
+    yc#=camera position y()
+    zc#=camera position z()
+    xscalet=_obj(newobj,17)
+    yscalet=_obj(newobj,18)
+    key=scancode()
+    if upkey()=1 then yscalet=yscalet+defaultstep2
+    if downkey()=1 then yscalet=yscalet-defaultstep2
+    if leftkey()=1 then xscalet=xscalet-defaultstep2
+    if rightkey()=1 then xscalet=xscalet+defaultstep2
+    if key=inserkey then inc defaultstep2
+    if key=supprkey then dec defaultstep2
+    if key=defaultkey
+      xscalet=0 : yscalet=0
+     endif
+    if defaultstep2=0 then defaultstep2=1
+    if defaultstep2>8 then defaultstep2=8
+    if xscalet<(0-99) then xscalet=0-99
+    if yscalet<(0-99) then yscalet=0-99
+    if key=defaultkey
+      xscalet=xscaletinit
+      yscalet=yscaletinit
+     endif
+    _obj(newobj,17)=xscalet
+    _obj(newobj,18)=yscalet
+    Fct_Refresh_Object(newobj)
+    if XScalet>0
+      XScalet_final#=XScalet
+     else
+      XScalet_final#=1.0+(XScalet*0.01)
+     endif
+    if YScalet>0
+      YScalet_final#=YScalet
+     else
+      YScalet_final#=1.0+(YScalet*0.01)
+     endif
+    if XScalet=0 then XSCalet_final#=xsize/128.0
+    if YScalet=0 then YSCalet_final#=ysize/128.0
+    rem Use MOUSEMOVE to alter camera angles
+    MW_Ink(12,128,128,128)
+    MW_Set_Cursor(12,0,0)
+    MW_Print(12,"Texture:")
+    MW_Print(12,"Xs="+str$(xscalet_final#))
+    MW_Print(12,"Ys="+str$(yscalet_final#))
+    MW_Print(12,_Dialogue$(56)+str$(defaultstep2))
+    ycurs=mousey() : xcurs=mousex()
+    sprite 2,xcurs,ycurs,3
+    if mouseclick()=1 then _3DMeMW_Check_Mouse_View()
+    MW_Sync(0) : sync
+    MW_Cls(12,32,32,32)
+   until spacekey()=1 or mouseclick()=2
+  _Wait_MouseClick0()
+ Return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *                    APPLIQUER LA TEXTURE SUIVANTE OU PRECEDENTE A L'OBJET COURANT                          *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_Modify_Texture:
+  choice=0
+  if lastobject=1 then return
+  textre=_obj(newobj,10)
+  if choice=19 then dec textre
+  if choice=20 then inc textre
+  if textre<1 then textre=1
+  if textre>_TextureNum then textre=_TextureNum
+  if _TextureNum>0 and newobj>0 then texture object newobj,(textre+_FirstTextureImage)
+  _obj(newobj,10)=textre
+  choice=0
+  MW_Background_Task() : MW_sync(0) : sync
+ return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *                                 SE DEPLACER DANS LES TEXTURES AFFICHEES                                   *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_Decrease_Texture_View:
+  choice=0
+  dec _firsttexture
+  if _firsttexture<1 then _firsttexture=1
+  gosub _display_texture
+ return
+Rem *************************************************************************************************************
+_Increase_Texture_View:
+  choice=0
+  inc _firsttexture
+  if _firsttexture>(_texturenum-3) then _firsttexture=_texturenum-3
+  if _firsttexture<1 then _firsttexture=1
+  gosub _display_texture
+ return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *                          DETRUIRE UNE TEXTURE AINSI QUE LES EVENEMENTS ASSOCIES                           *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_Kill_Texture:
+  choice=0
+  if _TextureNum=0 then Return
+  if MW_Window_Exist(18)=0
+    MW_Open_New_Window(18,_Dialogue$(67),196,242,1,1,0)
+    MW_Position_Window(18,128,12)
+    MW_Paste_Image(18,11,0,0)
+   Endif
+  _first=1
+  gosub _refresh_texture_list
+  _delete_texture=0
+  repeat
+    MW_Background_Task()
+    _window=MW_Current_Window()
+    if _window=18
+      xm=MW_Window_Position_X() : ym=MW_Window_Position_Y()
+     else
+      xm=0 : ym=0
+     endif
+    if mouseclick()=1
+      if xm>17 and xm<80
+        if ym>176 and ym<193
+          _quit=1 : Rem QUITTE PAR LA FONCTION 'ANNULER'
+         endif
+        if ym>156 and ym<173
+          _delete_texture=_selected : _quit=1
+         endif
+       endif
+      if xm>171 and xm<188
+        if ym>15 and ym<32
+          dec _first : _reftexture=1
+         endif
+        if ym>127 and ym<144
+          inc _first : _reftexture=1
+         endif
+       endif
+      if _reftexture=1
+        _reftexture=0
+        if _first>(_TextureNum-7) then _first=_Texturenum-7
+        if _first<1 then _first=1
+        gosub _refresh_texture_list
+       endif
+      if xm>33 and xm<170 and ym>15 and ym<144
+        _YLine=(ym-16)/16
+        _Selected=_first+(_YLine)
+        if _Selected>_TextureNum then _Selected=0
+        gosub _refresh_texture_list
+        MW_Ink(18,64,192,255)
+        MW_Set_cursor(18,42,16+((_YLine)*16))
+        MW_print(18,right$(_textures$(_Selected),16))
+        if _selected>0 then gosub _DisplayPreviewTexture
+       endif
+     endif
+    if mouseclick()=1 then _3DMeMW_Check_Mouse_View()
+    MW_Sync(0)
+    ycurs=mousey() : xcurs=mousex()
+    sprite 2,xcurs,ycurs,3
+    sync
+   until _quit=1 or MW_window_Exist(18)=0
+  _quit=0
+  if _delete_texture>0
+    rem On décale la liste des textures de -1
+    for boucle=_delete_texture to _texturenum-1
+      _textures$(boucle)=_textures$(boucle+1)
+     next boucle
+    dec _TextureNum,1
+rem   endif
+    if image exist(_FirstTextureImage+_TextureNum+1)=1 then delete image (_FirstTextureImage+_TextureNum+1)
+    Rem ON REACTUALISE LES IMAGES DES TEXTURES
+    for boucle=1 to _TextureNum
+      txt$=_Textures$(boucle)
+      if file exist(txt$)
+        if image exist(_FirstTextureImage+boucle)=1 then delete image (_FirstTextureImage+boucle)
+        _Load_Image(txt$,(_FirstTextureImage+boucle),_TextureType)
+       else
+        if file exist(_TexturePath$+txt$)
+          if image exist(_FirstTextureImage+boucle)=1 then delete image (_FirstTextureImage+boucle)
+          _Load_Image(_TexturePath$+txt$,(_FirstTextureImage+boucle),_TextureType)
+         endif
+       endif
+     next boucle
+    REM Suppression de la texture dans les objets et décalage de -1 pour les suivantes.
+    for boucle=2 to lastobject step 1
+      if _obj(boucle,10)=_delete_texture
+        _obj(boucle,10)=0
+        Fct_Refresh_Object(boucle)
+       endif
+      if _obj(boucle,10)>_delete_texture
+        _obj(boucle,10)=_obj(boucle,10)-1
+        Fct_Refresh_Object(boucle)
+       endif
+     next boucle
+    Rem Suppression de la texture dans les matrices et décalage de -1 pour les suivantes.
+    If _LastMatrix>0
+      For Boucle=1 to _LastMatrix
+        _modified=0
+        For ZT=0 to _Matrix(boucle,5)
+          For XT=0 to _Matrix(boucle,4)
+            _TILE=_Matrix_Tile(boucle,xt,zt)
+            if _TILE=_delete_texture then _TILE=1 : _modified=1
+            if _TILE>_delete_texture then dec _TILE,1 : _modified=1
+            _Matrix_Tile(boucle,xt,zt)=_TILE
+           next xt
+         next zt
+        if _modified=1 then _3DMe_Refresh_Matrix(boucle,_FirstTextureImage,_texturenum)
+       Next Boucle
+     Endif
+    _delete_texture=0
+    gosub _display_texture
+   endif
+  _Obj(1,8)=_numtexture
+  if MW_Window_Exist(18)=1 then MW_Close_Window(18)
+ return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *         RAFRAICHIR L'AFFICHAGE DE LA LISTE DES TEXTURES DANS LA FENETRE DE SELECTION DES TEXTURES         *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_refresh_texture_list:
+  MW_Paste_Image(18,11,0,0)
+  MW_Ink(18,0,0,0)
+  MW_Set_Cursor(18,13,0)
+  _lastt=_first+7
+  if _lastt>_texturenum then _lastt=_texturenum
+  yp=16
+  MW_Ink(18,255,255,255)
+  for boucle=_first to _lastt
+    _textureused=0
+    for sousboucle=2 to lastobject
+      if _obj(sousboucle,10)=boucle then inc _textureused
+     next sousboucle
+    MW_Set_Cursor(18,8,yp)
+    MW_Print(18,str$(_textureused))
+    MW_Set_Cursor(18,42,yp)
+    MW_Print(18,right$(_textures$(boucle),16))
+    inc yp,16
+   next boucle
+ return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *              AFFICHER LE MEDAILLON D'UNE TEXTURE DANS LA FENETRE DE SUPPRESSION DE TEXTURES               *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+ _Displaypreviewtexture:
+  file$=_textures$(_selected)
+  if bitmap exist(1)=1 then delete bitmap 1
+
+  MW_Sync(0) : sync
+  if file exist(_texturepath$+file$)=1
+    load bitmap _texturepath$+file$,1
+   else
+    if file exist(file$)=1
+      load bitmap file$,1
+     endif
+   endif
+  MW_Sync(0) : sync
+  xbitmap=bitmap width(1) : ybitmap=bitmap height(1)
+  MW_Copy_Bitmap2Window(1,0,0,xbitmap-1,ybitmap-1,18,112,159,191,238)
+  MW_Sync(0) : sync
+  delete bitmap 1
+  set current bitmap 0
+ return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *                                  AJOUTER UN OBJET PRIMITIF - SPHERE -                                     *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_Create_Sphere:
+  choice=0
+  Fct_Create_Sphere(newobj,lastx,lasty,lastz,defaultsizex,defaultsizey,defaultsizez,defaulttexture)
+ Return
+_Create_Cube:
+  choice=0
+  Fct_Create_Cube(newobj,lastx,lasty,lastz,defaultsizex,defaultsizey,defaultsizez,defaulttexture)
+ Return
+_Create_Box:
+  choice=0
+  Fct_Create_Box(newobj,lastx,lasty,lastz,defaultsizex,defaultsizey,defaultsizez,defaulttexture)
+ Return
+_Create_Cylinder:
+  choice=0
+  Fct_Create_Cylinder(newobj,lastx,lasty,lastz,defaultsizex,defaultsizey,defaultsizez,defaulttexture)
+ Return
+_Create_Cone:
+  choice=0
+  Fct_Create_Cone(newobj,lastx,lasty,lastz,defaultsizex,defaultsizey,defaultsizez,defaulttexture)
+ Return
+_Create_Plain:
+  choice=0
+  Fct_Create_Plain(newobj,lastx,lasty,lastz,defaultsizex,defaultsizey,defaultsizez,defaulttexture)
+ Return
+_Create_Light:
+  choice=0
+  Inc _LightNum
+  fct_create_light(newobj,_lightnum,lastx,lasty,lastz)
+  _Obj(1,16)=_LightNum
+ Return
+_Create_3DSound:
+  choice=0
+  fct_Create_3DSound(newobj,_3Dsoundobject,lastx,lasty,lastz)
+ Return
+Rem *************************************************************************************************************
+_Create_DirectX:
+  choice=0
+  xcp#=camera position x()
+  ycp#=camera position y()
+  zcp#=camera position z()
+  if _current3dobject>0
+  rem Définition de l'objet 3D.
+    if file exist(_3DObjectPath$+_DirectXObject$(_current3dobject))=1
+      load object _3DObjectPath$+_DirectXObject$(_current3dobject),newobj
+     else
+      if file exist(_DirectXObject$(_current3dobject))=1
+        load object _DirectXObject$(_current3dobject),newobj
+       endif
+     endif
+    _obj(newobj,1)=lastx
+    _obj(newobj,2)=lasty
+    _obj(newobj,3)=lastz
+    if _zoom#<>0
+      finalx#=object size x(newobj) : finalx#=finalx#*_zoom# : finalx=int(finalx#)
+      finaly#=object size y(newobj) : finaly#=finaly#*_zoom# : finaly=int(finaly#)
+      finalz#=object size z(newobj) : finalz#=finalz#*_zoom# : finalz=int(finalz#)
+     else
+       finalx=object size x(newobj)
+       finaly=object size y(newobj)
+       finalz=object size z(newobj)
+      endif
+    _obj(newobj,4)=finalx
+    _obj(newobj,5)=finaly
+    _obj(newobj,6)=finalz
+    _obj(newobj,7)=(10+_current3dobject)
+    _obj(newobj,8)=128
+    _Obj(newobj,15)=128
+    _Obj(newobj,16)=128
+    _obj(newobj,9)=0
+    _obj(newobj,10)=defaulttexture
+    position camera xcp#,ycp#,zcp#
+    Fct_Refresh_Object(newobj)
+  endif
+ Return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *                                        DEPLACER L'OBJET COURANT                                           *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_Move_Object:
+  choice=0
+  if lastobject=1 then return
+  Fct_Move_Object(newobj)
+  lastx=_obj(newobj,1)
+  lasty=_obj(newobj,2)
+  lastz=_obj(newobj,3)
+ Return
+Rem *************************************************************************************************************
+_Scale_Object:
+  choice=0
+  if lastobject=1 then return
+  Fct_Scale_Object(newobj)
+ Return
+Rem *************************************************************************************************************
+_Rotate_Object:
+  choice=0
+  if lastobject=1 then return
+  Fct_Rotate_Object(newobj)
+ Return
+Rem *************************************************************************************************************
+_Ghost_Mode:
+  choice=0
+  if lastobject=1 then return
+  Fct_Ghost_Object(newobj)
+ Return
+Rem *************************************************************************************************************
+_Select_Object:
+  choice=0
+  if lastobject=1 then return
+  newobj=Fct_select_Object(newobj,lastobject)
+ Return
+Rem *************************************************************************************************************
+_Copy_Object:
+  choice=0
+  if _obj(newobj,7)=8 or _obj(newobj,7)=9 then return
+  if lastobject=1 then return
+  inc lastobject
+  _Obj(1,1)=lastobject
+    xc#=camera position x()
+    yc#=camera position y()
+    zc#=camera position z()
+  for boucle=1 to 27
+    _Obj(lastobject,boucle)=_Obj(newobj,boucle)
+   next boucle
+  newobj=lastobject
+  Fct_Refresh_Object(newobj)
+  position camera xc#,yc#,zc#
+ Return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *                                DETRUIRE L'OBJET 3D COURANT DE LA CARTE                                    *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_Kill_Object:
+  choice=0
+  if lastobject=1 then return
+  if _obj(newobj,7)=8 then gosub _Kill_Light
+  if object exist(lastobject) then delete object lastobject
+  if sound exist(lastobject) then stop sound lastobject
+  if newobj<lastobject
+    for boucle=newobj to (lastobject-1)
+      for sousboucle=1 to 25
+        _Obj(boucle,sousboucle)=_Obj(boucle+1,sousboucle)
+       next sousboucle
+     next boucle
+   endif
+  for boucle=1 to 25
+    _Obj(lastobject,boucle)=0
+   next boucle
+  dec lastobject
+  if newobj>lastobject then newobj=lastobject
+  if lastobject>1
+    for boucle=newobj to lastobject
+      Fct_Refresh_Object(boucle)
+     next boucle
+   endif
+ return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *           OPTIMISZE LES OBJETS 3D PRESENTS DANS LA CARTE PAR RAPPORT A LEUR DISTANCES RESPECTIVES         *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_Optimize_Objects:
+  choice=0
+  if lastobject=1 then return
+  Fct_Optimize_Objects(lastobject)
+ return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *                            MODIFICATION DES ATTRIBUTS DE L'OBJET EN COURS                                 *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_Object_Properties:
+  choice=0
+  if lastobject=1 then return
+  Fct_Object_Properties(newobj)
+ Return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *                     DEFINIR LA COULEUR ET L'INTENSITE DE LA LUMIERE AMBIANTE                              *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_Ambient_Light:
+  choice=0
+  _AmbientRed=_Obj(1,9)
+  _AmbientGreen=_Obj(1,10)
+  _AmbientBlue=_Obj(1,11)
+  _AmbientLight=_Obj(1,12)
+  repeat
+    MW_background_Task()
+    Inc _AmbientRed,upkey()-downkey()
+    Inc _AmbientGreen,rightkey()-leftkey()
+    key=scancode()
+    if key=pageupkey then Inc _AmbientBlue
+    if key=pagedownkey then Dec _AmbientBlue
+    if key=inserkey then Inc _AmbientLight
+    if key=supprkey then Dec _AmbientLight
+    If _AmbientRed<0 then _AmbientRed=0
+    If _AmbientGreen<0 then _AmbientGreen=0
+    If _AmbientBlue<0 then _AmbientBlue=0
+    If _AmbientLight<0 then _AmbientLight=0
+    If _AmbientRed>255 then _AmbientRed=255
+    If _AmbientGreen>255 then _AmbientGreen=255
+    If _AmbientBlue>255 then _AmbientBlue=255
+    If _AmbientLight>100 then _AmbientLight=100
+    MW_Ink(12,128,128,128)
+    MW_Set_Cursor(12,0,0)
+    MW_Print(12,_Dialogue$(61))
+    MW_Print(12,"R:"+str$(_AmbientRed))
+    MW_Print(12,"V:"+str$(_AmbientGreen))
+    MW_Print(12,"B:"+str$(_AmbientBlue))
+    MW_Print(12,"I:"+str$(_AmbientLight))
+    color ambient light Rgb(_AmbientRed,_AmbientGreen,_AmbientBlue)
+    set ambient light _AmbientLight
+    if mouseclick()=1 then _3DMeMW_Check_Mouse_View()
+    ycurs=mousey() : xcurs=mousex()
+    sprite 2,xcurs,ycurs,3
+    MW_sync(0)
+    sync
+    MW_Cls(12,32,32,32)
+   until spacekey()=1 or mouseclick()=2
+  _Wait_MouseClick0()
+  _Obj(1,9)=_AmbientRed
+  _Obj(1,10)=_AmbientGreen
+  _Obj(1,11)=_AmbientBlue
+  _Obj(1,12)=_AmbientLight
+ return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *                            DEFINIR LA DIRECTION DE LA LUMIERE AMBIANTE                                    *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_ambient_orientation:
+  choice=0
+  _AmbientX=_Obj(1,13)
+  _AmbientY=_Obj(1,14)
+  _AmbientZ=_Obj(1,15)
+  repeat
+    MW_background_Task()
+    Inc _AmbientX,upkey()-downkey()
+    Inc _AmbientY,rightkey()-leftkey()
+    key=scancode()
+    if key=pageupkey then Inc _AmbientZ
+    if key=pagedownkey then Dec _AmbientZ
+    If _AmbientX<-1 then _AmbientX=-1
+    If _AmbientY<-1 then _AmbientY=-1
+    If _AmbientZ<-1 then _AmbientZ=-1
+    If _AmbientX>1 then _AmbientX=1
+    If _AmbientY>1 then _AmbientY=1
+    If _AmbientZ>1 then _AmbientZ=1
+    MW_Ink(12,128,128,128)
+    MW_Set_Cursor(12,0,0)
+    MW_Print(12, _Dialogue$(61))
+    MW_Print(12,"Xo:"+str$(_AmbientX))
+    MW_Print(12,"Yo:"+str$(_AmbientY))
+    MW_Print(12,"Zo:"+str$(_AmbientZ))
+    set directional light 0,_AmbientX,_AmbientY,_AmbientZ
+    if mouseclick()=1 then _3DMeMW_Check_Mouse_View()
+    ycurs=mousey() : xcurs=mousex()
+    sprite 2,xcurs,ycurs,3
+    MW_sync(0)
+    Sync
+    MW_Cls(12,32,32,32)
+   until spacekey()=1 or mouseclick()=2
+  _Wait_MouseClick0()
+  _Obj(1,13)=_AmbientX
+  _Obj(1,14)=_AmbientY
+  _Obj(1,15)=_AmbientZ
+  return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *    DEFINIR L'ORIENTATION DE LA LUMIERE COURANTE ( DESACTIVE DANS LES DERNIERES VERSIONS DE L'EDITEUR )    *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_Light_Orientation:
+  choice=0
+  if lastobject=1 then return
+  _AmbientX=_Lights(_LightNum,9)
+  _AmbientY=_Lights(_LightNum,10)
+  _AmbientZ=_Lights(_LightNum,11)
+  repeat
+    MW_BackGround_Task()
+    Inc _AmbientX,upkey()-downkey()
+    Inc _AmbientY,rightkey()-leftkey()
+    key=scancode()
+    if key=pageupkey then Inc _AmbientZ
+    if key=pagedownkey then Dec _AmbientZ
+    If _AmbientX<-1 then _AmbientX=-1
+    If _AmbientY<-1 then _AmbientY=-1
+    If _AmbientZ<-1 then _AmbientZ=-1
+    If _AmbientX>1 then _AmbientX=1
+    If _AmbientY>1 then _AmbientY=1
+    If _AmbientZ>1 then _AmbientZ=1
+    MW_Ink(12,128,128,128)
+    MW_Set_Cursor(12,0,0)
+    MW_Print(12,_Dialogue$(62))
+    MW_Print(12,"X:"+str$(_AmbientX))
+    MW_Print(12,"Y:"+str$(_AmbientY))
+    MW_Print(12,"Z:"+str$(_AmbientZ))
+    _Lights(1,9)=_AmbientX
+    _Lights(1,10)=_AmbientY
+    _Lights(1,11)=_AmbientZ
+    _checkFor7Lights()
+    if mouseclick()=1 then _3DMeMW_Check_Mouse_View()
+    ycurs=mousey() : xcurs=mousex()
+    sprite 2,xcurs,ycurs,3
+    MW_sync(0)
+    Sync
+    MW_Cls(12,32,32,32)
+   until spacekey()=1 or mouseclick()=2
+  _Wait_MouseClick0()
+  return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *                          DEFINIR L'INTENSITE ET LA COULEUR DE LA LUMIERE COURANTE                         *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_light_Intensity:
+  choice=0
+  if lastobject=1 then return
+  _LightRed=_Lights(_LightNum,4)
+  _LightGreen=_Lights(_LightNum,5)
+  _LightBlue=_Lights(_LightNum,6)
+  _LightLight=_Lights(_LightNum,8)
+  repeat
+    MW_background_Task()
+    Inc _LightRed,upkey()-downkey()
+    Inc _LightGreen,rightkey()-leftkey()
+    key=scancode()
+    if key=pageupkey then Inc _LightBlue
+    if key=pagedownkey then Dec _LightBlue
+    if key=inserkey then Inc _LightLight
+    if key=supprkey then Dec _LightLight
+    If _LightRed<(0-255) then _LightRed=(0-255)
+    If _LightGreen<(0-255) then _LightGreen=(0-255)
+    If _LightBlue<(0-255) then _LightBlue=(0-255)
+    If _LightLight<(0-255) then _LightLight=(0-255)
+    If _LightRed>255 then _LightRed=255
+    If _LightGreen>255 then _LightGreen=255
+    If _LightBlue>255 then _LightBlue=255
+    If _LightLight<10 then _LightLight=10
+    MW_Ink(12,128,128,128)
+    MW_Set_Cursor(12,0,0)
+    MW_Print(12,_Dialogue$(62))
+    MW_Print(12,"R:"+str$(_LightRed))
+    MW_Print(12,"V:"+str$(_LightGreen))
+    MW_Print(12,"B:"+str$(_LightBlue))
+    MW_Print(12,"I:"+str$(_LightLight))
+    _Lights(_LightNum,4)=_LightRed
+    _Lights(_LightNum,5)=_LightGreen
+    _Lights(_LightNum,6)=_LightBlue
+    _Lights(_LightNum,8)=_LightLight
+    _checkFor7Lights()
+    if mouseclick()=1 then _3DMeMW_Check_Mouse_View()
+    ycurs=mousey() : xcurs=mousex()
+    sprite 2,xcurs,ycurs,3
+    MW_sync(0)
+    Sync
+    MW_Cls(12,32,32,32)
+   until spacekey()=1 or mouseclick()=2
+  repeat
+   until spacekey()=0 and mouseclick()=0
+  return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *                               DETRUIRE UNE LUMIERE ET LES EVENEMENTS ASSOCIES                             *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_Kill_Light:
+  choice=0
+  if lastobject=1 then return
+  _lightkilled=_Obj(newobj,14)
+  if _lightkilled<_lightnum
+    for boucle=_lightkilled to (_lightnum-1)
+      for sousboucle=1 to 16
+        _Lights(boucle,sousboucle)=_Lights(boucle+1,sousboucle)
+       next sousboucle
+     next boucle
+   endif
+  for boucle=1 to 16
+    _Lights(_lightnum,boucle)=0
+   next boucle
+  dec _lightnum
+  _checkFor7Lights()
+ return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *                         DETRUIRE UN OBJET 3D DE LA LISTE ET LES OBJETS ASSOCIES                           *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_Kill_3dobject:
+  choice=0
+  if _DirectXObject=0 then Return
+  _first=1
+  If MW_Window_Exist(19)=0
+    MW_Open_New_Window(19,_Dialogue$(68),196,242,1,1,0)
+    MW_Position_Window(19,128,12)
+    MW_Paste_Image(19,11,0,0)
+   Endif
+  rem set camera view 0,12,bitmap width(0),bitmap height(0)
+  gosub _refresh_3DObject_list
+  _delete_3dobject=0
+  repeat
+    MW_Background_Task()
+    _wnd=MW_Current_Window()
+    if _wnd=19
+      xm=MW_Window_Position_X() : ym=MW_Window_Position_Y()
+     else
+      xm=0 : ym=0
+     endif
+    if mouseclick()=1 and ym>0
+      if xm>15 and xm<78
+        if ym>176 and ym<193
+          _quit=1 : Rem QUITTE PAR LA FONCTION 'ANNULER'
+         endif
+        if ym>156 and ym<173
+          _delete_DirectXObject=_selected
+          _quit=1
+         endif
+       endif
+      if xm>169 and xm<186
+        if ym>15 and ym<32
+          dec _first
+          _ref3dobject=1
+         endif
+        if ym>127 and ym<144
+          inc _first
+          _ref3dobject=1
+         endif
+       endif
+      if _ref3dobject=1
+        _ref3dobject=0
+        if _first>(_DirectXObject-7) then _first=_DirectXObject-7
+        if _first<1 then _first=1
+        gosub _refresh_3dObject_list
+       endif
+      if xm>33 and xm<170 and ym>15 and ym<144
+        _YLine=(ym-28)/16
+        _Selected=_first+(_YLine)
+        if _Selected>_DirectXObject then _Selected=0
+        gosub _refresh_3DObject_list
+        MW_Ink(19,64,192,255)
+        MW_Set_Cursor(19,42,16+(_YLine*16))
+        MW_Print(19,right$(_DirectXObject$(_Selected),16))
+       endif
+     endif
+    ycurs=mousey() : xcurs=mousex()
+    sprite 2,xcurs,ycurs,3
+    MW_Sync(0)
+    Sync
+   until _quit=1 or MW_window_Exist(19)=0
+  _quit=0
+  If MW_Window_Exist(19)=1 then MW_Close_Window(19)
+  if _delete_DirectXObject>0
+    rem On décale la liste des textures de -1
+    for boucle=_delete_DirectXObject to _DirectXObject-1
+      _DirectXObject$(boucle)=_DirectXObject$(boucle+1)
+     next boucle
+    dec _DirectXObject,1
+rem   endif
+    Rem ON REACTUALISE LES IMAGES DES TEXTURES
+    REM Suppression de la texture dans les objets et décalage de -1 pour les suivantes.
+    for boucle=lastobject to 2 step -1
+      if _obj(boucle,7)=(_delete_DirectXObject+10)
+        newobj=boucle
+        gosub _kill_object
+rem        refobj=boucle
+rem        gosub _refresh_object
+       endif
+      if _obj(boucle,7)>(_delete_DirectXObject+10)
+        Fct_Refresh_Object(boucle)
+       endif
+     next boucle
+    _delete_DirectXObject=0
+   endif
+ return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *                        SELECTIONNER UN SON OBJET DANS LA LISTE EN MEMOIRE                                 *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_Select_3dobject:
+  choice=0
+  if _DirectXObject=0 then Return
+  If MW_Window_Exist(19)=0
+    MW_Open_New_Window(19,_Dialogue$(68+2),196,242,1,1,0)
+    MW_Position_Window(19,128,12)
+    MW_Paste_Image(19,11,0,0)
+   Endif
+  _first=1
+  rem set camera view 0,12,bitmap width(0),bitmap height(0)
+  gosub _refresh_3DObject_list
+  _delete_3dobject=0
+  repeat
+    MW_Background_Task()
+    _wnd=MW_Current_Window()
+    if _wnd=19
+      xm=MW_Window_Position_X() : ym=MW_Window_Position_Y()
+     else
+      xm=0 : ym=0
+     endif
+    if mouseclick()=1 and ym>0
+      if xm>15 and xm<78
+        if ym>176 and ym<193
+          _quit=1 : Rem QUITTE PAR LA FONCTION 'ANNULER'
+         endif
+        if ym>156 and ym<173
+          _delete_DirectXObject=_selected
+          _quit=1
+         endif
+       endif
+      if xm>169 and xm<186
+        if ym>15 and ym<32
+          dec _first
+          _ref3dobject=1
+         endif
+        if ym>127 and ym<144
+          inc _first
+          _ref3dobject=1
+         endif
+       endif
+      if _ref3dobject=1
+        _ref3dobject=0
+        if _first>(_DirectXObject-7) then _first=_DirectXObject-7
+        if _first<1 then _first=1
+        gosub _refresh_3dObject_list
+       endif
+      if xm>33 and xm<170 and ym>15 and ym<144
+        _YLine=(ym-16)/16
+        _Selected=_first+(_YLine)
+        if _Selected>_DirectXObject then _Selected=0
+        gosub _refresh_3DObject_list
+        MW_Ink(19,64,192,255)
+        MW_Set_Cursor(19,42,16+(_YLine*16))
+        MW_Print(19,right$(_DirectXObject$(_Selected),16))
+       endif
+     endif
+    ycurs=mousey() : xcurs=mousex()
+    sprite 2,xcurs,ycurs,3
+    MW_sync(0)
+    sync
+   until _quit=1 or MW_Window_Exist(19)=0
+  _quit=0
+  If MW_Window_Exist(19)=1 then MW_Close_Window(19)
+  rem set camera view 0,12,bitmap width(0),bitmap height(0)
+  if _delete_DirectXObject>0
+     _current3dobject=_delete_DirectXObject
+    _delete_DirectXObject=0
+   endif
+  s3do=0
+ return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *       RAFRAICHIR L'AFFICHAGE DE LA LISTE DES OBJETS 3D DANS LA FENETRE DE SELECTION DE D'OBJETS 3D        *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_refresh_3DObject_list:
+  MW_paste_image(19,11,0,0)
+  MW_Ink(19,0,0,0)
+  MW_Set_Cursor(19,11,0)
+  _lastt=_first+7
+  if _lastt>_DirectXObject then _lastt=_DirectXObject
+  yp=16
+  MW_Ink(19,255,255,255)
+  for boucle=_first to _lastt
+    _textureused=0
+    for sousboucle=2 to lastobject
+      if _obj(sousboucle,7)=(boucle+10) then inc _textureused
+     next sousboucle
+    MW_Set_Cursor(19,8,yp)
+    MW_Print(19, str$(_textureused))
+    MW_Set_Cursor(19,42,yp)
+    MW_Print(19,right$(_DirectXObject$(boucle),16))
+    inc yp,16
+   next boucle
+ return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *                        DETRUIRE UN SON 3D DE LA LISTE ET LES EVENEMENTS SONORES ASSOCIES                  *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_Kill_3dsound:
+  choice=0
+  if _3DSoundObject=0 then Return
+  If MW_Window_Exist(20)=0
+    MW_Open_New_Window(20,_Dialogue$(69),196,242,1,1,0)
+    MW_Position_Window(20,128,12)
+    MW_Paste_Image(20,11,0,0)
+   Endif
+  _first=1
+  rem set camera view 0,12,bitmap width(0),bitmap height(0)
+  gosub _refresh_3DSound_list
+  _delete_3dsound=0
+  repeat
+    MW_Background_Task()
+    _wnd=MW_Current_Window()
+    if _wnd=20
+      xm=MW_Window_Position_X() : ym=MW_Window_Position_Y()
+     else
+      xm=0 : ym=0
+     endif
+    if mouseclick()=1 and ym>0
+      if xm>15 and xm<78
+        if ym>176 and ym<193
+          _quit=1 : Rem QUITTE PAR LA FONCTION 'ANNULER'
+         endif
+        if ym>156 and ym<173
+          _delete_3DSound=_selected
+          _quit=1
+         endif
+       endif
+      if xm>169 and x<186
+        if ym>15 and ym<32
+          dec _first
+          _ref3dsound=1
+         endif
+        if ym>127 and ym<144
+          inc _first
+          _ref3dsound=1
+         endif
+       endif
+      if _ref3dsound=1
+        _ref3dsound=0
+        if _first>(_3DSoundObject-7) then _first=_3DSoundObject-7
+        if _first<1 then _first=1
+        gosub _refresh_3dsound_list
+       endif
+      if xm>33 and xm<170 and ym>15 and ym<144
+        _YLine=(ym-16)/16
+        _Selected=_first+(_YLine)
+        if _Selected>_3DSoundObject then _Selected=0
+        gosub _refresh_3dsound_list
+        MW_Ink(20,64,192,255)
+        MW_Set_Cursor(20,42,16+(_YLine*16))
+        MW_Print(20,right$(_3DSound$(_Selected),16))
+       endif
+     endif
+    ycurs=mousey() : xcurs=mousex()
+    sprite 2,xcurs,ycurs,3
+    MW_Sync(0)
+    Sync
+   until _quit=1 or MW_Window_Exist(20)=0
+  _quit=0
+  if MW_window_Exist(20)=1 then MW_Close_Window(20)
+  rem set camera view 0,12,bitmap width(0),bitmap height(0)
+  if _delete_3dsound>0
+    rem On décale la liste des textures de -1
+    for boucle=_delete_3Dsound to _3DSoundObject-1
+      _3DSound$(boucle)=_3DSound$(boucle+1)
+     next boucle
+    dec _3DSoundObject,1
+rem   endif
+    Rem ON REACTUALISE LES IMAGES DES TEXTURES
+    REM Suppression de la texture dans les objets et décalage de -1 pour les suivantes.
+    for boucle=lastobject to 2 step -1
+      if _obj(boucle,7)=9
+        if _obj(boucle,14)=_delete_3dsound
+          newobj=boucle
+          gosub _kill_object
+         else
+          if _obj(boucle,14)>_delete_3dsound
+rem            _obj(boucle,14)=(_obj(boucle,14))-1
+            Fct_Refresh_Object(boucle)
+           endif
+         endif
+       endif
+     next boucle
+    _delete_3dsound=0
+   endif
+ return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *                        SELECTIONNER UN SON 3D DANS LA LISTE EN MEMOIRE                                    *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_Select_3dsound:
+  choice=0
+  if _3DSoundObject=0 then Return
+  If MW_Window_Exist(20)=0
+    MW_Open_New_Window(20,_Dialogue$(69+2),196,242,1,1,0)
+    MW_Position_Window(20,128,12)
+    MW_Paste_Image(20,11,0,0)
+   Endif
+  _first=1
+  gosub _refresh_3DSound_list
+  _delete_3dsound=0
+  repeat
+    MW_Background_Task()
+    _wnd=MW_Current_Window()
+    if _wnd=20
+      xm=MW_Window_Position_X() : ym=MW_Window_Position_Y()
+     else
+      xm=0 : ym=0
+     endif
+    if mouseclick()=1 and ym>0
+      if xm>15 and xm<78
+        if ym>176 and ym<193
+          _quit=1 : Rem QUITTE PAR LA FONCTION 'ANNULER'
+         endif
+        if ym>156 and ym<173
+          _delete_3DSound=_selected
+          _quit=1
+         endif
+       endif
+      if xm>169 and xm<186
+        if ym>15 and ym<32
+          dec _first
+          _ref3dsound=1
+         endif
+        if ym>127 and ym<144
+          inc _first
+          _ref3dsound=1
+         endif
+       endif
+      if _ref3dsound=1
+        _ref3dsound=0
+        if _first>(_3DSoundObject-7) then _first=_3DSoundObject-7
+        if _first<1 then _first=1
+        gosub _refresh_3dsound_list
+       endif
+      if xm>33 and xm<170 and ym>15 and ym<144
+        _YLine=(ym-16)/16
+        _Selected=_first+(_YLine)
+        if _Selected>_3DSoundObject then _Selected=0
+        gosub _refresh_3dsound_list
+        MW_Ink(20,64,192,255)
+        MW_Set_Cursor(20,42,16+(_YLine*16))
+        MW_Print(20,right$(_3DSound$(_Selected),16))
+       endif
+     endif
+    ycurs=mousey() : xcurs=mousex()
+    sprite 2,xcurs,ycurs,3
+    MW_sync(0)
+    Sync
+   until _quit=1 or MW_Window_Exist(20)=0
+  _quit=0
+  if MW_Window_Exist(20)=1 then MW_Close_Window(20)
+  rem set camera view 0,12,bitmap width(0),bitmap height(0)
+  _Current_3dsound=_delete_3dsound
+  _delete_3dsound=0
+  s3ds=0
+ return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *           RAFRAICHIR L'AFFICHAGE DE LA LISTE DES SONS 3D DANS LA FENETRE DE SELECTION DE SONS 3D          *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_refresh_3Dsound_list:
+  MW_Paste_Image(20,11,0,0)
+  MW_Ink(20,0,0,0)
+  MW_Set_Cursor(20,11,0)
+  _lastt=_first+7
+  if _lastt>_3dsoundobject then _lastt=_3dsoundobject
+  yp=16
+  for boucle=_first to _lastt
+    _textureused=0
+    for sousboucle=2 to lastobject
+      if _obj(sousboucle,7)=9 and _obj(sousboucle,14)=boucle then inc _textureused
+     next sousboucle
+    MW_Ink(20,255,255,255)
+    MW_Set_Cursor(20,8,yp)
+    MW_Print(20,str$(_textureused))
+    MW_Set_Cursor(20,42,yp)
+    MW_Print(20,right$(_3dsound$(boucle),16))
+    inc yp,16
+   next boucle
+ return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *                         PASSAGE DU MODE NORMAL à PREVIEW et PREVIEW à NORMAL                              *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+Rem Now use real Exploration mode.
+_FogTest:
+  choice=0
+  hide object 1
+  gosub _3D_Exploration
+  show object 1
+  fog off
+ Return
+  inc _fogtype
+  if _fogtype=2 then _fogtype=0
+  if _fogtype=0
+    fog off
+    color backdrop rgb(_BgdRedGRB,_BgdGreenRGB,_BgdBlueRGB)
+    show object 1
+   else
+    hide object 1
+    fog color rgb(_FogRedRGB,_FogGreenRGB,_FogBlueRGB)
+    fog distance _fogdistance
+    color backdrop rgb(_FogRedRGB,_FogGreenRGB,_FogBlueRGB)
+    fog on
+   endif
+ sync
+ return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *                             APPROCHER OU ELOIGNER LA DISTANCE DU BROUILLARD                               *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_Fog_Far:
+  choice=0
+  _fogdistance=_fogdistance+100
+  fog distance _fogdistance
+ return
+_Fog_Near:
+  choice=0
+  _fogdistance=_fogdistance-50
+  if _fogdistance<100 then _fogdistance=100
+  fog distance _fogdistance
+ return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *                        DEFINITION DU CHOIX DU LANGAGE FRANCAIS/ENGLAIS                                    *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_Set_Language:
+  Fct_SetLanguage(_LANGUAGE$)
+ return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *                        SAUVER LE POSITIONNEMENT ET L'ANGLE DE VUE DE LA CAMERA                            *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_Save_Camera_View:
+  choice=0
+  Fct_Save_Camera_States()
+ return
+_Scan_For_shortcuts:
+  choice=fct_scan_keyboards()
+ Return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *                                     Utilisateur enregistré ou shareware ?                                 *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_Registration_Check:
+  L=len(_RegisteredUser$)
+  restore donnees_password
+  if L>7
+    for boucle=1 to 16
+      read comp(boucle)
+      if comp(boucle)>L then comp(boucle)=comp(boucle)-8
+     next boucle
+    password$=""
+    for boucle=1 to 16 step 1
+      charac$=mid$(_RegisteredUser$,comp(boucle)) : Rem EXTRACTION DU CHARACTERE DU NOM D'UTILISATEUR.
+      if charac$=" " then charac$="z"
+      number=asc(charac$)-97 : Rem CONVERTION DE CE CARACTERE EN NOMBRE ( "a"=97 )
+      inc number,comp(boucle)
+      if number>9 then dec number,10
+      if number>9 then dec number,10
+      if number>9 then dec number,10
+      password$=password$+chr$(number+48)
+     next boucle
+    _Check=0
+    for boucle=1 to 16
+      chr1$=mid$(_RegisteredID$,boucle)
+      chr2$=mid$(Password$,boucle)
+      if chr1$=chr2$ then inc _Check
+     next boucle
+    if _check=16 then _Registered=1
+   endif
+  Rem If a beta Tester exist The register to beta tester
+  If _Beta_Tester1$<>""
+    _RegisteredUser$=_Beta_Tester1$
+    _Registered=1
+    _RegisteredID$="0000000000000000"
+   endif
+ return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *                                   REAL PREVIEW MODE FOR 3D EXPLORATION                                    *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+Rem Chargement du décor de fond.
+rem load image "background2.jpg",numtextures+1
+_3D_Exploration:
+  Hide sprite 2
+  xc=camera position x()
+  yc=camera position y()
+  zc=camera position z()
+  player=lastobject+1
+  rem set camera view 0,0,640,480
+  Load Sound "viewsound/woodstep.wav",1022
+  Load Sound "viewsound/scream1.wav",1023
+Rem  _set_fog(0,0,0,4000)
+  set camera range 1,4000
+Rem  color backdrop rgb(0,0,0)
+  load music "musics\default.mid",1
+  play music 1
+  loop music 1
+  Rem Création de l'objet représentant le personnage.
+  make object box player,6,80,6
+  set object collision on player
+position object player,xc,yc,zc
+hide object player
+rem position camera object position x(player),object position y(player),object position z(player)
+make object collision box player,-16,-40,-16,16,40,16,0
+for boucle=2 to lastobject
+  xp=_obj(boucle,1) : yp=_obj(boucle,2) : zp=_obj(boucle,3)
+  xs=_obj(boucle,4) : if xs<2 then xs=2
+  ys=_obj(boucle,5) : if ys<2 then ys=2
+  zs=_obj(boucle,6) : if zs<2 then zs=2
+  kind=_obj(boucle,7) : xrot=_obj(boucle,11) : yrot=_obj(boucle,12) : zrot=_obj(boucle,13)
+  _HiddenObject=_Obj(boucle,26) : _ObjectCollisions=_Obj(boucle,27)
+  if _HiddenObject=1 or kind=8 or kind=9 then hide object boucle
+  if _ObjectCollisions=1 and ( kind<8 or kind>9 )
+    set object collision on boucle
+   else
+    set object collision off boucle
+   endif
+ next boucle
+Rem Cache les zones d'action
+if _last_zone>0
+  for boucle=1 to _last_zone
+    if object exist(65536-boucle) then hide object 65536-boucle
+   next boucle
+ endif
+Rem **************************************************
+Rem *                                                *
+Rem * DEBUT DE LA BOUCLE PRINCIPALE DU MOTEUR DE JEU *
+Rem *                                                *
+Rem **************************************************
+Rem INITIALISATION DE LA ZONE DE CIEL AVANT LA BOUCLE PRINCIPALE.
+Rem
+set object collision off 1
+Rem On initialise la SkyBox.
+_initialize_zones()
+Rem
+repeat
+  paste image 1,0,0,0
+  oldx#=object position x(player)
+  oldy#=object position y(player)
+  oldz#=object position z(player)
+Rem Calcul du nouvel angle de vue selon le déplacement de la souris.
+  position mouse 320,240
+  cx#=wrapvalue(cx#+(mousemovey()/2))
+  cy#=wrapvalue(cy#+(mousemovex()/2))
+
+rem Avancer , reculer ( , se déplacer en strafe )
+  course#=(shiftkey()/2.0)+1.0
+  player_walk=upkey()-downkey()
+  if player_walk<>0
+    move object player,movespeed*player_walk
+    humanwalk=wrapvalue(humanwalk+(walkspeed*course#))
+  endif
+  strafe=rightkey()-leftkey()
+  if strafe<>0
+    cy2#=wrapvalue(cy#+(90*strafe))
+    rotate object player,0,cy2#,0
+    move object player,movespeed
+    rotate object player,0,cy#,0
+   endif
+  x#=object position x(player)
+  y#=oldy#
+  z#=object position z(player)
+  position object player,x#,y#,z#
+
+Rem calcul des collisions de l'objets aux murs .
+  set object collision on player
+  x#=object position x(player)
+  y#=object position y(player)
+  z#=object position z(player)
+
+Rem calcul simple d'une marche.
+  if object collision(player,0)>0
+    position object player,x#,y#+16,z#
+    if object collision(player,0)=0
+      inc y#,16
+      for boucle=1 to 4
+        position object player,x#,y#-4,z#
+        if object collision(player,0)=0 then y#=y#-4
+       next boucle
+     endif
+   endif
+  position object player,x#,y#,z#
+Rem Collision aux murs !
+  if object collision(player,0)>0
+    x#=x#-get object collision x()
+    z#=z#-get object collision z()
+  endif
+  position object player,x#,y#,z#
+Rem Si le mur n'est pas sur un angle de 0°,90°,180°,270°
+  if object collision(player,0)>0
+    x#=oldx#
+    z#=oldz#
+    position object player,x#,y#,z#
+   endif
+ground=0
+  Rem Calcul de l'apesanteur
+  if jump<1 and ground=0
+    position object player,x#,y#-4,z#
+    if object collision(player,0)=0
+      y#=(y#-4)
+     else
+      ground=1
+      position object player,x#,y#,z#
+     endif
+   endif
+Rem Calcul de collision avec les matrices
+  newy#=_Check_for_ground(x#,y#,z#,object size y(player))
+  if newy#<>y# then ground=1
+  y#=newy#
+  position object player,x#,y#,z#
+  Rem le joueur veut sauter ?
+  if jump=0 and ground=1 and mouseclick()=2 then jump=16
+
+  Rem On crée le saut et on vérifie qu'il n'y aie pas de plafond!
+    if jump>0
+      position object player,x#,y#+4,z#
+      if object collision(player,0)=0
+        dec jump
+        if jump=0 then jump=0
+        y#=(y#+4)
+       else
+        jump=0
+     endif
+   endif
+  rem position object player,x#,y#,z#
+  rem Object and Camera are linked for easy calculation of collisions !
+  rotate object player,0,cy#,0
+  rotate camera cx#,cy#,0
+  humancalc=cos(humanwalk)*4
+  position camera object position x(player),object position y(player)+32+humancalc,object position z(player)
+
+rem   scroll backdrop (cy#/4),(cx#/4)
+  if humanwalk>190 and humanwalk<211 and jump=0 and ground=1
+    play sound 1022
+    humanwalk=humanwalk+10
+   endif
+Rem Important : Recalcul de la vitesse du joueur selon le nombre d'images par secondes.
+  movespeed=4*course#
+  inc _lightcheck
+  if _lightcheck=16
+    _checkFor7Lights() : Rem vérifie et met 7 lumières MAX !
+    _lightcheck=0
+   endif
+Rem
+Rem GESTION DES ZONES D'ACTIONS JUSTE AVANT LAsync
+  _check_all_zones()
+Rem
+  set cursor 0,0
+  ink rgb(255,255,255),rgb(0,0,0)
+  for boucle=1 to _zone_data(1)
+    if _zone_inside(boucle)=1 then print "inside zone #";boucle
+   next boucle
+ sync
+ until spacekey()=1 or camera position y()<-200
+
+Rem ON DOIT DESACTIVER TOUTE LES ZONES ACTIVES !!!! ET REMETTRE TOUT A 0.
+  _quit_all_zones()
+  _replace_skyobject()
+
+Rem FIN DE LA BOUCLE PRINCIPALE DU JEU !!!
+ delete object player
+ play sound 1023
+ wait 1000
+Rem
+Rem On efface les objets 3D crées.
+if music exist(1)=1
+  stop music 1
+  delete music 1
+ endif
+delete sound 1022
+delete sound 1023
+color backdrop rgb(_BgdRedGRB,_BgdGreenRGB,_BgdBlueRGB)
+_set_fog(_FogRedRGB,_FogGreenRGB,_FogBlueRGB,_fogdistance)
+rem set camera view 0,12,bitmap width(0),bitmap height(0)
+paste image 1,0,0
+sync
+movespeed=16
+movespeedneg=0-movespeed
+for boucle=2 to lastobject
+  show object boucle
+  set object collision off boucle
+ next boucle
+Rem re affiche les zones d'action
+if _last_zone>0
+  for boucle=1 to _last_zone
+    if object exist(65536-boucle) then show object 65536-boucle
+   next boucle
+ endif
+  Show sprite 2
+ return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *                        MISE EN PLACE D'UN SKIN DIFFERENT DE CELUI PAR DEFAUT                              *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_MAKE_SKIN:
+  if _skin$="" or file exist(_edpath$+"\editor\"+_skin$)=0 or _Registered=0
+    restore DEFAULT_SKIN_DATA
+    boucle=0
+    repeat
+      inc boucle,1
+      read _skin_data$(boucle)
+     until _skin_data$(boucle)="END_SKIN"
+   else
+    open to read 1,_edpath$+"\editor\"+_skin$
+    boucle=0
+    repeat
+      inc boucle,1
+      read string 1,_skin_data$(boucle)
+     until _skin_data$(boucle)="END_SKIN"
+    close file 1
+   endif
+ Return
+DEFAULT_SKIN_DATA:
+data "3DMe Theme Skin : DEFAULT 3DME SKIN"
+data "Author : Frederic Cordier"
+data " "
+data "COMMON_FILES:"
+data "editor\mainwindow_v3.jpg"
+data "editor\case.jpg"
+data "editor\mouse.bmp"
+data "editor\mousebusy.bmp"
+data "editor\mire.jpg"
+data "editor\emptybox.bmp"
+data "editor\checkedbox.bmp"
+data "ENGLISH_FILES:"
+data "editor\fileselector_v1_english.jpg"
+data "editor\objectattributes_v1_english.jpg"
+data "editor\zoneproperties_v1_english.jpg"
+data "editor\objectselection_v1_english.jpg"
+data "editor\menu_item.jpg"
+data "editor\add_matrix_v1_english.jpg"
+data "editor\matrixattributes_v1_english.jpg"
+data "editor\matrix_rndheight_v1_english.jpg"
+data "FRENCH_FILES:"
+data "editor\fileselector_v1_french.jpg"
+data "editor\objectattributes_v1_french.jpg"
+data "editor\zoneproperties_v1_french.jpg"
+data "editor\objectselection_v1_french.jpg"
+data "editor\menu_item.jpg"
+data "editor\add_matrix_v1_french.jpg"
+data "editor\matrixattributes_v1_french.jpg"
+data "editor\matrix_rndheight_v1_french.jpg"
+Data "END_SKIN"
+
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *                     SOUS-PROGRAMMES SUR LA GESTION DES ZONE D'ACTION                                      *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_create_zone:
+  choice=0
+  if _registered=0 and _last_zone>15 then return
+  if _last_zone>255 then return
+  inc _last_zone
+  _current_zone=_last_zone
+  _zone_data(1)=_last_zone
+  _zone_info(_last_zone,1)=0 : Rem ZONE NULLE PAR DEFAUT !!!
+  _zone_info(_last_zone,2)=lastx
+  _zone_info(_last_zone,3)=lasty
+  _zone_info(_last_zone,4)=lastz
+  for boucle=5 to 7
+    _zone_info(_last_zone,boucle)=defaultboxsize
+   next boucle
+  for boucle=8 to 16
+    _zone_info(_last_zone,boucle)=0
+   next boucle
+  _zone_ref=_last_zone
+  gosub _refresh_zone
+ return
+
+_Move_Zone:
+  choice=0
+  if _last_zone=0 then return
+  xposinit=_zone_info(_current_zone,2)
+  yposinit=_zone_info(_current_zone,3)
+  zposinit=_zone_info(_current_zone,4)
+  repeat
+    MW_Background_Task()
+    xpos=_zone_info(_current_zone,2)
+    ypos=_zone_info(_current_zone,3)
+    zpos=_zone_info(_current_zone,4)
+    key=scancode()
+    if key=pageupkey then ypos=ypos+defaultstep
+    if key=pagedownkey then ypos=ypos-defaultstep
+    if upkey()=1 then zpos=zpos+defaultstep
+    if downkey()=1 then zpos=zpos-defaultstep
+    if leftkey()=1 then xpos=xpos-defaultstep
+    if rightkey()=1 then xpos=xpos+defaultstep
+    if key=inserkey then inc defaultstep
+    if key=supprkey then dec defaultstep
+    if defaultstep=0 then defaultstep=1
+    if defaultstep>128 then defaultstep=128
+    if key=defaultkey
+      xpos=xposinit
+      ypos=yposinit
+      zpos=zposinit
+     endif
+    _zone_info(_current_zone,2)=xpos
+    _zone_info(_current_zone,3)=ypos
+    _zone_info(_current_zone,4)=zpos
+    position object 65536-(_current_zone),xpos,ypos,zpos
+    if mouseclick()=1 then _3DMeMW_Check_Mouse_View()
+    MW_Ink(12,128,128,128)
+    MW_Set_Cursor(12,0,0)
+    MW_Print(12,_Dialogue$(66))
+    MW_Print(12,"X="+str$(xpos))
+    MW_Print(12,"Y="+str$(ypos))
+    MW_Print(12,"Z="+str$(zpos))
+    MW_Print(12,_Dialogue$(56)+str$(defaultstep))
+    MW_Sync(0)
+    Sync
+    MW_Cls(12,32,32,32)
+   until spacekey()=1 or mouseclick()=2
+  _Wait_MouseClick0()
+  lastx=xpos
+  lasty=0
+  lastz=zpos
+ Return
+
+_Scale_zone:
+  choice=0
+  if _last_zone=0 then return
+  xsizeinit=_zone_info(_current_zone,5)
+  ysizeinit=_zone_info(_current_zone,6)
+  zsizeinit=_zone_info(_current_zone,7)
+  repeat
+    MW_Background_Task()
+    xc#=camera position x()
+    yc#=camera position y()
+    zc#=camera position z()
+    xsize=_zone_info(_current_zone,5)
+    ysize=_zone_info(_current_zone,6)
+    zsize=_zone_info(_current_zone,7)
+    key=scancode()
+    if key=pageupkey then ysize=ysize+defaultstep
+    if key=pagedownkey then ysize=ysize-defaultstep
+    if upkey()=1 then zsize=zsize+defaultstep
+    if downkey()=1 then zsize=zsize-defaultstep
+    if leftkey()=1 then xsize=xsize+defaultstep
+    if rightkey()=1 then xsize=xsize-defaultstep
+    if key=inserkey then inc defaultstep
+    if key=supprkey then dec defaultstep
+    if defaultstep=0 then defaultstep=1
+    if defaultstep>128 then defaultstep=128
+    if xsize<1 then xsize=1
+    if ysize<1 then ysize=1
+    if zsize<1 then zsize=1
+    if key=defaultkey
+      xsize=xsizeinit
+      ysize=ysizeinit
+      zsize=zsizeinit
+     endif
+    _zone_info(_current_zone,5)=xsize
+    _zone_info(_current_zone,6)=ysize
+    _zone_info(_current_zone,7)=zsize
+    _zone_ref=_current_zone
+    gosub _Refresh_Zone
+    if mouseclick()=1 then _3DMeMW_Check_Mouse_View()
+    MW_ink(12,128,128,128)
+    MW_Set_Cursor(12,0,0)
+    MW_Print(12,_Dialogue$(67))
+    MW_Print(12,"X="+str$(xsize))
+    MW_Print(12,"Y="+str$(ysize))
+    MW_Print(12,"Z="+str$(zsize))
+    MW_Print(12,_Dialogue$(56)+str$(defaultstep))
+    MW_sync(0)
+    Sync
+    MW_Cls(12,32,32,32)
+   until spacekey()=1 or mouseclick()=2
+  _Wait_MouseClick0()
+ Return
+
+_refresh_zone:
+  Autocam Off
+  if _zone_ref>0
+    if object exist(65536-_zone_ref) then delete object 65536-_zone_ref
+    xp=_zone_info(_zone_ref,2)
+    yp=_zone_info(_zone_ref,3)
+    zp=_zone_info(_zone_ref,4)
+    xs=_zone_info(_zone_ref,5)
+    ys=_zone_info(_zone_ref,6)
+    zs=_zone_info(_zone_ref,7)
+    make object box 65536-_zone_ref,xs,ys,zs
+    position object 65536-_zone_ref,xp,yp,zp
+    color object 65536-_zone_ref,rgb(240,224,128)
+    ghost object on 65536-_zone_ref
+    set object collision off 65536-_zone_ref
+    set object 65536-_zone_ref,1,1,0
+   endif
+ return
+
+_Select_zone:
+  choice=0
+  if _last_zone=0 then return
+  repeat
+    key=scancode()
+    if key=inserkey
+      _zone_ref=_current_zone
+      gosub _refresh_zone
+      inc _current_zone
+     endif
+    if key=supprkey
+      _zone_ref=_current_zone
+      gosub _refresh_zone
+      dec _current_zone
+     endif
+    if _current_zone>_last_zone then _current_zone=_last_zone
+    if _current_zone<1 then _current_zone=1
+    if mouseclick()=1 then _3DMeMW_Check_Mouse_View()
+    MW_Ink(12,128,128,128)
+    MW_Set_Cursor(12,0,0)
+    MW_Print(12,_Dialogue$(60))
+    MW_Print(12,"    "+str$(_current_zone))
+    if object exist(65536-_current_zone) then texture object 65536-_current_zone,5
+    MW_sync(0)
+    Sync
+    MW_Cls(12,32,32,32)
+   until spacekey()=1 or mouseclick()=2
+  _Wait_MouseClick0()
+  _zone_ref=_current_zone
+  gosub _refresh_zone
+ Return
+
+_kill_zone:
+  choice=0
+  if _last_zone=0 then return
+  if object exist(65536-_last_zone) then delete object 65536-_last_zone
+  if _current_zone=_last_zone
+    for boucle=1 to 16
+      _zone_info(_current_zone,boucle)=0
+     next boucle
+    _zone_filename$(_current_zone)=""
+    dec _last_zone
+   else
+    for boucle=_current_zone+1 to _last_zone
+      for sousboucle=1 to 16
+        _zone_info(boucle-1,sousboucle)=_zone_info(boucle,sousboucle)
+       next sousboucle
+      _zone_filename$(boucle-1)=_zone_filename$(boucle)
+     next boucle
+    for boucle=1 to 16
+      _zone_info(_last_zone,boucle)=0
+      _zone_filename$(_last_zone)=""
+     next boucle
+    dec _last_zone
+   endif
+  for _zone_ref=1 to _last_zone
+    gosub _refresh_zone
+   next _zone_ref
+  _zone_data(1)=_last_zone
+ return
+
+ _zone_properties:
+  choice=0 : _quit=0
+  _refresh=1
+  If MW_Window_Exist(21)=0
+    MW_Open_New_Window(21,"",396,246,1,1,0)
+    MW_Position_Window(21,128,12)
+    MW_Paste_Image(21,11,0,0)
+   Endif
+  repeat
+    MW_background_Task()
+    _wnd=MW_Current_Window()
+    if _wnd=21
+      xcurs=MW_Window_Position_X() : ycurs=MW_Window_Position_Y()
+     else
+      xcurs=0 : ycurs=0
+     endif
+    if mouseclick()>0 and ycurs>0
+      if mouseclick()=2 then ajout=10 else ajout=1
+      if mouseclick()=3 then ajout=100
+      gosub _check_cases
+
+      MW_Cls(12,32,32,32)
+      MW_Set_Cursor(12,0,0)
+      MW_Print(12,str$(xcurs))
+      MW_Print(12,str$(ycurs))
+      MW_Print(12,str$(xcase))
+      MW_Print(12,str$(ycase))
+
+      Rem Changer de zone à éditer
+      if ycase=1
+        if xcase=1 and _current_zone>1 then dec _current_zone
+        if xcase=2 and _current_zone<_last_zone then inc _current_zone
+        if xcase=1 or xcase=2 then _refresh=1
+       endif
+      Rem Changer le type de zone
+      if ycase=2
+        if xcase=1 and _zone_info(_current_zone,1)>0 then _zone_info(_current_zone,1)=_zone_info(_current_zone,1)-1
+        if xcase=2 and _zone_info(_current_zone,1)<6 then _zone_info(_current_zone,1)=_zone_info(_current_zone,1)+1
+        if xcase=1 or xcase=2 then _refresh=1
+        if _zone_info(_current_zone,1)=0
+          for boucle=8 to 15
+            _zone_info(_current_zone,boucle)=0
+           next boucle
+         endif
+        if _zone_info(_current_zone,1)=1
+          for boucle=13 to 15
+            _zone_info(_current_zone,boucle)=0
+           next boucle
+         endif
+        if _zone_info(_current_zone,1)=2
+          for boucle=11 to 14
+            _zone_info(_current_zone,boucle)=0
+           next boucle
+         endif
+        if _zone_info(_current_zone,1)=3 or _zone_info(_current_zone,1)=4
+          for boucle=8 to 10
+            _zone_info(_current_zone,boucle)=0
+           next boucle
+          _zone_info(_current_zone,14)=0
+          _zone_info(_current_zone,15)=0
+         endif
+        if _zone_info(_current_zone,1)=5
+          _zone_info(_current_zone,14)=0
+          _zone_info(_current_zone,15)=0
+         endif
+        if _zone_info(_current_zone,1)=6
+          for boucle=8 to 15
+            _zone_info(_current_zone,boucle)=0
+           next boucle
+         endif
+       endif
+      Rem Changer la composante ROUGE / VERTE / BLEUE
+      if ycase=5 or ycase=6 or ycase=7
+        dat=(ycase+3)
+        if xcase=1 and _zone_info(_current_zone,dat)>ajout then _zone_info(_current_zone,dat)=_zone_info(_current_zone,dat)-ajout
+        if xcase=2 and _zone_info(_current_zone,dat)<(255-ajout) then _zone_info(_current_zone,dat)=_zone_info(_current_zone,dat)+ajout
+        if xcase=1 or xcase=2 then _refresh=1
+       endif
+      Rem Changer FOG DISTANCE / VOLUME / AMPLITUDE
+      if ycase=8
+        if xcase=1 and _zone_info(_current_zone,11)>ajout then _zone_info(_current_zone,11)=_zone_info(_current_zone,11)-ajout
+        if xcase=2 then _zone_info(_current_zone,11)=_zone_info(_current_zone,11)+ajout
+        Rem Vérification des limites de cette valeur selon le type de zone utilisé.
+        if _zone_info(_current_zone,1)=0 then _zone_info(_current_zone,11)=0
+        if _zone_info(_current_zone,1)=1 and _zone_info(_current_zone,11)<100 then _zone_info(_current_zone,11)=100
+        if _zone_info(_current_zone,1)=2 then _zone_info(_current_zone,11)=0
+        if _zone_info(_current_zone,1)=3 and _zone_info(_current_zone,11)>63 then _zone_info(_current_zone,11)=63
+        if _zone_info(_current_zone,1)=4 and _zone_info(_current_zone,11)>63 then _zone_info(_current_zone,11)=63
+        if _zone_info(_current_zone,1)=5 and _zone_info(_current_zone,11)>99 then _zone_info(_current_zone,11)=99
+        if _zone_info(_current_zone,1)=6 then _zone_info(_current_zone,11)=0
+        if xcase=1 or xcase=2 then _refresh=1
+       endif
+      Rem Changer la valeur de fading #1
+      if ycase=9
+        if xcase=1 and _zone_info(_current_zone,12)>ajout then _zone_info(_current_zone,12)=_zone_info(_current_zone,12)-ajout
+        if xcase=2 then _zone_info(_current_zone,12)=_zone_info(_current_zone,12)+ajout
+        if _zone_info(_current_zone,1)=0 then _zone_info(_current_zone,12)=0
+        if _zone_info(_current_zone,1)=2 then _zone_info(_current_zone,12)=0
+        if _zone_info(_current_zone,1)=6 then _zone_info(_current_zone,12)=0
+        if xcase=1 or xcase=2 then _refresh=1
+       endif
+      Rem Changer la valeur de fading #2
+      if ycase=10
+        if xcase=1 and _zone_info(_current_zone,13)>ajout then _zone_info(_current_zone,13)=_zone_info(_current_zone,13)-ajout
+        if xcase=2 then _zone_info(_current_zone,13)=_zone_info(_current_zone,13)+ajout
+        if _zone_info(_current_zone,1)=0 then _zone_info(_current_zone,13)=0
+        if _zone_info(_current_zone,1)=2 then _zone_info(_current_zone,13)=0
+        if _zone_info(_current_zone,1)=6 then _zone_info(_current_zone,13)=0
+        if xcase=1 or xcase=2 then _refresh=1
+       endif
+      Rem Changer la valeur de la gravité d'une zone
+      if ycase=12
+        if xcase=1 and _zone_info(_current_zone,15)>0 then _zone_info(_current_zone,15)=_zone_info(_current_zone,15)-1
+        if xcase=2 and _zone_info(_current_zone,15)<2 then _zone_info(_current_zone,15)=_zone_info(_current_zone,15)+1
+        if _zone_info(_current_zone,1)<>2 then _zone_info(_current_zone,15)=0
+        if xcase=1 or xcase=2 then _refresh=1
+       endif
+      Rem Changer la valeur de désactivation d'une zone.
+      if ycase=13
+        if xcase=1 and _zone_info(_current_zone,16)>0 then _zone_info(_current_zone,16)=_zone_info(_current_zone,16)-1
+        if xcase=2 and _zone_info(_current_zone,16)<15 then _zone_info(_current_zone,16)=_zone_info(_current_zone,16)+1
+        if xcase=1 or xcase=2 then _refresh=1
+       endif
+      Rem Changer le numero de la texture utilisée par la zone.
+      if ycase=14
+        if xcase=1 and _zone_info(_current_zone,17)>0 then _zone_info(_current_zone,17)=_zone_info(_current_zone,17)-1
+        if xcase=2 and _zone_info(_current_zone,17)<_TextureNum then _zone_info(_current_zone,17)=_zone_info(_current_zone,17)+1
+        if _zone_info(_current_zone,1)=0 then _zone_info(_current_zone,17)=0
+        if _zone_info(_current_zone,1)=3 then _zone_info(_current_zone,17)=0
+        if _zone_info(_current_zone,1)=4 then _zone_info(_current_zone,17)=0
+        if _zone_info(_current_zone,1)=5 then _zone_info(_current_zone,17)=0
+        if xcase=1 or xcase=2 then _refresh=1
+       endif
+      Rem
+      Rem SELECTION DU FICHIER A UTILISER AVEC LA ZONE MUSIQUE / SONS
+      Rem
+      if _zone_info(_current_zone,1)<3 or _zone_info(_current_zone,1)>4 then _zone_filename$(_current_zone)=""
+      if ycase=15 and xcase=2
+        fichier$=""
+        _loaderpath$=_edpath$
+        if _zone_info(_current_zone,1)=3
+          _loaderpath$=_musPath$
+          filter1$=".mid" : filter2$=".mp3"
+         endif
+        if _zone_info(_current_zone,1)=4
+          _loaderpath$=_soundPath$
+          filter1$=".wav" : filter2$=".mp3"
+         endif
+        title$=_Dialogue$(52)
+        REM FILE SELECTOR FUNCTION USE
+        fileselector$(2)=title$
+        Fct_File_Selector_v1(_loaderpath$,filter1$,filter2$)
+        _dossierfinal$=fileselector$(8)
+        _fichierfinal$=fileselector$(9)
+        REM
+        rem set camera view 0,12,bitmap width(0),bitmap height(0)
+        if file exist(_loaderPath$+_fichierfinal$)=1
+          fichier$=_fichierfinal$
+         else
+          fichier$=_dossierfinal$+_fichierfinal$
+         endif
+        _refresh=1
+        if fichier$<>"" then _zone_filename$(_current_zone)=fichier$
+        Rem
+       endif
+     endif
+    if _refresh=1 then gosub _refresh_zone_properties
+    if mouseclick()=1 then _3DMeMW_Check_Mouse_View()
+    sprite 2,mousex(),mousey(),3
+    MW_sync(0)
+    sync
+   until _quit=1 or MW_Window_Exist(21)=0
+  _quit=0 : _refresh=0
+  if MW_Window_Exist(21)=1 then MW_Close_Window(21)
+  rem set camera view 0,12,bitmap width(0),bitmap height(0)
+ return
+_check_cases:
+  xc=xcurs : yc=ycurs
+  xcase=0 : ycase=0
+  if xc>7 and xc<24 then xcase=1
+  if xc>25 and xc<42 then xcase=2
+  if xcase<>0
+    ycase=(yc/16)+1
+    if ycase>15 then ycase=0
+   endif
+  _Wait_MouseClick0()
+ return
+_refresh_zone_properties:
+  _refresh=0
+  MW_Paste_Image(21,10,0,0)
+  ink rgb(255,255,255),rgb(0,0,0)
+  Rem Affichage du numéro de la zone en cours.
+  MW_Set_Cursor(21,44,4) : MW_Print(21,str$(_current_zone))
+  Rem Affichage du type de zone crée.
+  dis=_zone_info(_current_zone,1)
+  MW_Set_Cursor(21,44,20) : MW_Print(21,_zone_type$(dis))
+  Rem Affichage des positions de la zone.
+  MW_Set_Cursor(21,44,36)
+  MW_Print(21,str$(_zone_info(_current_zone,2))+","+str$(_zone_info(_current_zone,3))+","+str$(_zone_info(_current_zone,4)))
+  Rem Affichage des dimensions de la zone.
+  MW_Set_Cursor(21,44,52)
+  MW_Print(21,str$(_zone_info(_current_zone,5))+","+str$(_zone_info(_current_zone,6))+","+str$(_zone_info(_current_zone,7)))
+  Rem Affichage des 3 composantes de couleur si zone utilise
+  MW_Set_Cursor(21,44,68) : MW_Print(21,str$(_zone_info(_current_zone,8)))
+  MW_Set_Cursor(21,44,84) : MW_Print(21,str$(_zone_info(_current_zone,9)))
+  MW_Set_Cursor(21,44,100) : MW_Print(21,str$(_zone_info(_current_zone,10)))
+  Rem Affichage de la valeur FOG_DISTANCE/VOLUME/AMPLITUDE
+  MW_Set_Cursor(21,44,116) : MW_Print(21,str$(_zone_info(_current_zone,11)))
+  Rem Affichage des valeurs de Fading In/Out
+  MW_Set_Cursor(21,44,132) : MW_Print(21,str$(_zone_info(_current_zone,12)))
+  MW_Set_Cursor(21,44,148) : MW_Print(21,str$(_zone_info(_current_zone,13)))
+  Rem Affichage de valeur nulle
+  Rem
+  Rem Affichage de la gravité utilisé.
+  MW_Set_Cursor(21,44,180) : MW_Print(21,_zone_gravity$(_zone_info(_current_zone,15)))
+  Rem Affichage si la zone est destructible et en combien de coups.
+  MW_Set_Cursor(21,44,196) : MW_Print(21,str$(_zone_info(_current_zone,16)))
+  Rem Affichage de la couleur de la zone dans la boite réservée.
+  MW_Ink(21,_zone_info(_current_zone,8),_zone_info(_current_zone,9),_zone_info(_current_zone,10))
+  MW_Box(21,345,68,392,115)
+  Rem Affichage de la texture utilisée si texture>0
+  MW_Ink(21,255,255,255)
+  MW_Set_Cursor(21,44,212) : MW_Print(21,str$(_zone_info(_current_zone,17)))
+  if _zone_info(_current_zone,17)>0
+    imagenum=_firsttextureimage+_zone_info(_current_zone,17)
+    if image exist(imagenum)=1
+      MW_Sync(0) : Sync
+      create bitmap 1,256,256
+      paste image imagenum,0,0
+      MW_Copy_Bitmap2Window(1,0,0,127,127,21,329,175,392,238)
+      delete bitmap 1
+      MW_Sync(0) : Sync
+     endif
+   endif
+  Rem Affichage du nom du fichier joint à la zone si existant
+  if _zone_filename$(_current_zone)<>""
+    MW_Set_Cursor(21,44,228) : MW_Print(21,right$(_zone_filename$(_current_zone),16))
+   endif
+ return
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *                                        GESTION DES MATRICES DE 3DGC                                       *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+_Create_New_Matrix:
+  choice=0
+  if _Registered=0 and _LastMatrix>15 then return
+  XTiles=8 : ZTiles=8 : XSize=32 : ZSize=32
+  xc=camera position x() : yc=camera position y() : zc=camera position z()
+  xa=camera angle x() : ya=camera angle y() : za=camera angle z()
+  rem set camera view 0,12,bitmap width(0),bitmap height(0)
+  xpos=384/2 : ypos=400/2
+  _quit=0
+  If MW_Window_Exist(22)=0
+    MW_Open_New_Window(22,"",252,76,1,1,0)
+    MW_Position_Window(22,128,12)
+    MW_Paste_Image(22,22,0,0)
+   Endif
+Repeat
+  MW_Background_Task()
+  MW_Paste_Image(22,22,0,0)
+  MW_Ink(22,255,255,255)
+  MW_Set_Cursor(22,96,16) : MW_Print(22,str$(XTiles))
+  MW_Set_Cursor(22,160,16) : MW_Print(22,str$(ZTiles))
+  MW_Set_Cursor(22,96,46) : MW_Print(22,str$(XSize))
+  MW_Set_Cursor(22,160,46) : MW_Print(22,str$(ZSize))
+  _wnd=MW_Current_Window()
+  if _wnd=22
+    xm=MW_Window_Position_X() : ym=MW_Window_Position_Y()
+   else
+    xm=0 : ym=0
+   endif
+  if mouseclick()=1 and ym>0
+    if xm>202 and xm<251 and ym>60 and ym<75 then _quit=1
+    if xm>153 and xm<202 and ym>60 and ym<75 then _quit=2
+    if ym>15 and ym<30
+      if xm>133 and xm<145 then dec xtiles,1 : _slow=1
+      if xm>144 and xm<156 then inc xtiles,1 : _slow=1
+      if xm>196 and xm<208 then dec ztiles,1 : _slow=1
+      if xm>207 and xm<219 then inc ztiles,1 : _slow=1
+     endif
+    if ym>45 and ym<60
+      if xm>133 and xm<145 then dec xsize,1 : _slow=1
+      if xm>144 and xm<156 then inc xsize,1 : _slow=1
+      if xm>196 and xm<208 then dec zsize,1 : _slow=1
+      if xm>207 and xm<219 then inc zsize,1 : _slow=1
+     endif
+   endif
+  if xtiles<2 then xtiles=2
+  if xtiles>64 then xtiles=64
+  if ztiles<2 then ztiles=2
+  if ztiles>64 then ztiles=64
+  if xsize<8 then xsize=8
+  if zsize<8 then zsize=8
+  if mouseclick()=1 then _3DMeMW_Check_Mouse_View()
+  sprite 2,mousex(),mousey(),3
+  MW_Sync(0) : sync
+  if _slow=1
+    MW_Sync(0) : sync : MW_Sync(0) : sync : MW_Sync(0) :sync : _slow=0
+   endif
+ until _quit>0 or MW_Window_Exist(22)=0
+  _Wait_MouseClick0()
+  if MW_Window_Exist(22)=1 then MW_Close_Window(22)
+  if _quit=2
+    inc _LastMatrix,1
+    _3DME_Add_New_Matrix(_Lastmatrix,lastx,lasty,lastz,XTiles,ZTiles,XSIZE,ZSIZE)
+    _CurrentMatrix=_LastMatrix
+   endif
+  position camera xc,yc,zc
+  rotate camera xa,ya,za
+  _Matrix(0,0)=_LastMatrix
+ Return
+Rem ---------------------------------------------------
+_Delete_Current_Matrix:
+  choice=0
+  if _CurrentMatrix>0
+    _3DME_Delete_Matrix(_currentmatrix)
+    if _CurrentMatrix<_LastMatrix
+      For boucle=_CurrentMatrix to _LastMatrix-1
+        for sb=1 to 16
+          _Matrix(boucle,sb)=_Matrix(boucle+1,sb)
+         next sb
+        for sb1=0 to _matrix(boucle+1,4)
+          for sb2=0 to _matrix(boucle+1,5)
+            _Matrix_Height(boucle,sb1,sb2)=_Matrix_Height(boucle+1,sb1,sb2)
+            _Matrix_Tile(boucle,sb1,sb2)=_Matrix_Tile(boucle+1,sb1,sb2)
+           next sb2
+         next sb1
+       Next boucle
+      For boucle=1 to _lastmatrix-1
+        if matrix exist(boucle)=1 then _3DME_Delete_Matrix(boucle)
+        MW_Background_Task() : MW_sync(0) : sync
+        _3DMe_Refresh_Matrix(boucle,_FirstTextureImage,_texturenum)
+       Next boucle
+     endif
+    if matrix exist(_lastmatrix)=1 then _3DME_Delete_Matrix(_lastmatrix)
+    MW_Background_Task() : MW_sync(0) : sync
+    dec _lastmatrix,1
+    if _currentmatrix>_lastmatrix then _currentmatrix=_lastmatrix
+   endif
+  _Matrix(0,0)=_LastMatrix
+ Return
+Rem ---------------------------------------------------
+_Move_Matrix:
+  choice=0
+  if _CurrentMatrix>0 then _3DME_Move_Matrix(_CurrentMatrix)
+ Return
+Rem ---------------------------------------------------
+_change_point_height:
+  choice=0
+  if _CurrentMatrix>0 then _3DME_Move_Matrix_Point(_CurrentMatrix)
+ Return
+Rem ---------------------------------------------------
+_texture_matrix_tile:
+  choice=0
+  if _CurrentMatrix>0 then _3DME_Texture_Matrix_Tiles(_CurrentMatrix,_FirstTextureImage,_texturenum)
+ Return
+Rem ---------------------------------------------------
+_define_matrix_properties:
+  choice=0
+  if _CurrentMatrix>0 then _Matrix_Properties(_CurrentMatrix)
+ Return
+Rem ---------------------------------------------------
+_select_another_matrix:
+  choice=0
+  if _LastMatrix>1 then _CurrentMatrix=Fct_Select_Matrix(_CurrentMatrix,_LastMatrix)
+ Return
+Rem ---------------------------------------------------
+_make_random_height:
+  choice=0
+  ymax=64 : ymin=0 : y0=32 : alfa=32
+  xc=camera position x() : yc=camera position y() : zc=camera position z()
+  xa=camera angle x() : ya=camera angle y() : za=camera angle z()
+  rem set camera view 0,12,bitmap width(0),bitmap height(0)
+  xpos=384/2 : ypos=400/2
+  _quit=0
+  If MW_Window_Exist(23)=0
+    MW_Open_New_Window(23,"",252,76,1,1,0)
+    MW_Position_Window(23,128,12)
+    MW_Paste_Image(23,24,0,0)
+   Endif
+Repeat
+  MW_Background_Task()
+  MW_Paste_Image(23,24,0,0)
+  MW_Ink(23,255,255,255)
+  MW_Set_Cursor(23,96,16) : MW_Print(23,str$(ymax))
+  MW_Set_Cursor(23,160,16) : MW_Print(23,str$(ymin))
+  MW_Set_Cursor(23,96,46) : MW_Print(23,str$(y0))
+  MW_Set_Cursor(23,160,46) : MW_Print(23,str$(alfa))
+  _wnd=MW_Current_Window()
+  if _wnd=23
+    xm=MW_Window_Position_X() : ym=MW_Window_Position_Y()
+   else
+    xm=0 : ym=0
+   endif
+  if mouseclick()=1 and ym>0
+    if xm>202 and xm<251 and ym>60 and ym<75 then _quit=1
+    if xm>153 and xm<202 and ym>60 and ym<75 then _quit=2
+    if ym>15 and ym<30
+      if xm>133 and xm<145 then dec ymax,1 : _slow=1
+      if xm>144 and xm<156 then inc ymax,1 : _slow=1
+      if xm>196 and xm<208 then dec ymin,1 : _slow=1
+      if xm>207 and xm<219 then inc ymin,1 : _slow=1
+     endif
+    if ym>45 and ym<60
+      if xm>133 and xm<145 then dec y0,1 : _slow=1
+      if xm>144 and xm<156 then inc y0,1 : _slow=1
+      if xm>196 and xm<208 then dec alfa,1 : _slow=1
+      if xm>207 and xm<219 then inc alfa,1 : _slow=1
+     endif
+   endif
+  if ymax<(ymin+4) then ymax=ymin+4
+  if ymin>(ymax-4) then ymin=ymax-4
+  if y0<(ymin+2) then y0=ymin+2
+  if y0>(ymax-2) then y0=ymax-2
+  if alfa<2 then alfa=2
+  if alfa>256 then alfa=256
+  if mouseclick()=1 then _3DMeMW_Check_Mouse_View()
+  sprite 2,mousex(),mousey(),3
+  MW_Sync(0)
+  sync
+  if _slow=1
+    MW_Sync(0) : sync : MW_Sync(0) : sync : MW_Sync(0) :sync : _slow=0
+   endif
+ until _quit>0 or MW_Window_Exist(23)=0
+rem set camera view 0,12,bitmap width(0),bitmap height(0)
+  _Wait_MouseClick0()
+  if MW_Window_Exist(23)=1 then MW_Close_Window(23)
+  if _quit=2
+    _3DME_Random_Height(_currentmatrix,ymax,ymin,y0,alfa)
+   endif
+  position camera xc,yc,zc
+  rotate camera xa,ya,za
+  _Matrix(0,0)=_LastMatrix
+ Return
+Rem ---------------------------------------------------
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *                     DONNEES POUR LA DEFINITION DES CODES IDENTIFIANTS UTILISATEUR                         *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+donnees_password:
+  Data 10,4,15,7,16,2,1,6
+  Data 8,13,11,5,9,14,12,3
+
+menus_values:
+data 1,1,1,1,2,21,1,3,2,1,4,3,1,5,4,1,6,5,1,7,6,1,8,7
+data 1,9,25,1,10,26,1,11,27,1,12,24,1,13,22
+data 2,1,9,2,2,10,2,3,11,2,4,12,2,5,13,2,6,14,2,7,15,2,8,16
+data 2,9,17,2,10,32,2,11,33,2,12,34,2,13,35
+data 2,14,31,2,15,36,2,16,30,2,17,37
+data 3,1,28,3,2,29,3,3,8
+data 4,1,42,4,2,43,4,3,44,4,4,45,4,5,46,4,6,47,4,7,0,4,8,49
+data 4,9,50,4,10,51,4,11,52,4,12,53,4,13,54,4,14,55,4,15,56,4,16,57
+data 5,1,58,5,2,59,5,3,60
+data 0,0,0
+
+gadgets_values:
+data 9
+data 2,6,1,21,2,22,23,24
+data 3,7,3,4,18,19,20,39,40
+data 4,4,5,10,6,7
+data 5,4,25,11,26,27
+data 6,4,9,8,28,29
+data 7,6,12,13,14,15,16,17
+data 8,9,32,33,34,35,36,31,38,37,30
+data 9,6,42,43,44,45,46,47
+data 10,9,49,50,51,52,53,54,55,56,57
+Rem ---------------------------------------------------
+Function _Wait_MouseClick0()
+  repeat
+    MW_Sync(0)
+    Sync
+   Until MouseClick()=0
+ EndFunction
+Rem ---------------------------------------------------
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *                     DOCUMENTATION SUR LE FORMAT DES DONNEES CONCERNANT LES CARTES 3D                      *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+REMSTART
+Liste des variables importantes
+LastObject   = Numéro du dernier objet existant pour le décor.
+_Obj(1,x)    = Données importantes pour la définition de la carte :
+  _Obj(1,1)  = LastObject
+  _Obj(1,2)  = XCamera Start \
+  _Obj(1,3)  = YCamera Start  > Définissent la position initiale du joueur dans la carte 3D.
+  _Obj(1,4)  = ZCamera Start /
+  _Obj(1,5)  = XCamera Rotate \
+  _Obj(1,6)  = YCamera Rotate  > Définissent la rotation de la camera au point initial.
+  _Obj(1,7)  = ZCamera Rotate /
+  _Obj(1,8)  = Number of textures to be loaded.
+  _Obj(1,9)  = Ambient Light Red component.
+  _Obj(1,10) = Ambient Light Green component.
+  _Obj(1,11) = Ambient Light Blue component.
+  _Obj(1,12) = Ambient Light Intensity.
+  _Obj(1,13) = Ambient X Orientation.
+  _Obj(1,14) = Ambient Y Orientation.
+  _Obj(1,15) = Ambient Z Orientation.
+  _Obj(1,16) = Nombre de lumières crées.
+
+_Obj(a,B)    = Valeurs de définition pour l'objet a ( 2<a<(lastobject+1) )
+  _Obj(a,1)  = XObject Position \
+  _Obj(a,2)  = YObject Position  > Coordonnées initiales de l'objet 'a'
+  _Obj(a,3)  = ZObject Position /
+  _Obj(a,4)  = XObject Size \
+  _Obj(a,5)  = YObject Size  > Dimensions initiales de l'objet 'a'
+  _Obj(a,6)  = ZObject Size /
+  _Obj(a,7)  = Type d'objet 3D.
+                 Type = 1 : Sphère
+                 Type = 2 : Cube
+                 Type = 3 : Boite (Box)
+                 Type = 4 : Cylindre
+                 Type = 5 : Cone
+                 Type = 6 : Plan ( Carré / Rectangle )
+                 Type = 7 : Triangle ( NOT INPLEMENTED )
+                 Type = 8 : Source de lumière
+                 Type = 9 : Son 3D
+                 Type = 10 : Unused ( NOT INPLEMENTED )
+                 Type = 10+: Objects 3D Direct X.
+  _Obj(a,8)  = Couleur de l'objet Rouge
+  _Obj(a,9)  = Attributs de l'objet ( transparence )
+  _Obj(a,10) = Texture de l'objet
+  _Obj(a,11) = XObject Rotate \
+  _Obj(a,12) = YObject Rotate  > Définissent la rotation initiale de l'objet 'a'
+  _Obj(a,13) = ZObject Rotate /
+  _Obj(a,14) = Si Object=Light Then _LightNum attributed IDEM For 3D Sound
+  _Obj(a,15) = Couleur de l'objet Vert
+  _Obj(a,16) = Couleur de l'objet Bleu
+  _Obj(a,17) = X Scaling Texture.
+  _Obj(a,18) = Y Scaling Texture.
+  _Obj(a,19) = Set object function attributes : Wireframe drawing.
+  _Obj(a,20) = Set object function attributes : Black is transparent.
+  _Obj(a,21) = Set object function attributes : Cull ( show hidden faces ).
+  _Obj(a,22) = Set object function attributes : Texture Filtering.
+  _Obj(a,23) = Set object function attributes : Sensitive to light.
+  _Obj(a,24) = Set object function attributes : Sensitive to Fog.
+  _Obj(a,25) = Set object function attributes : Sensitive to ambient light.
+  _Obj(a,26) = Set object function attributes : Hide object.
+  _Obj(a,27) = Set object function attributes : Collision activation.
+
+
+  _Lights(a,1) = Light 'a' X Position.
+  _Lights(a,2) = Light 'a' Y Position.
+  _Lights(a,3) = Light 'a' Z Position.
+  _Lights(a,4) = Light Red component.
+  _Lights(a,5) = Light Green component.
+  _Lights(a,6) = Light Blue component.
+  _Lights(a,7) = Light Intensity.
+  _Lights(a,8) = Light Range.
+  _Lights(a,9) = Light X Orientation.
+  _Lights(a,10) = Light Y Orientation.
+  _Lights(a,11) = Light Z Orientation.
+  _Lights(a,12) = ...
+    ...          = ...
+  _Lights(a,16) = ...
+
+
+  _Zone_Info(Zone_Number,Zone_Data)
+  _Zone_Info(Zone_Number,1)=0 No Effect Zone
+  _Zone_Info(Zone_Number,1)=1 Fog Zone
+  _Zone_Info(Zone_Number,1)=2 Water Zone
+  _Zone_Info(Zone_Number,1)=3 Music Zone
+  _Zone_Info(Zone_Number,1)=4 Sound Zone
+  _Zone_Info(Zone_Number,1)=5 Ambient Zone
+  _Zone_Info(Zone_Number,1)=6 Sky Box Zone
+
+  _Zone_Info(Zone,2)=X Position
+  _Zone_Info(Zone,3)=Y Position
+  _Zone_Info(Zone,4)=Z Position
+  _Zone_Info(Zone,5)=X Size
+  _Zone_Info(Zone,6)=Y Size
+  _Zone_Info(Zone,7)=Z Size
+  _Zone_Info(Zone,8)=Red
+  _Zone_Info(Zone,9)=Green
+  _Zone_Info(Zone,10)=Blue
+  _Zone_Info(Zone,11)=Distance / Amplitude / Volume
+  _Zone_Info(Zone,12)=Fade In/Out #1
+  _Zone_Info(Zone,13)=Fade In/Out #2
+  _Zone_Info(Zone,14)=Unused
+  _Zone_Info(Zone,15)=Gravity type
+  _Zone_Info(Zone,16)=Destructive
+  _Zone_Info(Zone,17)=Texture for effects.
+
+  _3dme_temp(1) to _3dme_temp(12) are used
+
+  _Matrix(_MATRIX,1)=Matrix X Position
+  _Matrix(_MATRIX,2)=Matrix Y Position
+  _Matrix(_MATRIX,3)=Matrix Z Position
+  _Matrix(_MATRIX,4)=X Number of tiles
+  _Matrix(_MATRIX,5)=Z Number of tiles
+  _Matrix(_MATRIX,6)=X tiles size
+  _Matrix(_MATRIX,7)=Z tiles size
+  _Matrix(_MATRIX,8)=Mode GHOST
+  _Matrix(_MATRIX,9)=Fil De Fer
+  _Matrix(_MATRIX,10)=Transparence
+  _Matrix(_MATRIX,11)=faces cachées
+  _Matrix(_MATRIX,12)=filtrage de textures
+  _Matrix(_MATRIX,13)=sensible à la lumière
+  _Matrix(_MATRIX,14)=sensible au brouillard
+  _Matrix(_MATRIX,15)=sensible à la lumière ambiante
+  _Matrix(_MATRIX,16)=collisions actives.
+  _Matrix_Heigth(_MATRIX,X,Z)=Height of the point X,Z of the matrix _MATRIX
+  _Matrix_Tile(_MATRIX,X,Z)=Texture used for the tile X,Z of the matrix _MATRIX
+ REMEND
+
+Rem CALCUL DES MOUVEMENTS DE LA SOURIS POUR LES CHANGEMENTS DE VUE.
+Rem  position mouse 320,240
+Rem  cx#=wrapvalue(cx#+((mousemovey()*movespeed))/8)
+Rem  cy#=wrapvalue(cy#+((mousemovex()*movespeed))/8)
+rem cz#=wrapvalue(cz#+((mousemovez()*movespeed))/8)
+Rem  rotate camera cx#,cy#,cz#
+rem DEPLACEMENT EN AVANT ET EN ARRIERE AU CLAVIER.
+Rem  move camera movespeed*( upkey()-downkey() )
+
+  Rem FENETRE #02 : Système
+  Rem FENETRE #03 : TEXTURES
+  Rem FENETRE #04 : OBJECTS IMPORTATION
+  Rem FENETRE #05 : 3D SOUNDS
+  Rem FENETRE #06 : LIGHTS
+  Rem FENETRE #07 : OBJECTS ADDING
+  Rem FENETRE #08 : OBJECTS MODIFICATIONS
+  Rem FENETRE #09 : ACTION ZONES
+  Rem FENETRE #10 : MATRIXES
+  Rem FENETRE #11 : BUGG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  Rem FENETRE #12 : ACTIONS
+  Rem FENETRE #13 : DIALOGUES
+  Rem FENETRE #14 : COUNTER
+  Rem FENETRE #15 : PROPRIETES D'OBJETS
+  Rem FENETRE #16 : FILE-SELECTOR
+  Rem FENETRE #17 : PROPRIETES MATRICES
+  Rem FENETRE #18 : KILL TEXTURES
+  Rem FENETRE #19 : IMPORTED 3D OBJECTS
+  Rem FENETRE #20 : IMPORTED 3D SOUNDS
+  Rem FENETRE #21 : ACTION ZONES PROPERTIES
+  Rem FENETRE #22 : MATRIX CREATION
+  Rem FENETRE #23 : MATRIX RND HEIGHT
+  Rem FENETRE #24 : FENETRE DE MINIATURES DES TEXTURES
+  Rem  if mouseclick()=1 then 3DMeMW_Check_Mouse_View()

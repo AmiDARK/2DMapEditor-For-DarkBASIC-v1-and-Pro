@@ -1,0 +1,310 @@
+Rem _set_fog(RED,GREEN,BLUE,DISTANCE)                     Define Fog value ( and save states )
+Rem _initialize_zones                                     Initialize all zones ( including SkyBox )
+Rem _initialize_skybox
+Rem _position_skybox                                      Reposition skybox around player vision
+Rem _check_zone_inout                                     check if player enter or leave a zone
+Rem _check_zone_action(_check)                            Active zone effects .
+Rem _enter_water_zone(_zone_number)
+Rem _inside_water_zone
+Rem _leave_water_zone
+Rem _enter_music_zone(_zone_number)
+Rem _enter_sound_zone(_zone_number)
+Rem _inside_light_zone(_zone_number)
+Rem _inside_fog_zone(_zone_number)
+Rem
+Rem  Fonctions for Editor Only :
+Rem ----------------------------
+Rem _replace_skyobject()
+Rem
+Rem _zone_data(1)=_last_zone
+Rem _zone_data(2)=_skybox_zone
+Rem _zone_data(3)=_skybox_object
+Rem
+function _set_fog(R,G,B,DIST)
+  _3dme_temp(8)=R : _3dme_temp(9)=G : _3dme_temp(10)=B : _3dme_temp(11)=DIST
+  fog on
+  fog color rgb(R,G,B)
+  fog distance DIST
+ endfunction
+Rem
+function _initialize_zones
+  Rem Sauvegarde des valeurs de FOG par défaut
+  _3dme_temp(4)=_obj(1,9) : _3dme_temp(5)=_obj(1,10) : _3dme_temp(6)=_obj(1,11) : _3dme_temp(7)=_obj(1,12)
+  _initialize_skybox()
+ endfunction
+Rem
+function _check_all_zones
+  _check=_check_zone_inout()
+  if _check>0 then _check_zone_action(_check)
+  _position_skybox()
+ endfunction
+Rem
+function _quit_all_zones
+  for boucle=1 to _last_zone
+    if _zone_inside(boucle)=1
+      _zone_inside(boucle)=0
+      _zone_entrance(boucle)=0
+      _zone_sortance(boucle)=1
+     endif
+   next boucle
+  _sortance=1
+  _check_zone_action(2) : Rem on force la sortie de toute les zones.
+  for boucle=1 to _last_zone
+    _zone_sortance(boucle)=0
+   next boucle
+ endfunction
+Rem
+function _initialize_skybox
+  _skybox_zone=0
+  for bcl=1 to _zone_data(1)
+    if _zone_info(bcl,1)=6 then _skybox_zone=bcl
+   next bcl
+  Rem SI IL EXISTE UNE ZONE DE SKYBOX_ZONE ALORS ON NOTE LES 16 OBJETS ( MAX QU'ELLE CONTIENT )
+  if _skybox_zone>0
+    xzp=_zone_info(_skybox_zone,2) : yzp=_zone_info(_skybox_zone,3) : zzp=_zone_info(_skybox_zone,4)
+    xzs=_zone_info(_skybox_zone,5) : yzs=_zone_info(_skybox_zone,6) : zzs=_zone_info(_skybox_zone,7)
+    _sky_object=0
+    for boucle=2 to _obj(1,1)
+      xop=_obj(boucle,1) : yop=_obj(boucle,2) : zop=_obj(boucle,3)
+      if xop>(xzp-(xzs/2)) and xop<(xzp+(xzs/2))
+        if yop>(yzp-(yzs/2)) and yop<(yzp+(yzs/2))
+          if zop>(zzp-(zzs/2)) and zop<(zzp+(zzs/2))
+            if _sky_object<16
+              inc _sky_object
+              _skybox_object(_sky_object)=boucle
+              REM SET OBJECT Object Number, Wireframe, Transparency, Cull, Filter, Light, Fog, Ambient
+rem              set object boucle,1,1,0,0,0,1,0
+             endif
+           endif
+         endif
+       endif
+     next boucle
+    _zone_data(2)=_skybox_zone
+    _zone_data(3)=_sky_object
+   endif
+ endfunction
+Rem
+function _position_skybox
+  if _zone_data(2)>0
+    set cursor 0,0
+    ink rgb(255,255,255),rgb(0,0,0)
+    xzp=_zone_info(_zone_data(2),2) : yzp=_zone_info(_zone_data(2),3) : zzp=_zone_info(_zone_data(2),4)
+    if _zone_data(3)>0
+      for boucle=1 to _zone_data(3)
+        _sky_obj=_skybox_object(boucle)
+        xop=_obj(_sky_obj,1) : yop=_obj(_sky_obj,2) : zop=_obj(_sky_obj,3)
+        xop=xop-xzp : yop=yop-yzp : zop=zop-zzp
+        xop=xop+camera position x()
+        yop=yop+camera position y()
+        zop=zop+camera position z()
+        position object _sky_obj,xop,yop,zop
+      next boucle
+     endif
+   endif
+ endfunction
+Rem
+function _check_zone_inout
+  _entrance=0 : _sortance=0
+  if _zone_data(1)>0
+    xc=camera position x() : yc=camera position y() : zc=camera position z()
+    for bcl=1 to _zone_data(1)
+      xzp=_zone_info(bcl,2) : yzp=_zone_info(bcl,3) : zzp=_zone_info(bcl,4)
+      xzs=_zone_info(bcl,5) : yzs=_zone_info(bcl,6) : zzs=_zone_info(bcl,7)
+      Rem Si on est dans une zone , calcule si on viens juste d'en sortir.
+      _zone_sortance(bcl)=0
+      if _zone_inside(bcl)=1
+        if xc<(xzp-(xzs/2)) or xc>(xzp+(xzs/2))
+          _zone_sortance(bcl)=1 : _zone_inside(bcl)=0 : _zone_entrance(bcl)=0 : _sortance=1
+         endif
+        if yc<(yzp-(yzs/2)) or yc>(yzp+(yzs/2))
+          _zone_sortance(bcl)=1 : _zone_inside(bcl)=0 : _zone_entrance(bcl)=0 : _sortance=1
+         endif
+        if zc<(zzp-(zzs/2)) or zc>(zzp+(zzs/2))
+          _zone_sortance(bcl)=1 : _zone_inside(bcl)=0 : _zone_entrance(bcl)=0 : _sortance=1
+         endif
+       endif
+      Rem Si on viens juste de rentrer dans une zone , on reste dedans mais on désactive le flag d'entrée.
+      if _zone_entrance(bcl)=1
+        _zone_entrance(bcl)=0
+        _zone_inside(bcl)=1
+       endif
+      Rem Calcule si l'on rentre dans une zone d'action.
+      if _zone_inside(bcl)=0
+        if xc>(xzp-(xzs/2)) and xc<(xzp+(xzs/2))
+          if yc>(yzp-(yzs/2)) and yc<(yzp+(yzs/2))
+            if zc>(zzp-(zzs/2)) and zc<(zzp+(zzs/2))
+              _zone_entrance(bcl)=1 : _entrance=1
+             endif
+           endif
+         endif
+       endif
+      if _zone_inside(bcl)=1 then _inside=1
+     next boucle
+   endif
+   _retour=_entrance+(_sortance*2)+(_inside*4)
+ endfunction _retour
+Rem
+Rem Activate action for dedicaced zones.
+Rem
+function _check_zone_action(_check)
+  _entrance=0 : _sortance=0
+  if _zone_data(1)>0
+    if _check>3
+      _inside=1 : _check=_check-4
+     endif
+    if _check>1
+      _sortance=1 : _check=_check-2
+     endif
+    _entrance=_check
+    Rem ON VERIFIE ET EXECUTE LES FONCTIONS D'ENTREE DE ZONES NECESSAIRES.
+    for boucle=1 to _zone_data(1)
+      if _zone_entrance(boucle)=1
+        _zone_number=boucle
+        if _zone_info(boucle,1)=2 then _enter_water_zone(_zone_number)
+        if _zone_info(boucle,1)=3 then _enter_music_zone(_zone_number)
+        if _zone_info(boucle,1)=4 then _enter_sound_zone(_zone_number)
+       endif
+      if _zone_inside(boucle)=1
+        _zone_number=boucle
+        if _zone_info(boucle,1)=1 then _inside_fog_zone(_zone_number)
+        if _zone_info(boucle,1)=2 then _inside_water_zone()
+        if _zone_info(boucle,1)=5 then _inside_light_zone(_zone_number)
+       endif
+      if _zone_sortance(boucle)=1
+        _zone_number=boucle
+        if _zone_info(boucle,1)=2 then _leave_water_zone()
+       endif
+     next boucle
+   endif
+ endfunction
+Rem
+Rem Set of 3 functions that control water effects ( entering zone , leaving zone , inside zone )
+Rem
+function _enter_water_zone(_zone_number)
+  wat=65535-256
+  if object exist(wat)=1 then delete object wat
+  xpos=camera position x() : ypos=camera position y() : zpos=camera position z()
+  make object sphere wat,64
+  position object wat,xpos,ypos,zpos
+  color object wat,rgb(_zone_info(_zone_number,8),_zone_info(_zone_number,9),_zone_info(_zone_number,10))
+  ghost object on wat
+  fade object wat,3000
+  disable object zdepth wat
+  set object collision off wat
+  Rem Texturage de l'objet d'eau
+  if _zone_info(_zone_number,17)>0
+    imgnum=_zone_info(_zone_number,17)+_3dme_temp(12)
+    if image exist(imgnum)=1 then texture object wat,imgnum
+   endif
+  REM SET OBJECT Object Number, Wireframe, Transparency, Cull, Filter, Light, Fog, Ambient
+  set object wat,1,1,0
+ endfunction
+function _inside_water_zone
+  wat=65535-256
+  xdec=_3dme_temp(1) : ydec=_3dme_temp(2) : zdec=_3dme_temp(3)
+  xdec=wrapvalue(xdec+1) : ydec=wrapvalue(ydec+1) : zdec=wrapvalue(zdec+2)
+  xpos=camera position x() : ypos=camera position y() : zpos=camera position z()
+  position object wat,xpos,ypos,zpos
+  _3dme_temp(1)=xdec : _3dme_temp(2)=ydec : _3dme_temp(3)=zdec
+  xdec=wrapvalue(camera angle x()+xdec)
+  ydec=wrapvalue(camera angle y()+ydec)
+  zdec=wrapvalue(camera angle z()+zdec)
+  rotate object wat,xdec,ydec,zdec
+ endfunction
+function _leave_water_zone
+  wat=65535-256
+  if object exist(wat)=1 then delete object wat
+ endfunction
+Rem
+Rem Set of function for Music Zome
+Rem
+function _enter_music_zone(_zone_number)
+  Rem On désactive la musique qui est actuellement jouée.
+  if music exist(1)=1
+    stop music 1
+    delete music 1
+   endif
+  if file exist(_FilesPath$(6)+_zone_filename$(_zone_number))=1
+    load music _FilesPath$(6)+_zone_filename$(_zone_number),1
+    play music 1
+   endif
+ endfunction
+Rem
+Rem Set of function for Sound Zome
+Rem
+function _enter_sound_zone(_zone_number)
+  if sound exist(1)=1
+    stop sound 1
+    delete sound 1
+   endif
+  if file exist(_FilesPath$(7)+_zone_filename$(_zone_number))=1
+    load sound _FilesPath$(7)+_zone_filename$(_zone_number),1
+    play sound 1
+   endif
+ endfunction
+Rem
+Rem Set of function for Light Zone
+Rem
+function _inside_light_zone(_zone_number)
+  redz=_zone_info(_zone_number,8) : greenz=_zone_info(_zone_number,9) : bluez=_zone_info(_zone_number,10)
+  ligz=_zone_info(_zone_number,11)
+  red=_3dme_temp(4) : green=_3dme_temp(5) : blue=_3dme_temp(6) : lig=_3dme_temp(7)
+  if red=redz and green=greenz and blue=bluez and lig=ligz then changes=0 else changes=1
+  if red>redz then dec red,1
+  if red<redz then inc red,1
+  if green>greenz then dec green,1
+  if green<greenz then inc green,1
+  if blue>bluez then dec blue,1
+  if blue<bluez then inc blue,1
+  if lig>ligz then dec lig,1
+  if lig<ligz then inc lig,1
+  if changes=1
+    color ambient light rgb(red,green,blue)
+    set ambient light lig
+   endif
+  _3dme_temp(4)=red : _3dme_temp(5)=green : _3dme_temp(6)=blue : _3dme_temp(7)=lig
+ endfunction
+Rem
+Rem Sets of functions for Fog Zone
+rem
+function _inside_fog_zone(_zone_number)
+  redz=_zone_info(_zone_number,8) : greenz=_zone_info(_zone_number,9) : bluez=_zone_info(_zone_number,10)
+  disz=_zone_info(_zone_number,11)
+  red=_3dme_temp(8) : green=_3dme_temp(9) : blue=_3dme_temp(10) : dis=_3dme_temp(11)
+  if red=redz and green=greenz and blue=bluez and dis=disz then changes=0 else changes=1
+  if red>redz then dec red,1
+  if red<redz then inc red,1
+  if green>greenz then dec green,1
+  if green<greenz then inc green,1
+  if blue>bluez then dec blue,1
+  if blue<bluez then inc blue,1
+  if dis>disz then dec dis,1
+  if dis<disz then inc dis,1
+  if changes=1
+    fog color rgb(red,green,blue)
+    fog distance dis
+   endif
+  _3dme_temp(8)=red : _3dme_temp(9)=green : _3dme_temp(10)=blue : _3dme_temp(11)=dis
+ endfunction
+Rem
+Rem
+Rem
+Rem *************************************************************************************************************
+Rem *                                                                                                           *
+Rem *                     INTERACTION AVEC LES ZONES CREES DANS L'EDITEUR                                       *
+Rem *                                                                                                           *
+Rem *************************************************************************************************************
+Function _replace_skyobject
+  _skybox_zone=_zone_data(2)
+  _skybox_object=_zone_data(3)
+  if _skybox_zone>0
+    xzp=_zone_info(_skybox_zone,2) : yzp=_zone_info(_skybox_zone,3) : zzp=_zone_info(_skybox_zone,4)
+    if _skybox_object>0
+      for boucle=1 to _skybox_object
+        _sky_object=_skybox_object(boucle)
+        xop=_obj(_sky_object,1) : yop=_obj(_sky_object,2) : zop=_obj(_sky_object,3)
+        position object _sky_object,xop,yop,zop
+       next boucle
+     endif
+   endif
+ EndFunction

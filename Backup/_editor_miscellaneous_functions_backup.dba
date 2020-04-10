@@ -1,0 +1,101 @@
+
+function Fct_Save_Camera_States
+  xcam=camera position x()
+  ycam=camera position y()
+  zcam=camera position z()
+  xang=camera angle x()
+  yang=camera angle y()
+  zang=camera angle z()
+  _obj(1,2)=xcam
+  _obj(1,3)=ycam
+  _obj(1,4)=zcam
+  _obj(1,5)=xang
+  _obj(1,6)=yang
+  _obj(1,7)=zang
+ endfunction
+
+ Rem ****************************************************************************************************************
+function Fct_Scan_Keyboards
+  keyb=scancode()
+  Rem Load/Save/Quit options
+  if keyb=59 then choice=1 : Rem                F1 = Load Map
+  if keyb=60 then choice=2 : Rem                F2 = Clear Map
+  if keyb=61 then choice=21 : Rem                F3 = Save Map
+  if keyb=62 then choice=22 : Rem                F4 = Save Camera States
+  if keyb=63 then choice=3 : Rem                F5 = Load Texture
+  if keyb=64 then choice=4 : Rem                F6 = Kill Texture
+  if keyb=65 then choice=5 : Rem                F7 = Load DirectX
+Rem if keyb=66 then choice=7 : Rem                F8 = Kill DirectX
+  if keyb=67 then choice=25 : Rem                F9 = Load 3DSound
+Rem if keyb=68 then choice=26 : Rem                F10= Kill 3DSound
+  Rem Adding Various objects.
+  if keyb=2 then choice=9 : Rem                 1 = ADD Light
+  if keyb=3 then choice=10 : Rem                 2 = ADD DirectX
+  if keyb=4 then choice=11 : Rem                 3 = ADD 3DSound
+  if keyb=5 then choice=12 : Rem                 4 = ADD Sphere
+  if keyb=6 then choice=13 : Rem                 5 = ADD Cube
+  if keyb=7 then choice=14 : Rem                 6 = ADD Box
+  if keyb=8 then choice=15 : Rem                 7 = ADD Cylinder
+  if keyb=9 then choice=16 : Rem                 8 = ADD Cone
+  if keyb=10 then choice=17 : Rem                9 = ADD Plain
+  Rem Adding Textures choices.
+  if keyb=inserkey then choice=20 : Rem          INSER = Apply Next Texture
+  if keyb=supprkey then choice=19 : Rem          SUPPR = Apply Previous Texture
+  if keyb=201 then choice=39 : Rem               PAGE UP = Scroll Texture List -1
+  if keyb=209 then choice=40 : Rem               PAGE DOWN = Scroll Texture List +1
+  Rem Accessing modify object
+  if keyb=31 then choice=31 : Rem                S = Select object
+  if keyb=16 then choice=36 : Rem                A = Object's Attributes
+  if keyb=46 then choice=32 : Rem                C = Copy object
+  if keyb=39 then choice=33 : Rem                M = Move object
+  if keyb=32 then choice=34 : Rem                D = Scale object ( dimension )
+  if keyb=19 then choice=35 : Rem                R = Rotate object
+  if keyb=24 then choice=37 : Rem                O = Optimize objects
+  if keyb=34 then choice=38 : Rem                G = Object's Ghost mode
+  if keyb=25 then choice=24 : Rem                P = Preview mode
+  if choice>0 then fastmenu=1
+  keyb=0
+ endfunction choice
+
+ Rem ****************************************************************************************************************
+Function _Load_Image(_Fichier$,_Img,_texture)
+  _num=8
+  repeat
+    dec _num,1
+   until bitmap exist(_num)=0 or _num=1
+  if file exist(_fichier$)=1
+    load bitmap _fichier$,_num
+    MW_Sync(0) : Sync
+    set current bitmap _num
+    _image_x(_Img)=bitmap width(_num)
+    _image_y(_Img)=bitmap height(_num)
+    get image _Img,0,0,_image_x(_Img),_image_y(_Img),_texture
+    set current bitmap 0
+    delete bitmap _num
+    MW_Sync(0) : Sync
+   endif
+ EndFunction
+
+ Rem ****************************************************************************************************************
+Function _Paste_scaled_Image(_img,X,Y,X2,Y2,target)
+  _bmp=8
+  repeat
+    dec _bmp,1
+   until bitmap exist(_bmp)=0 or _bmp=1
+  create bitmap _bmp,512,512
+  MW_Sync(0) : Sync
+  set current bitmap _bmp
+  paste image _img,0,0
+  xs=_image_x(_img) : if xs<1 then xs=16
+  ys=_image_y(_img) : if ys<1 then ys=16
+  copy bitmap _bmp,0,0,xs,ys,target,x,y,x2,y2
+  delete bitmap _bmp
+  MW_Sync(0) : Sync
+ EndFunction
+
+Rem ****************************************************************************************************************
+Rem ****************************************************************************************************************
+Rem ****************************************************************************************************************
+Rem ****************************************************************************************************************
+Rem ****************************************************************************************************************
+Rem ****************************************************************************************************************

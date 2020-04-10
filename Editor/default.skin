@@ -1,0 +1,30 @@
+3DMe Theme Skin : DEFAULT 3DME SKIN
+Author : Frederic Cordier
+
+COMMON_FILES:
+editor\mainwindow_v3.jpg
+editor\case.jpg
+editor\mouse.bmp
+editor\mousebusy.bmp
+editor\mire.jpg
+editor\emptybox.bmp
+editor\checkedbox.bmp
+ENGLISH_FILES:
+editor\fileselector_v1_english.jpg
+editor\objectattributes_v1_english.jpg
+editor\zoneproperties_v1_english.jpg
+editor\objectselection_v1_english.jpg
+editor\menu_item.jpg
+editor\add_matrix_v1_english.jpg
+editor\matrixattributes_v1_english.jpg
+editor\matrix_rndheight_v1_english.jpg
+FRENCH_FILES:
+editor\fileselector_v1_french.jpg
+editor\objectattributes_v1_french.jpg
+editor\zoneproperties_v1_french.jpg
+editor\objectselection_v1_french.jpg
+editor\menu_item.jpg
+editor\add_matrix_v1_french.jpg
+editor\matrixattributes_v1_french.jpg
+editor\matrix_rndheight_v1_french.jpg
+END_SKIN

@@ -1,0 +1,52 @@
+Dim _Windows_sys(16) : Dim _Windows_Order(16)
+Dim _Windows_Data(16,32) : Dim _Windows_Title$(16) : Dim _Windows_Font$(16)
+Dim _Windows_Gadget(16,32,8) : Dim _Windows_Gadget_Text$(16,32)
+#Include "MW_functions.dba"
+#Include "3DMe_Magic_Windows.dba"
+Dim _buttons(2)
+Set Display Mode 800,600,16
+Sync Rate 60 : Sync On
+backdrop on
+Rem Initialization
+MW_Initialize_Tiles(32768)
+MW_Auto_Refresh_Off()
+MW_Dinable_RealTime_Scaling()
+Rem On crée les icones graphiques qui servirons aux boutons
+_firstimage=1
+3DMeMW_Make_Icon_Graphics(_firstimage)
+
+Rem On crée toutes les fenêtres voulues
+3DMeMW_Create_All_windows(_firstimage)
+
+Repeat
+  MW_Background_Task()
+Rem
+  _window=MW_Current_Window()
+  _gadget=MW_Current_gadget()
+Rem
+  if mouseclick()=1 and _window=2 and _gadget=4 then _QUIT=1
+Rem
+  MW_Sync(0)
+  Sync
+  _QUIT2=1
+  For Boucle=1 to 16
+    if MW_Window_Exist(boucle)=1 then _QUIT2=0
+   Next boucle
+ until spacekey()=1 or _QUIT=1 or _QUIT2=1
+MW_Release_All()
+3DMeMW_Clear_Icon_Graphics()
+End
+Rem Liste de fenêtres crées :
+Rem 02 : Système
+Rem 03 : Textures Functions
+Rem 04 : Objects Importation
+Rem 05 : 3D Sounds
+Rem 06 : Lights
+Rem 07 : Objects Adding
+Rem 08 : Objects Modification
+Rem 09 : Action Zones
+Rem 10 : Matrixes
+Rem 11 : Textures Thumbails
+Rem 11 : Actions
+Rem 13 : Dialogs
+Rem 14 : Objects Counter

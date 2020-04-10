@@ -1,0 +1,317 @@
+Rem
+Rem *************************************************************************************
+Rem *                                                                                   *
+Rem * 3DMAPEDITOR : EXAMPLE SUR L'UTILISATION DES MAPS DE 3DMAPEDITOR :                 *
+Rem *------------------------------------------------------------------                 *
+Rem * Version de l'éditeur : VER 2.30                                                   *
+Rem * Version de cartes :    VER 1.12                                                   *
+Rem * Version de l'exemple : VER 1.12                                                   *
+Rem * Langage :              FRANCAIS                                                   *
+Rem *-----------------------------------------------------------------------------------*
+Rem *                                                                                   *
+Rem *************************************************************************************
+Rem
+Rem
+Rem                                                          <<<--- Début de zone 1 à insérer dans votre code source
+Rem ************************************************************************************
+Rem 3DMAPEDITOR VER 2.30 FICHIER A INCLURE POUR L'UTILISATION DES MAPS
+Rem ************************************************************************************
+` #include "_fileselector_function.dba"
+` #include "_3dmapeditor_functions.dba"
+` #include "_editor_zones_functions.dba"
+Rem ************************************************************************************
+Rem 3DMAPEDITOR VER 2.29 INITIALISATION DES VARIABLES PRINCIPALES
+Rem ************************************************************************************
+Rem Définition des chemins d'accès par défaut
+_defpath$=get dir$() : _edpath$=_defpath$ : _MapPath$=_EdPath$+"\Maps\"
+_TutorialMapPath$=_MapPath$+"Tutorials_Maps\" : _TexturePath$=_EdPath$+"\Textures\"
+_3DObjectPath$=_EdPath$+"\Objects_Library\" : _3DSoundPath$=_EdPath$+"\3DSound\"
+_muspath$=_edpath$+"\musics\" : _soundpath$=_edpath$+"\sounds\"
+Rem Variables utilisées par le format de .map de l'éditeur 3DME
+Dim _obj(16383,27) : Dim _Textures$(256) : dim _Lights(256,16) : dim _LightActive(8)
+Dim _DirectXObject$(256) : Dim _3DSound$(256) : dim _fichier$(256) : Dim _FilesPath$(16)
+Rem INFORMATIONS LIES A LA GESTION DES ZONES , nouveauté de la version 2.29
+dim _zone_info(256,17) : dim _zone_filename$(256) : dim _zone_inside(256) : dim _zone_sortance(256)
+dim _zone_entrance(256) : dim _zone_active(256) : dim _zone_data(16) : dim _skybox_object(16)
+dim _3dme_temp(256)
+Rem ************************************************************************************
+Rem Gestion des matrices Ver 1.0 ( 3DMapEditor Ver 2.30+ )
+Dim _Matrix(256,16) : Rem Variables système aux matrices.
+Dim _Matrix_Height(256,64,64) : Rem Store all points height
+Dim _Matrix_Tile(256,64,64) : Rem Store which texture are used on matrix.
+Dim _Matrix_RealTile(256,64,64) : Rem Store which texture-tile will really be used on matrix.
+Dim _matrix_tilelist(64) : Rem stoque la liste des images à utiliser pour faire les tiles.
+Dim _Image_X(65535)
+Dim _Image_Y(65535)
+Rem FILE SELECTOR VER 2.00 INITIALISATION DES VARIABLES PRINCIPALES
+dim fileselector$(9) : dim fileselectordata(12) : dim _filespath$(7) : dim _fichier$(256)
+fileselector$(1)=get dir$() : fileselector$(2)="Charger une map" : fileselectordata(1)=150
+fileselectordata(2)=50 : fileselectordata(11)=65535 : fileselectordata(12)=65534
+_FilesPath$(1)=_edpath$ : _FilesPath$(2)=_mappath$ : _FilesPath$(3)=_TexturePath$
+_FilesPath$(4)=_3DObjectPath$ : _FilesPath$(5)=_3DSoundPath$ : _FilesPath$(6)=_muspath$
+_FilesPath$(7)=_soundpath$
+fileselector$(1)=get dir$() : fileselector$(2)="Charger une map"
+fileselectordata(1)=150 : fileselectordata(2)=50
+fileselectordata(11)=1 : fileselectordata(12)=2
+_FilesPath$(1)=_edpath$ : _FilesPath$(2)=_MapPath$ : _FilesPath$(3)=_TexturePath$
+_FilesPath$(4)=_3DObjectPath$ : _FilesPath$(5)=_3DSoundPath$
+Rem 3DMAPEDITOR : MISE EN PLACE DE VALEURS INITIALES AVANT CHARGEMENT DE MAP
+_DirectXObject=0
+_LightsNum=0
+_TextureNum=0
+_FirstTexture=1
+_FirstTextureImage=1
+_FADEOBJECT=4000
+_foglength=1500
+newobj=1
+lastobject=newobj
+Rem                                                          <<<--- Fin de zone 1 à insérer dans votre code source
+Rem
+Rem ************************************************************************************
+Rem VALEURS DE LA DEMONSTRATION
+Rem ************************************************************************************
+rem Variables utilisées par la DEMO.
+movespeed=1
+movespeedneg=0-movespeed
+humanwalk=0
+walkspeed=10
+player=1
+Rem values are scancode() keyboards values.
+pageupkey=201
+pagedownkey=209
+inserkey=210
+supprkey=211
+defaultkey=199
+
+Rem On vérifie si le mode d'écran souhaité est disponible , dans quel cas on l'active.
+Perform Checklist For Display modes
+exist=check display mode(640,480,16)
+if exist=1
+  set display mode 640,480,16
+ endif
+acceleration=screen type()
+sync rate 75 : sync on
+autocam off
+set camera range 1,4000
+
+Rem on demande à l'utilisateur de choisir un fichier .map à utiliser pour la démo.
+repeat
+  filter1$=".map" : filter2$=""
+  _fichierchoisi=_File_Selector_v1(_mappath$,filter1$,filter2$)
+  if _fichierchoisi=1
+    _dossierfinal$=fileselector$(8)
+    _fichierfinal$=fileselector$(9)
+   endif
+ until _fichierchoisi=1
+cls 0 : sync : sync
+
+Rem Chargement du décor de fond.
+hide mouse
+Load Sound "viewsound/woodstep.wav",1
+Load Sound "viewsound/scream1.wav",2
+
+Rem On essaye de charger la map de 3DME.
+
+Rem
+Rem ************************************************************************************
+Rem 3DMAPEDITOR : ICI ON CHARGE UN FICHIER .MAP DE 3DMAPEDITOR ET ON RECREE LA CARTE ENTIERE.
+Rem ************************************************************************************
+Rem                                                          <<<--- Début de zone 2 à insérer dans votre code source
+_charge=_Load_Map(_dossierfinal$,_fichierfinal$,_FirstTextureImage)
+print _charge
+if _charge=0 then end
+lastobject=_obj(1,1) : newobj=lastobject
+for boucle=2 to lastobject
+  _Refresh_Object(boucle,_FirstTextureImage,_FADEOBJECT)
+ next boucle
+_LastMatrix=_Matrix(0,0) : _texturenum=_Obj(1,8)
+if _LastMatrix>0
+  for boucle=1 to _lastmatrix
+    _3DMe_Refresh_Matrix(boucle,_FirstTextureImage,_texturenum)
+   next boucle
+ endif
+Rem Initialisation de la position de la caméra puis des valeurs de la lumière ambiante.
+_initialize_camera()
+_initialize_ambient_light()
+Rem on met en place les effets standard de brouillard . . .
+_set_fog(0,0,0,_foglength)
+color backdrop rgb(0,0,0)
+Rem On initialise la SkyBox.
+_initialize_zones()
+Rem                                                          <<<--- Fin de zone 2 à insérer dans votre code source
+Rem on met en place la musique de fond.
+load music "musics\default.mid",1
+play music 1
+loop music 1
+Rem Création de l'objet représentant le personnage.
+make object box player,6,80,6
+set object collision on player
+position object player,_obj(1,2),_obj(1,3)-32,_obj(1,4)
+hide object player
+position camera object position x(player),object position y(player),object position z(player)
+make object collision box player,-16,-40,-16,16,40,16,0
+Rem
+Rem **************************************************
+Rem *                                                *
+Rem * DEBUT DE LA BOUCLE PRINCIPALE DU MOTEUR DE JEU *
+Rem *                                                *
+Rem **************************************************
+Rem
+repeat
+oldx#=object position x(player)
+oldy#=object position y(player)
+oldz#=object position z(player)
+Rem Calcul du nouvel angle de vue selon le déplacement de la souris.
+  position mouse 320,240
+  cx#=wrapvalue(cx#+(mousemovey()/2))
+  cy#=wrapvalue(cy#+(mousemovex()/2))
+rem Avancer , reculer ( , se déplacer en strafe )
+  course#=(shiftkey()/2.0)+1.0
+  player_walk=upkey()-downkey()
+  if player_walk<>0
+    move object player,movespeed*player_walk
+    humanwalk=wrapvalue(humanwalk+(walkspeed*course#))
+  endif
+  strafe=rightkey()-leftkey()
+  if strafe<>0
+    cy2#=wrapvalue(cy#+(90*strafe))
+    rotate object player,0,cy2#,0
+    move object player,movespeed
+    rotate object player,0,cy#,0
+   endif
+  x#=object position x(player)
+  y#=oldy#
+  z#=object position z(player)
+  position object player,x#,y#,z#
+Rem calcul des collisions de l'objets aux murs .
+set object collision on player
+x#=object position x(player)
+y#=object position y(player)
+z#=object position z(player)
+Rem calcul simple d'une marche.
+if object collision(player,0)>0
+  position object player,x#,y#+16,z#
+  if object collision(player,0)=0
+    inc y#,16
+    for boucle=1 to 4
+      position object player,x#,y#-4,z#
+      if object collision(player,0)=0 then y#=y#-4
+     next boucle
+   endif
+ endif
+    position object player,x#,y#,z#
+Rem Collision aux murs !
+if object collision(player,0)>0
+   x#=x#-get object collision x()
+   z#=z#-get object collision z()
+endif
+  position object player,x#,y#,z#
+Rem Si le mur n'est pas sur un angle de 0°,90°,180°,270°
+  if object collision(player,0)>0
+    x#=oldx#
+    z#=oldz#
+    position object player,x#,y#,z#
+   endif
+  ground=0
+  Rem Calcul de l'apesanteur
+if jump<1 and ground=0
+  position object player,x#,y#-4,z#
+  if object collision(player,0)=0
+    y#=(y#-4)
+   else
+    position object player,x#,y#,z#
+    ground=1
+   endif
+ endif
+Rem                                                          <<<--- Début de zone 3 à insérer dans votre code source
+Rem Calcul de collision avec les matrices
+  newy#=_Check_for_ground(x#,y#,z#,object size y(player))
+  if newy#<>y# then ground=1
+  y#=newy#
+  position object player,x#,y#,z#
+Rem                                                          <<<--- Fin de zone 3 à insérer dans votre code source
+Rem le joueur veut sauter ?
+  if jump=0 and ground=1 and mouseclick()=2 then jump=16
+
+Rem On crée le saut et on vérifie qu'il n'y aie pas de plafond!
+  if jump>0
+    position object player,x#,y#+4,z#
+    if object collision(player,0)=0
+      dec jump
+      if jump=0 then jump=0
+      y#=(y#+4)
+     else
+      jump=0
+   endif
+ endif
+rem position object player,x#,y#,z#
+rem Object and Camera are linked for easy calculation of collisions !
+rotate object player,0,cy#,0
+rotate camera cx#,cy#,0
+humancalc=cos(humanwalk)*4
+position camera object position x(player),object position y(player)+32+humancalc,object position z(player)
+
+rem   scroll backdrop (cy#/4),(cx#/4)
+  if humanwalk>190 and humanwalk<211 and jump=0 and ground=1
+    play sound 1
+    humanwalk=humanwalk+10
+   endif
+
+  fps=screen fps()
+  set cursor 0,0
+  ink rgb(128,128,128),rgb(0,0,0)
+  print fps;"  "
+
+Rem                                                          <<<--- Début de zone 4 à insérer dans votre code source
+Rem Important : Recalcul de la vitesse du joueur selon le nombre d'images par secondes.
+  movespeed=4*course#
+  inc _lightcheck
+  if _lightcheck=16
+    _checkFor7Lights(0,_fogdistance,7)
+    _lightcheck=0
+   endif
+  _check_all_zones()
+Rem                                                          <<<--- Fin de zone 4 à insérer dans votre code source
+Rem
+Rem ************************************************************************************
+Rem 3DMAPEDITOR : FIN DE RE-ACTUALISATION
+Rem ************************************************************************************
+  set cursor 0,0
+  ink rgb(255,255,255),rgb(0,0,0)
+  for boucle=1 to _zone_data(1)
+    if _zone_inside(boucle)=1 then print "inside zone #";boucle
+   next boucle
+
+  sync
+ until spacekey()=1 or object position y(player)<-200
+Rem FIN DE LA BOUCLE PRINCIPALE DU JEU !!!
+ play sound 2
+ wait 1000
+Rem
+Rem ************************************************************************************
+Rem 3DMAPEDITOR : ICI ON DESACTIVE TOUTE LES ZONES EN COURS D'UTILISATION
+Rem ************************************************************************************
+Rem                                                          <<<--- Début de zone 6 à insérer dans votre code source
+  _quit_all_zones()
+Rem Ver 2.30+ Suppression de toute les matrices crées.
+    If _LastMatrix>0
+      for boucle=_lastmatrix to 1 step -1
+        delete matrix boucle
+       next boucle
+      _lastmatrix=0 : _currentmatrix=0
+     Endif
+    _Matrix(0,0)=_LastMatrix
+Rem On efface les bitmaps utilisés.
+for boucle=1 to _texturenum
+  if image exist(boucle)=1 then delete image boucle
+ next boucle
+for boucle=1 to newobj+4
+  if object exist(boucle)=1 then delete object boucle
+  if sound exist(boucle)=1 then delete sound boucle
+ next boucle
+Rem                                                          <<<--- Fin de zone 6 à insérer dans votre code source
+cls
+undim _obj(16383,16)
+stop music 1
+delete music 1
+end

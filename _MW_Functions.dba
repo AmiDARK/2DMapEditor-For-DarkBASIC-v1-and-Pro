@@ -1,0 +1,2640 @@
+Rem *****************
+Rem * Magic-Windows *
+Rem *****************
+Rem Ver 1.3
+Rem Date 28.11.02 - 29.11.02 - 10.12.02 - 30.01.03 - 03.02.03 - 11.02.03
+Rem      19.02.03 - 23.02.03
+Rem
+Rem ----------------
+Rem Still to do :
+Rem        - Optimiser pour éviter de retracer le gadget actif en cas de non changement d'état.
+Rem        - Fonction pour désactiver les gadgets en 2 couleurs et n'en utiliser qu'un . . .
+Rem 1.3 news :
+Rem        - Optimisation pour les redimensionnements de fenêtres . . .
+Rem        - Mise en place du système de désactivation des bordures de fenêtres . . .
+Rem        - Gérer les priorité d'affichage des sprites pour les fenêtres . . .
+Rem        - Sprite mode is now fast for windows and menu.
+Rem        - Optim : texts outputs are now faster -speed up improvements-
+Rem        - MW_Input : do not erase deleted characters in window now fixed.
+Rem        - Some small functions bugs ( endfunction , function names )
+Rem        - Menu color lighter ( more near to windows98 default colors )
+Rem
+Rem MAGIC-WINDOWS Ver1.3 NEEDED VALUES :
+Rem Dim _Windows_sys(34) : Dim _Windows_Order(16)
+Rem Dim _Windows_Data(24,32) : Dim _Windows_Title$(24) : Dim _Windows_Font$(24)
+Rem Dim _Windows_Gadget(24,32,8) : Dim _Windows_Gadget_Text$(24,32) : Dim _Windows_Text$(64)
+Rem Dim _Windows_Default(32,2)
+Rem dim fileselector$(9) : dim fileselectordata(13) : dim _filespath$(7) : dim _fichier$(256)
+Rem fileselector$(1)=get dir$() : fileselector$(2)="File Selector Title"
+Rem Dim _Menu_Option$(5,17) : Dim _Menu_State(5,17) : Dim _Menu_Logo(5,17) : Dim _Menu_sys(8)
+Rem -------------------------------------------------------------------------------------- MW WINDOWS --------------
+Rem MW_Open_New_Window(_Window,title$,x,y,close,prior,size)                               Crée une nouvelle fenêtre.
+Rem MW_Position_Window(_Window,xpos,ypos)                 Repositionne la fenêtre dans l'écran visible ( Bitmap 0 ).
+Rem MW_Close_Window(_Window)                                                            Ferme une fenêtre existante.
+Rem MW_Resize_Window(_Window,NewXSize,NewYSize)                                 Redimensionne une fenêtre existante.
+Rem MW_Window_bgd(_Window,_red,_green,_blue)                    Définit la couleur du fond de la fenêtre par défaut.
+Rem MW_Window_Borders(_Window,_red1,_green1,_blue1,_red2,_green2,_blue2)          Définit les couleurs des bordures.
+Rem MW_Window_To_Front(_window)                                              Met la fenêtre choisie au premier plan.
+Rem MW_Window_To_Back(_window)                                               Met la fenêtre choisie au dernier plan.
+Rem MW_Screen_Title_On()                                             Active l'affichage du titre en haut de l'écran.
+Rem MW_Screen_Title_Off()                                         Désactive l'affichage du titre en haut de l'écran.
+Rem MW_Set_Screen_Title(_title$) [NEW]                          Permet de définir le titre de l'écran Magic-Windows.
+Rem MW_Set_Window_Alpha(_window,_alpha) [NEW]     Utilise la transparence si la fenêtre est affichée en mode sprite.
+Rem MW_Load_Default_Positions() [NEW]             Charge les dernières positions des fenêtres à partir d'un fichier.
+Rem MW_Save_Default_Positions() [NEW]                   Sauvegarde les dernières positions des fenêtres sur fichier.
+Rem ------------------------------------------------------------------------------------ MW 2D FUNCTIONS -----------
+Rem MW_Cls(_Window,_red,_green,_blue)                                   Vide la fenêtre avec une couleur spécifique.
+Rem MW_Ink(_Window,red,green,blue)                             Définit la couleur d'écriture du texte de la fenêtre.
+Rem MW_Box(_Window,x1,y1,x2,y2)                                                  Déssine une boite dans une fenêtre.
+Rem MW_Empty_Box(_Window,x1,y1,x2,y2)                                             Draw an empty box inside a window.
+Rem MW_Line(_Window,x1,y1,x2,y2)                                                 Déssine une ligne dans une fenêtre.
+Rem MW_Dot(_Window,x,y)                                                           Déssine un point dans une fenêtre.
+Rem ------------------------------------------------------------------------------- MW 2D GRAPHICS FUNCTIONS -------
+Rem MW_Get_Image(_Window,_Image,Xpos,Ypos,Xpos2,Ypos2)                        Crée une image saisie dans la fenêtre.
+Rem MW_Paste_Image(_Window,_Image,Xpos,Ypos)                                     Affiche une image dans une fenêtre.
+Rem MW_Copy_Bitmap2Window(_Bitmap,X,Y,X2,Y2,_Window,X3,Y3,X4,Y4)      Copie une partie d'un bitmap dans une fenêtre.
+Rem MW_Copy_Window2Bitmap(_Window,X,Y,X2,Y2,_Bitmap,X3,Y3,X4,Y4)      Copie une partie d'une fenêtre dans un bitmap.
+Rem MW_Copy_Window2Window(_Window,X,Y,X2,Y2,_Window,X3,Y2,X4,Y4)      Copie une partie d'une fenêtre dans une autre.
+Rem ----------------------------------------------------------------------------------- MW TEXT FUNCTIONS ----------
+Rem MW_Print(_Window,_text$)                                                 Ecrit un texte dans la fenêtre choisie.
+Rem MW_MPrint(_Window,_text$)                         Ecrit un texte dans la fenêtre choisie sans retour à la ligne.
+Rem MW_Text(_Window,xpos,ypos,_text$)                     Ecrit un texte en le centrant par rapport aux coordonnées.
+Rem MW_Set_Cursor(_Window,Xcurs,Ycurs)               Redéfinit la position du curseur texte dans la fenêtre choisie.
+Rem MW_Set_Font_Size(_Window,_FontSize)                     Redéfinit la dimension des textes de la fenêtre choisie.
+Rem MW_Set_Font_Name(_Window,_fonte$)                 Définit quel type d'écriture utiliser dans la fanêtre choisie.
+Rem =MW_Input(_window,_texte$)                                                  équivalent d'un style INPUT de 3DGC.
+Rem MW_Set_Text_Normal(_Window)                                                  Define text as default DBv1 values.
+Rem MW_Set_Text_Opaque(_window)                                                          Define text as opaque text.
+Rem MW_Set_Text_Transparent(_Window)                                                Define text as transparent text.
+Rem MW_Set_Text_To_Italic(_Window)                                                       Use Italic for text output.
+Rem MW_Set_Text_To_Bold(_Window)                                                           Use bold for text output.
+Rem MW_Set_Text_To_BoldItalic(_Window)                                          Use bold and italic for text output.
+Rem MW_Set_Text_To_Normal_Sys() [SYSTEM]                              Check mode and active it if needed (speed up).
+Rem MW_Set_Text_To_Italic_Sys() [SYSTEM]                              Check mode and active it if needed (speed up).
+Rem MW_Set_Text_To_Bold_Sys() [SYSTEM]                                Check mode and active it if needed (speed up).
+Rem MW_Set_Text_To_BoldItalic_Sys() [SYSTEM]                          Check mode and active it if needed (speed up).
+Rem MW_Set_Text_Size_Sys() [SYSTEM]                                   Check mode and active it if needed (speed up).
+Rem MW_Set_Text_Opaque_Sys() [SYSTEM]                                 Check mode and active it if needed (speed up).
+Rem MW_Set_Text_Transparent_Sys() [SYSTEM]                            Check mode and active it if needed (speed up).
+Rem MW_Set_Text_Font_sys(font$) [SYSTEM]                              Check mode and active it if needed (speed up).
+Rem ----------------------------------------------------------------------------------- MW DISK FUNCTIONS ----------
+Rem MW_Load_Bitmap2Window(_file$,_window)                            Charge une image .bmp ou .jpg dans une fenêtre.
+Rem MW_Save_WindowImage(_windonw,_file$)                    Sauvegarde le contenu d'une fenêtre en image sur disque.
+Rem =MW_File_Selector_v2(_window,_loaderpath$,filter1$,filter2$)          Crée une fenêtre de sélecteur de fichiers.
+Rem ---------------------------------------------------------------------------------- MW GADGET FUNCTIONS ---------
+Rem MW_Create_Text_Gadget(_Window,_Gadget,_Text$,XPos,Ypos,Xsize,Ysize)                Crée un gadget de type texte.
+Rem MW_Create_Graphical_Gadget(_Window,_Gadget,_Image,Xpos,Ypos,Xsize,Ysize)       Crée un gadget de type graphique.
+Rem MW_Set_Alternate_Gadget_Image(_Window,_Gadget,_Image)               Créer l'image alternée de l'icone graphique.
+Rem MW_Refresh_Gadget(_window,_gadget)                                         Redéssine un gadget dans une fenêtre.
+Rem MW_Delete_Gadget(_Window,_Gadget)                                                     Efface un gadget existant.
+Rem MW_Disable_Gadget(_Window,_Gadget)                                              Rend un gadget existant inactif.
+Rem MW_Enable_Gadget(_Window,_Gadget)                                                 Rend un gadget existant actif.
+Rem MW_Refresh_Text_Gadget(_window,_gadget)                     Rafraichit un gadget de type texte dans une fenetre.
+Rem MW_Refresh_Text_Gadget_Light(_window,_gadget) [SYSTEM]            Rafraichit un gadget de type texte en + clair.
+Rem MW_Refresh_Graphic_Gadget(_window,_gadget)                  Rafraichit un gadget de type texte dans une fenetre.
+Rem MW_Refresh_Graphic_Gadget_Light(_winnum,_gadget) [SYSTEM]     Rafraichit un icone en utilisant l'image alternée.
+Rem ---------------------------------------------------------------------------------- MW SYSTEM FUNCTIONS ---------
+Rem MW_Initialize_Tiles(_firstimage)             Charge les images qui serviront à la partie graphique des fenêtres.
+Rem MW_Release_All()                                     Libère la mémoire utilisée par les graphiques des fenêtres.
+Rem MW_Sync()                                     Réactualise toutes les fenêtres dans l'écran visible ( Bitmap 0 ).
+Rem MW_BackGround_Task()                        Permet les déplacement , dimensionnement , fermetures en temps réel.
+Rem MW_Retrace_Window(_Window)                                Retrace entièrement la fenêtre ( bordures , contenu ).
+Rem MW_Auto_Refresh_On()                             Active le rafraichissement de bords de fenêtres à chaque frame.
+Rem MW_Auto_Refresh_Off()                        Désactive la fonctionalité ( peut permettre de gagner quelques FPS.
+Rem MW_Enable_RealTime_Moving()                         Active le mode temps réel pour les déplacements de fenêtres.
+Rem MW_Disable_RealTime_Moving()                     Désactive le mode temps réel pour les déplacements de fenêtres.
+Rem MW_Enable_RealTime_Scaling()                   Active le mode temps réel pour les redimensionnement de fenêtres.
+Rem MW_Disable_RealTime_Scaling()               Désactive le mode temps réel pour les redimensionnement de fenêtres.
+Rem MW_Enable_RealTime_DrawingPriority()      Active le mode temps réel pour les changement de priorité d'affichage.
+Rem MW_Disable_RealTime_DrawingPriority()  Désactive le mode temps réel pour les changement de priorité d'affichage.
+Rem MW_AutoClearMode_On()                                            Active le mode CLS sur le bitmap 0 automatique.
+Rem MW_AutoClearMode_Off()                              Désactive le mode CLS sur le bitmap 0 automatique (=défaut).
+Rem MW_BackgroundRefreshMode_On()                    Active le mode de rafraichissement automatique du fond d'image.
+Rem MW_BackgroundRefreshMode_Off()       Désactive le mode de rafraichissement automatique du fond d'image(=defaut).
+Rem MW_Sprite_Mode_On()                                         Active le mode d'affichage des fenêtres par sprites.
+Rem MW_Paste_Mode_On()                                     Active le mode d'affichage des fenêtres par paste images.
+Rem MW_DBPro_Mode_On()                             Active le FLAG pour les images désactivant le mode BLUR de dbpro.
+Rem MW_Auto_Images_To_VideoRam()           Load Automatically images to VideoRam (DBv1) equal to MW_DBPro_Mode_On().
+Rem MW_Auto_Images_Compression_On()                Load images to videoram and use texture compression if available.
+Rem MW_Auto_Images_To_SystemRam()                  Load images to videoram and use texture compression if available.
+Rem MW_Auto_Position_Save_on() [NEW]                                Sauvegarde les dernières positions des fenêtres.
+Rem MW_Auto_Position_Save_off() [NEW]                        Ne sauvegarde pas les dernières positions des fenêtres.
+Rem MW_Set_Mouse_Pointer(_image) [NEW]                            Utilise un sprite pour faire le curseur graphique.
+Rem MW_Default_Mouse_Pointer() [NEW]                                             Remet le curseur de souris de DBv1.
+Rem MW_Hide_Windows_Border() [NEW]                                          n'affiche pas les bordures des fenêtres.
+Rem MW_Show_Windows_Border() [NEW]                                      Affiche les bordures des fenêtres (=defaut).
+Rem -------------------------------------------------------------------------------- MW DATA BACK FUNCTIONS --------
+Rem =MW_MagicWindows_Initialized()                                   =1 si le système a été initialisé correctement.
+Rem =MW_Window_Exist(_window)                                       Renvoie 1 si la fenêtre demandée existe sinon 0.
+Rem =MW_Window_XSize(_window)                      Renvoie la dimension sur X de la fenêtre demandée si elle existe.
+Rem =MW_Window_YSize(_window)                      Renvoie la dimension sur Y de la fenêtre demandée si elle existe.
+Rem =MW_Window_XPosition(_window)      Renvoie la position sur X dans l'écran de la fenêtre demandée si elle existe.
+Rem =MW_Window_YPosition(_window)      Renvoie la position sur Y dans l'écran de la fenêtre demandée si elle existe.
+Rem =MW_Current_Window()                Renvoie le numéro de la fenêtre devant laquelle le curseur de la souris est.
+Rem =MW_Current_Gadget()                  Renvoie le numéro du gadget au dessus duquel le pointeur de la souris est.
+Rem =MW_Realtime_Moving_State()                 =1 si le mode Temps-Réel pour les déplacements de fenêtre est actif.
+Rem =MW_Realtime_Scaling_State()          =1 si le mode Temps-Réel pour les redimensionnements de fenêtre est actif.
+Rem =MW_Realtime_Drawing_State()    =1 si le mode Temps-Réel pour les changements de priorité d'affichage est actif.
+Rem =MW_Window_Over() [SYSTEM]          Renvoie le numéro de la fenêtre devant laquelle le curseur de la souris est.
+Rem =MW_Window_Gadget(_window) [SYSTEM]   Renvoie le numéro du gadget au dessus duquel le pointeur de la souris est.
+Rem =MW_Gadget_Exist(_Window,_Gadget)                                                =1 si le gadget demandé existe.
+Rem =MW_Gadget_Type(_Window,_Gadget)                                             Renvoie quel type de gadget est-ce.
+Rem =MW_Gadget_Active(_Window_Gadget)                                           =1 si le gadget existe et est actif.
+Rem =MW_Window_Position_X()               Renvoie la position sur X du curseur à l'intérieur de la fenêtre courante.
+Rem =MW_Window_Position_Y()               Renvoie la position sur Y du curseur à l'intérieur de la fenêtre courante.
+Rem ...$=MW_Get_FileName()              Donne le nom du dernier fichier choisi avec le sélecteur de fichier intégré.
+Rem ...$=MW_Get_DrawerName()            Donne le nom du dernier dossier choisi avec le sélecteur de fichier intégré.
+Rem =MW_RequestBox1(_winnum,title$,_desc$,item$)                    Ouvre une fenêtre de requête et attend un choix.
+Rem =MW_RequestBox2(_winnum,title$,_desc$,item1$,item2$)            Ouvre une fenêtre de requête et attend un choix.
+Rem =MW_RequestBox3(_winnum,title$,_desc$,itm1$,itm2$,itm3$)        Ouvre une fenêtre de requête et attend un choix.
+Rem =MW_Windows_Opened() [NEW]                 Renvoie le nombre correspondant à la quantité de fenêtres existantes.
+Rem ------------------------------------------------------------------------------------- MENU SYSTEM --------------
+Rem MW_Check_Menu() [NEW] [SYSTEM]                                        Redéssine le menu à l'écran si nécessaire.
+Rem MW_Get_Menu_State() [NEW]                               Renvoie 1 si un menu ou une option est survolée sinon 0.
+Rem MW_Get_Choosen_Menu() [NEW]                                     Renvoie le nombre correspondant au menu survolé.
+Rem MW_Get_Choosen_Option() [NEW]                               Renvoie le nombre correspondant à l'option survolée.
+Rem MW_Set_Menu_Title(menu,title$) [NEW]                                                 Définir le titre d'un menu.
+Rem MW_Set_Menu_Option(menu,option,title$) [NEW]                                       Définir une option d'un menu.
+Rem MW_Set_Menu_Image(_menu,_option,_image) [NEW]                            Définir l'image miniature d'une option.
+Rem MW_Set_Menu_Transition(menu,option) [NEW]                             Définir une option en tant que transition.
+Rem MW_Prepare_Menu_v3() [NEW]                                                   Créer le menu selon les paramètres.
+Rem MW_Refresh_Menu_Option(xmenu,ymenu,state) [SYSTEM]                              Rafraîchit une option d'un menu.
+Rem MW_Refresh_Menu_Title(xmenu,state) [SYSTEM]                                          Rafraîchit 1 titre de menu.
+Rem MW_Show_Title_Bar() [SYSTEM]                                               Affiche la barre des menus à l'écran.
+Rem MW_Show_Menu_Bar() [SYSTEM]                                                   Affiche un menu complet à l'écran.
+Rem ------------------------------------------------------------------------------------- ----------- --------------
+Rem STILL TO DO :
+Rem
+Rem ---------------------------------------------------------------------------------- MW GADGET FUNCTIONS ---------
+Rem MW_Enable_Gadget_AutoRefresh()        redéssine tout les gadgets à chaque FPS. ( permet les gadget en 2 images )
+Rem MW_Disable_Gadget_AutoRefresh()                                                   désactive cette fonctionalité.
+Rem MW_Create_Predefined_Gadget(_Window,_Gadget,_Type,Xpos,Ypos)          Crée un gadget parmi une liste prédéfinié.
+Rem ----------------------------------------------------------------------------------------------------------------
+Rem
+Rem
+Rem
+Rem -------------------------------------------------------------------------------------- MW WINDOWS --------------
+Rem MW_Open_New_Window(_Window,title$,x,y,close,prior,size)                               Crée une nouvelle fenêtre.
+Function MW_Open_New_window(_winnum,title$,xsize,ysize,closegad,displaygad,sizegad)
+  _ERROR=0
+  if _winnum>0 and _winnum<25
+    if _Windows_Data(_winnum,1)=0
+      if bitmap exist(32-_winnum)=0
+        _howmany=_Windows_Sys(4)
+        inc _howmany : _Windows_Order(_HowMany)=_winnum
+        _Windows_Sys(4)=_howmany
+        create bitmap 32-_winnum,xsize+4,ysize+14
+        _Windows_Data(_winnum,1)=1
+        if _Windows_sys(30)=0
+          _Windows_Data(_winnum,2)=0 : _Windows_Data(_winnum,3)=12
+         else
+          _Windows_Data(_winnum,2)=_Windows_Default(_winnum,1)
+          _Windows_Data(_winnum,3)=_Windows_Default(_winnum,2)
+         endif
+        _Windows_Data(_winnum,4)=xsize : _Windows_Data(_winnum,5)=ysize
+        _Windows_Data(_winnum,6)=closegad : _Windows_Data(_winnum,7)=sizegad : _Windows_Data(_winnum,8)=displaygad
+        _Windows_Title$(_winnum)=title$
+        _Windows_Data(_winnum,9)=33 : _Windows_Data(_winnum,10)=33 : _Windows_Data(_winnum,11)=33 : Rem BGD ink
+        _Windows_Data(_winnum,12)=0 : _Windows_Data(_winnum,13)=0 : Rem Cursor position
+        _Windows_Data(_winnum,14)=255 : _Windows_Data(_winnum,15)=255 : _Windows_Data(_winnum,16)=255 : Rem Ink RGB
+        Rem Default border colors.
+        _Windows_Data(_winnum,18)=183 : _Windows_Data(_winnum,19)=183
+        _Windows_Data(_winnum,20)=183 : _Windows_Data(_winnum,21)=106
+        _Windows_Data(_winnum,22)=106 : _Windows_Data(_winnum,23)=106
+        Rem Default Font Attributes
+        _Windows_Font$(_winnum)="times new roman" : _Windows_Data(_winnum,17)=12 : Rem Font
+        xsize=_Windows_Data(_winnum,4) : ysize=_Windows_Data(_winnum,5)
+        _red=_windows_Data(_winnum,9) : _green=_windows_Data(_winnum,10) : _blue=_windows_Data(_winnum,11)
+        _img=_Windows_sys(1)
+        ink rgb(_red,_green,_blue),0
+        box 0,0,xsize+3,ysize+13
+        MW_Retrace_Window(_winnum)
+       else
+        _ERROR=-3
+       Endif
+     else
+      _ERROR=-2
+     endif
+   else
+    _ERROR=-1
+   endif
+ Endfunction _ERROR
+Rem -------------------------------------------------------------------------------------- MW WINDOWS --------------
+Rem MW_Position_Window(_Window,xpos,ypos)                 Repositionne la fenêtre dans l'écran visible ( Bitmap 0 ).
+Function MW_Position_Window(_winnum,xpos,ypos)
+  _ERROR=0
+  if _winnum>0 and _winnum<25
+    if _Windows_Data(_winnum,1)=1
+      if xpos<0 then xpos=0
+      if ypos<12 then ypos=12
+      _Windows_Data(_winnum,2)=xpos
+      _Windows_Data(_winnum,3)=ypos
+     else
+      _ERROR=-4
+     endif
+   else
+    _ERROR=-1
+   endif
+  _Windows_Data(_winnum,0)=2
+ Endfunction _ERROR
+Rem -------------------------------------------------------------------------------------- MW WINDOWS --------------
+Rem MW_Close_Window(_Window)                                                            Ferme une fenêtre existante.
+Function MW_Close_window(_winnum)
+  _ERROR=0
+  if _winnum>0 and _winnum<25
+    if _Windows_Data(_winnum,1)=1
+      Rem Sauvegarde des coordonnées de la fenêtre.
+      _Windows_Default(_winnum,1)=_Windows_Data(_winnum,2)
+      _Windows_Default(_winnum,2)=_Windows_Data(_winnum,3)
+      for bcl=1 to 32
+        _Windows_Data(_winnum,bcl)=0
+        For sbcl=1 to 8
+          _Windows_Gadget(_winnum,bcl,sbcl)=0
+         Next sbcl
+        _Windows_Gadget_Text$(_winnum,bcl)=""
+       next bcl
+      _windows_Title$(_winnum)="" : _windows_Font$(_winnum)=""
+      Rem Si la fenêtre supprimée n'est pas la dernière affichée , on la supprime de la liste.
+      _howmany=_Windows_Sys(4) : _count=0
+      Repeat
+        inc _count,1
+       until _Windows_Order(_count)=_winnum
+      if _count<_howmany
+        for boucle=_count to _howmany-1
+          _Windows_Order(boucle)=_Windows_Order(boucle+1)
+         next boucle
+       endif
+      dec _howmany,1 : _Windows_Sys(4)=_howmany
+      _displaymode=_Windows_sys(22) : Rem check if displaymode is PASTE or SPRITE mode . . .
+      if _displaymode=1
+        _sprt=65536-_winnum
+        if sprite exist(_sprt)=1 then delete sprite _sprt
+       endif
+      delete bitmap 32-_winnum
+     else
+      _ERROR=-4
+     endif
+   else
+    _ERROR=-1
+   endif
+ EndFunction _ERROR
+Rem -------------------------------------------------------------------------------------- MW WINDOWS --------------
+Rem MW_Resize_Window(_Window,NewXSize,NewYSize)                                 Redimensionne une fenêtre existante.
+Function MW_Resize_Window(_Winnum,NewXSize,NewYSize)
+  _ERROR=0
+  DBPro_Flag=_Windows_Sys(31)
+  if _winnum>0 and _winnum<25
+    if _windows_Data(_winnum,1)=1
+      Rem Tout d'abord , on essaye de trouver une image libre pour stoquer le contenu de la fenêtre.
+      _Windows_Data(_winnum,0)=1
+      _img=65536
+      Repeat
+        dec _img
+       until image exist(_img)=0
+      Rem On saisit le contenu de la fenêtre.
+      xsize=_Windows_Data(_Winnum,4) : ysize=_Windows_Data(_Winnum,5)
+      set current bitmap 32-_winnum
+      if newxsize<64 then newxsize=64
+      if newysize<12 then newysize=12
+      if newxsize<>xsize or newysize<>ysize
+        if xsize>newxsize then xsize=newxsize
+        if ysize>newysize then ysize=newysize
+        if _Windows_Data(_winnum,7)=0
+          get image _img,2,12,2+xsize,ysize+12,DBPro_Flag
+         else
+          get image _img,2,12,xsize-8,ysize+12,DBPro_Flag
+         endif
+        delete bitmap 32-_winnum
+        _Windows_Data(_Winnum,4)=NewXSize : _Windows_Data(_Winnum,5)=NewYSize
+        Create Bitmap 32-_winnum,newxsize+4,newysize+14
+        if newxsize<256 then newxsize=256
+        if newysize<128 then newysize=128 : Rem Si la fenêtre est très petite , prévoit un bitmap + grand .
+        Set Current Bitmap 32-_winnum
+        MW_Retrace_Window(_Winnum)
+        Paste Image _img,2,12
+        _Windows_Data(_winnum,0)=1
+        delete image _img
+       endif
+     else
+      _ERROR=-4
+     endif
+   else
+    _ERROR=-1
+   endif
+ EndFunction _ERROR
+Rem -------------------------------------------------------------------------------------- MW WINDOWS --------------
+Rem MW_window_bgd(_Window,_red,_green,_blue)                    Définit la couleur du fond de la fenêtre par défaut.
+Function MW_window_bgd(_winnum,_red,_green,_blue)
+  _ERROR=0
+  if _winnum>0 and _winnum<25
+    if _windows_Data(_winnum,1)=1
+      _Windows_Data(_winnum,0)=1
+      _Windows_Data(_winnum,9)=_red
+      _Windows_Data(_winnum,10)=_green
+      _Windows_Data(_winnum,11)=_blue
+     else
+      _ERROR=-4
+     endif
+   else
+    _ERROR=-1
+   endif
+ Endfunction _ERROR
+Rem -------------------------------------------------------------------------------------- MW WINDOWS --------------
+Rem MW_Window_Borders(_Window,_red1,_green1,_blue1,_red2,_green2,_blue2)         Définit les couleurs des bordures.
+Function MW_Window_Borders(_Winnum,_red1,_green1,_blue1,_red2,_green2,_blue2)
+  _ERROR=0
+  if _winnum>0 and _winnum<25
+    if _windows_Data(_winnum,1)=1
+      _Windows_Data(_winnum,0)=1
+      _Windows_Data(_winnum,18)=_red1 : _Windows_Data(_winnum,19)=_green1
+      _Windows_Data(_winnum,20)=_blue1 : _Windows_Data(_winnum,21)=_red2
+      _Windows_Data(_winnum,22)=_green2 : _Windows_Data(_winnum,23)=_blue2
+     else
+      _ERROR=-4
+     endif
+   else
+    _ERROR=-1
+   endif
+ EndFunction _ERROR
+Rem -------------------------------------------------------------------------------------- MW WINDOWS --------------
+Rem MW_Window_To_Front(_window)                                              Met la fenêtre choisie au premier plan.
+Function MW_Window_To_Front(_winnum)
+  _ERROR=0
+  if _winnum>0 and _winnum<25 and _Windows_Sys(4)>1
+    if _windows_Data(_winnum,1)=1
+      Rem On cherche la fenêtre à déplacer dans la liste et on les décales à partir de celle la.
+      _howmany=_Windows_Sys(4) : _count=0
+      Repeat
+        inc _count,1
+       until _Windows_Order(_count)=_winnum
+      if _count<_howmany
+        for boucle=_count to _howmany-1 step 1
+          _Windows_Order(boucle)=_Windows_Order(boucle+1)
+         next boucle
+        _Windows_Order(_howmany)=_winnum
+       endif
+      _displaymode=_Windows_sys(22) : Rem check if displaymode is PASTE or SPRITE mode . . .
+      if _displaymode=1
+        For boucle=1 to 16
+          _sprt=65536-boucle
+          if sprite exist(_sprt)=1 then delete sprite _sprt
+         next boucle
+       endif
+     else
+      _ERROR=-4
+     endif
+   else
+    _ERROR=-1
+   endif
+ EndFunction _ERROR
+Rem -------------------------------------------------------------------------------------- MW WINDOWS --------------
+Rem MW_Window_To_Back(_window)                                               Met la fenêtre choisie au dernier plan.
+Function MW_Window_To_Back(_winnum)
+  _ERROR=0
+  if _winnum>0 and _winnum<25 and _Windows_Sys(4)>1
+    if _windows_Data(_winnum,1)=1
+      Rem On cherche la fenêtre à déplacer dans la liste et on les décales à partir de celle la.
+      _howmany=_Windows_Sys(4) : _count=0
+      Repeat
+        inc _count,1
+       until _Windows_Order(_count)=_winnum
+      if _count>1
+        for boucle=_count-1 to 1 step -1
+          _Windows_Order(boucle+1)=_Windows_Order(boucle)
+         next boucle
+        _Windows_Order(1)=_winnum
+       endif
+      _displaymode=_Windows_sys(22) : Rem check if displaymode is PASTE or SPRITE mode . . .
+      if _displaymode=1
+        For boucle=1 to 16
+          _sprt=65536-boucle
+          if sprite exist(_sprt)=1 then delete sprite _sprt
+         next boucle
+       endif
+     else
+      _ERROR=-4
+     endif
+   else
+    _ERROR=-1
+   endif
+ EndFunction _ERROR
+Rem -------------------------------------------------------------------------------------- MW WINDOWS --------------
+Rem MW_Screen_Title_On() [NEW]                                       Active l'affichage du titre en haut de l'écran.
+Function MW_Screen_Title_On()
+  _Windows_sys(25)=1
+ EndFunction
+Rem -------------------------------------------------------------------------------------- MW WINDOWS --------------
+Rem MW_Screen_Title_Off() [NEW]                                   Désactive l'affichage du titre en haut de l'écran.
+Function MW_Screen_Title_Off()
+  _Windows_sys(25)=0
+ EndFunction
+Rem -------------------------------------------------------------------------------------- MW WINDOWS --------------
+Rem MW_Set_Screen_Title(_title$) [NEW]                          Permet de définir le titre de l'écran Magic-Windows.
+Function MW_Set_Screen_Title(_titre$)
+  _Windows_title$(0)=_titre$
+ EndFunction
+Rem -------------------------------------------------------------------------------------- MW WINDOWS --------------
+Rem MW_Set_Window_Alpha(_window,_alpha) [NEW]     Utilise la transparence si la fenêtre est affichée en mode sprite.
+Function MW_Set_Window_Alpha(_winnum,_alfa)
+  if _winnum>0 and _winnum<25
+    if _Windows_Data(_winnum,1)=1
+      if _alfa<1 then _alfa=1
+      if _alfa>255 then _alfa=255
+      _Windows_Data(_winnum,26)=_alfa
+     else
+      _ERROR=-4
+     endif
+   else
+    _ERROR=-1
+   endif
+ EndFunction
+Rem
+Rem
+Rem
+Rem ------------------------------------------------------------------------------------ MW 2D FUNCTIONS -----------
+Rem MW_Cls(_Window,_red,_green,_blue)                                   Vide la fenêtre avec une couleur spécifique.
+Function MW_Cls(_winnum,_red,_green,_blue)
+  _ERROR=0
+  if _winnum>0 and _winnum<25
+    if _Windows_Data(_winnum,1)=1
+      _Windows_Data(_winnum,0)=1
+      set current bitmap 32-_winnum
+      xsize=_Windows_Data(_winnum,4) : ysize=_Windows_Data(_winnum,5)
+      _img=_Windows_sys(1)
+      ink rgb(_red,_green,_blue),0
+      box 2,12,xsize+1,ysize+11
+      if _Windows_Data(_winnum,7)=1 then paste image _img+4,xsize-8,ysize+2,1
+      _Windows_Data(_winnum,0)=1
+     else
+      _ERROR=-4
+     endif
+   else
+    _ERROR=-1
+   endif
+ EndFunction
+Rem ------------------------------------------------------------------------------------ MW 2D FUNCTIONS -----------
+Rem MW_Ink(_Window,red,green,blue)                             Définit la couleur d'écriture du texte de la fenêtre.
+Function MW_ink(_winnum,_red,_green,_blue)
+  _ERROR=0
+  if _winnum>0 and _winnum<25
+    if _windows_Data(_winnum,1)=1
+      _Windows_Data(_winnum,0)=1
+      _Windows_Data(_winnum,14)=_red
+      _Windows_Data(_winnum,15)=_green
+      _Windows_Data(_winnum,16)=_blue
+     else
+      _ERROR=-4
+     endif
+   else
+    _ERROR=-1
+   endif
+ Endfunction _ERROR
+Rem ------------------------------------------------------------------------------------ MW 2D FUNCTIONS -----------
+Rem MW_Box(_Window,x1,y1,x2,y2)                                                          Draw a box inside a window.
+Function MW_Box(_winnum,x1,y1,x2,y2)
+  _ERROR=0
+  if _winnum>0 and _winnum<25
+    if _windows_Data(_winnum,1)=1
+      xsize=_Windows_Data(_winnum,04) : ysize=_Windows_Data(_winnum,05)
+      if x1<0 or x2<0 or y1<0 or y2<0 then _ERROR=-6
+      if x1>xsize or x2>xsize or y1>ysize or y2>ysize then _ERROR=-6
+      Rem vérifie si les coordonnées
+      if x1>x2 then x3=x1 : x1=x2 : x2=x3
+      if y1>y2 then y3=y1 : y1=y2 : y2=y3
+      if _ERROR=0
+        _red=_Windows_Data(_winnum,14) : _green=_Windows_Data(_winnum,15) : _blue=_Windows_Data(_winnum,16)
+        set current bitmap 32-_winnum
+        ink rgb(_red,_green,_blue),0
+        box x1+2,y1+12,x2+2,y2+12
+       EndIf
+      _Windows_Data(_winnum,0)=1
+     else
+      _ERROR=-4
+     endif
+   else
+    _ERROR=-1
+   endif
+ Endfunction _ERROR
+Rem ------------------------------------------------------------------------------------ MW 2D FUNCTIONS -----------
+Rem MW_Empty_Box(_Window,x1,y1,x2,y2)                                                          Draw a box inside a window.
+Function MW_Empty_Box(_winnum,x1,y1,x2,y2)
+      _Windows_Data(_winnum,0)=1
+      xsize=_Windows_Data(_winnum,04) : ysize=_Windows_Data(_winnum,05)
+      _red=_Windows_Data(_winnum,14) : _green=_Windows_Data(_winnum,15) : _blue=_Windows_Data(_winnum,16)
+      _Windows_Data(_winnum,0)=1
+      set current bitmap 32-_winnum
+      ink rgb(_red,_green,_blue),0
+      Line x1+2,y1+12,x1+2,y2+12
+      Line x1+2,y2+12,x2+2,y2+12
+      Line x2+2,y1+12,x2+2,y2+12
+      Line x1+2,y1+12,x2+2,y1+12
+ Endfunction
+Rem ------------------------------------------------------------------------------------ MW 2D FUNCTIONS -----------
+Rem MW_Line(_Window,x1,y1,x2,y2)                                                        Draw a line inside a window.
+Function MW_line(winnum,x1,y1,x2,y2)
+  _ERROR=0
+  if _winnum>0 and _winnum<25
+    if _windows_Data(_winnum,1)=1
+      _Windows_Data(_winnum,0)=1
+      xsize=_Windows_Data(_winnum,04) : ysize=_Windows_Data(_winnum,05)
+      if x1<0 or x2<0 or y1<0 or y2<0 then _ERROR=-6
+      if x1>xsize or x2>xsize or y1>ysize or y2>ysize then _ERROR=-6
+      Rem vérifie si les coordonnées
+      if x1>x2 then x3=x1 : x1=x2 : x2=x3
+      if y1>y2 then y3=y1 : y1=y2 : y2=y3
+      if _ERROR=0
+        _red=_Windows_Data(_winnum,14) : _green=_Windows_Data(_winnum,15) : _blue=_Windows_Data(_winnum,16)
+        set current bitmap 32-_winnum
+        ink rgb(_red,_green,_blue),0
+        line x1+2,y1+12,x2+2,y2+12
+       EndIf
+     else
+      _ERROR=-4
+     endif
+   else
+    _ERROR=-1
+   endif
+ Endfunction _ERROR
+Rem ------------------------------------------------------------------------------------ MW 2D FUNCTIONS -----------
+Rem MW_Dot(_Window,x,y)                                                               Draw a single point on window.
+Function MW_Dot(winnum,x,y)
+  _ERROR=0
+  if _winnum>0 and _winnum<25
+    if _windows_Data(_winnum,1)=1
+      _Windows_Data(_winnum,0)=1
+      xsize=_Windows_Data(_winnum,04) : ysize=_Windows_Data(_winnum,05)
+      if x<0 or y<0 then _ERROR=-6
+      if x>xsize or y>ysize then _ERROR=-6
+      if _ERROR=0
+        _red=_Windows_Data(_winnum,14) : _green=_Windows_Data(_winnum,15) : _blue=_Windows_Data(_winnum,16)
+        set current bitmap 32-_winnum
+        ink rgb(_red,_green,_blue),0
+        dot x+2,y+12
+       EndIf
+     else
+      _ERROR=-4
+     endif
+   else
+    _ERROR=-1
+   endif
+ Endfunction _ERROR
+Rem ------------------------------------------------------------------------------- MW 2D GRAPHICS FUNCTIONS -------
+Rem MW_Get_Image(_Window,_Image,Xpos,Ypos,Xpos2,Ypos2)                               Crée une image saisie dans la fenêtre.
+Function MW_Get_Image(_winnum,_Img,xp1,yp1,xp2,yp2)
+  _ERROR=0
+  DBPro_Flag=_Windows_Sys(31)
+  if _winnum>0 and _winnum<25
+    if _Windows_Data(_winnum,1)=1
+      xsize=_Windows_Data(_winnum,04) : ysize=_Windows_Data(_winnum,05)
+      if xp2<xsize and xp2>xp1
+        if yp2<ysize and yp2>yp1
+          if xp1>0-1 and yp1>0-1
+            Set Current Bitmap 32-_winnum
+            if image exist(_img)=1 then delete image _img
+            get image _img,xp1+2,yp1+12,xp2+2,yp2+12,DBPro_Flag
+           Else
+            _ERROR=-6
+           Endif
+          _ERROR=-6
+         Endif
+        _ERROR=-6
+       Endif
+     else
+      _ERROR=-4
+     endif
+   else
+    _ERROR=-1
+   endif
+ EndFunction
+Rem ------------------------------------------------------------------------------- MW 2D GRAPHICS FUNCTIONS -------
+Rem MW_Paste_Image(_Window,_Image,Xpos,Ypos)                                     Affiche une image dans une fenêtre.
+Function MW_Paste_Image(_winnum,_Img,xp1,yp1)
+  _ERROR=0
+  if _winnum>0 and _winnum<25
+    if _Windows_Data(_winnum,1)=1
+      _Windows_Data(_winnum,0)=1
+      xsize=_Windows_Data(_winnum,4) : ysize=_Windows_Data(_winnum,5)
+      if xp1>0-1 and yp1>0-1
+        if xp1<xsize and yp1<ysize
+          Set Current Bitmap 32-_winnum
+          if image exist(_Img)=1 then paste image _Img,xp1+2,yp1+12,_flag
+         Else
+          _ERROR=-6
+         Endif
+       Else
+        _ERROR=-6
+       Endif
+     else
+      _ERROR=-4
+     endif
+   else
+    _ERROR=-1
+   endif
+ EndFunction
+Rem ------------------------------------------------------------------------------- MW 2D GRAPHICS FUNCTIONS -------
+Rem MW_Copy_Bitmap2Window(_Bitmap,X,Y,X2,Y2,_Window,X3,Y3,X4,Y4)      Copie une partie d'un bitmap dans une fenêtre.
+Function MW_Copy_Bitmap2Window(_bmpnum,x1,y1,x2,y2,_winnum,x3,y3,x4,y4)
+  _ERROR=0
+  if _winnum>0 and _winnum<25
+    if _Windows_Data(_winnum,1)=1
+      _Windows_Data(_winnum,0)=1
+      if bitmap exist(_bmpnum)=1
+        copy bitmap _bmpnum,x1,y1,x2,y2,32-_winnum,x3+2,y3+12,x4+2,y4+12
+       else
+        _ERROR=-7
+       EndIf
+     else
+      _ERROR=-4
+     endif
+   else
+    _ERROR=-1
+   endif
+ EndFunction
+Rem ------------------------------------------------------------------------------- MW 2D GRAPHICS FUNCTIONS -------
+Rem MW_Copy_Window2Bitmap(_Window,X,Y,X2,Y2,_Bitmap,X3,Y3,X4,Y4)      Copie une partie d'une fenêtre dans un bitmap.
+Function MW_Copy_Window2Bitmap(_winnum,x1,y1,x2,y2,_bmpnum,x3,y3,x4,y4)
+  _ERROR=0
+  if _winnum>0 and _winnum<25
+    if _Windows_Data(_winnum,1)=1
+      if bitmap exist(_bmpnum)=1
+        copy bitmap 32-_winnum,x1+2,y1+12,x2+2,y2+12,_bmpnum,x3,y3,x4,y4
+       else
+        _ERROR=-7
+       EndIf
+     else
+      _ERROR=-4
+     endif
+   else
+    _ERROR=-1
+   endif
+ EndFunction
+Rem ------------------------------------------------------------------------------- MW 2D GRAPHICS FUNCTIONS -------
+Rem MW_Copy_Window2Window(_Window,X,Y,X2,Y2,_Window,X3,Y2,X4,Y4)      Copie une partie d'une fenêtre dans une autre.
+Function MW_Copy_Window2Window(_winnum,x1,y1,x2,y2,_winnum2,x3,y3,x4,y4)
+  _ERROR=0
+  if _winnum>0 and _winnum<25
+      _Windows_Data(_winnum2,0)=1
+    if _Windows_Data(_winnum,1)=1 and _Windows_Data(_winnum2,1)=1
+      copy bitmap 32-_winnum,x1+2,y1+12,x2+2,y2+12,32-_winnum2,x3+2,y3+12,x4+2,y4+12
+     else
+      _ERROR=-4
+     endif
+   else
+    _ERROR=-1
+   endif
+ EndFunction
+Rem ----------------------------------------------------------------------------------- MW TEXT FUNCTIONS ----------
+Rem MW_print(_Window,_text$)                                                 Ecrit un texte dans la fenêtre choisie.
+Function MW_print(_winnum,_text$)
+  _ERROR=0
+  if _winnum>0 and _winnum<25
+    if _windows_Data(_winnum,1)=1
+      _Windows_Data(_winnum,0)=1
+      ysize=_Windows_Data(_winnum,5) : xsize=_Windows_Data(_winnum,4)
+      xcurs=_Windows_Data(_winnum,12) : ycurs=_Windows_Data(_winnum,13)
+      _red=_Windows_Data(_winnum,14) : _green=_Windows_Data(_winnum,15) : _blue=_Windows_Data(_winnum,16)
+      _red2=_Windows_Data(_winnum,09) : _green2=_Windows_Data(_winnum,10) : _blue2=_Windows_Data(_winnum,11)
+      yfont=_Windows_Data(_winnum,17) : ymax=ysize-yfont : ylines=ysize/yfont
+      set current bitmap 32-_winnum
+      if ycurs>ymax+1
+        repeat
+          ycurs=ycurs-yfont
+         until ycurs<ylines*yfont
+        if ycurs<0 then ycurs=0
+        if ysize>12 then copy bitmap 32-_winnum,2,12+yfont,xsize-10,11+ysize,32-_winnum,2,12,xsize-10,(11+ysize)-yfont
+        ink rgb(_Windows_Data(_winnum,09),_Windows_Data(_winnum,10),_Windows_Data(_winnum,11)),0
+        box 2,12+ycurs,xsize-10,11+ycurs+yfont
+       endif
+      ink rgb(_red,_green,_blue),rgb(_red2,_green2,_blue2)
+      if _Windows_Font$(0)<>_Windows_Font$(_winnum) then MW_Set_Text_Font_Sys(_Windows_Font$(_winnum))
+      MW_Set_Text_Size_Sys(_Windows_Data(_winnum,17))
+      _Windows_Font$(0)=_Windows_Font$(_winnum) : _Windows_Sys(26)=_Windows_Data(_Winnum,17)
+      if _Windows_Data(_Winnum,28)=0 then MW_Set_Text_Opaque_Sys() else MW_Set_Text_Transparent_Sys()
+      _typ=_Windows_Data(_Winnum,27) : if _typ=0 then MW_Set_Text_Normal_Sys()
+      if _typ=1 then MW_Set_Text_Italic_Sys()
+      if _typ=2 then MW_Set_Text_Bold_Sys()
+      if _Typ=3 then MW_Set_Text_BoldItalic_Sys()
+      text xcurs+2,ycurs+12,_text$
+      ycurs=ycurs+yfont
+      _Windows_Data(_winnum,13)=ycurs
+     else
+      _ERROR=-4
+     endif
+   else
+    _ERROR=-1
+   endif
+ Endfunction _ERROR
+Rem ----------------------------------------------------------------------------------- MW TEXT FUNCTIONS ----------
+Rem MW_MPrint(_Window,_text$) [NEW]                   Ecrit un texte dans la fenêtre choisie sans retour à la ligne.
+Function MW_MPrint(_winnum,_text$)
+  _ERROR=0
+  if _winnum>0 and _winnum<25
+    if _windows_Data(_winnum,1)=1
+      _Windows_Data(_winnum,0)=1
+      ysize=_Windows_Data(_winnum,5) : xsize=_Windows_Data(_winnum,4)
+      xcurs=_Windows_Data(_winnum,12) : ycurs=_Windows_Data(_winnum,13)
+      _red=_Windows_Data(_winnum,14) : _green=_Windows_Data(_winnum,15) : _blue=_Windows_Data(_winnum,16)
+      _red2=_Windows_Data(_winnum,09) : _green2=_Windows_Data(_winnum,10) : _blue2=_Windows_Data(_winnum,11)
+      yfont=_Windows_Data(_winnum,17) : ymax=ysize-yfont : ylines=ysize/yfont
+      set current bitmap 32-_winnum
+      if ycurs>ymax+1
+        repeat
+          ycurs=ycurs-yfont
+         until ycurs<ylines*yfont
+        if ycurs<0 then ycurs=0
+        if ysize>12 then copy bitmap 32-_winnum,2,12+yfont,xsize-10,11+ysize,32-_winnum,2,12,xsize-10,(11+ysize)-yfont
+        ink rgb(_Windows_Data(_winnum,09),_Windows_Data(_winnum,10),_Windows_Data(_winnum,11)),0
+        box 2,12+ycurs,xsize-10,11+ycurs+yfont
+       endif
+      if _Windows_Font$(0)<>_Windows_Font$(_winnum) then MW_Set_Text_Font_Sys(_Windows_Font$(_winnum))
+      MW_Set_Text_Size_Sys(_Windows_Data(_winnum,17))
+      _Windows_Font$(0)=_Windows_Font$(_winnum) : _Windows_Sys(26)=_Windows_Data(_Winnum,17)
+      if _Windows_Data(_Winnum,28)=0 then MW_Set_Text_Opaque_Sys() else MW_Set_Text_Transparent_Sys()
+      _typ=_Windows_Data(_Winnum,27) : if _typ=0 then MW_Set_Text_Normal_Sys()
+      if _typ=1 then MW_Set_Text_Italic_Sys()
+      if _typ=2 then MW_Set_Text_Bold_Sys()
+      if _Typ=3 then MW_Set_Text_BoldItalic_Sys()
+      ink rgb(_red2,_green2,_blue2),0
+      box xcurs+2,ycurs+12,xcurs+2+(len(_text$)*yfont),ycurs+12+yfont
+      ink rgb(_red,_green,_blue),0
+      text xcurs+2,ycurs+12,_text$
+      _Windows_Data(_winnum,13)=ycurs
+     else
+      _ERROR=-4
+     endif
+   else
+    _ERROR=-1
+   endif
+ Endfunction _ERROR
+Rem ----------------------------------------------------------------------------------- MW TEXT FUNCTIONS ----------
+Rem MW_Text(_Window,xpos,ypos,_text$)                     Ecrit un texte en le centrant par rapport aux coordonnées.
+Function MW_Text(_winnum,xpos,ypos,_text$)
+  _ERROR=0
+  if _winnum>0 and _winnum<25
+    if _windows_Data(_winnum,1)=1
+      _Windows_Data(_winnum,0)=1
+      ysize=_Windows_Data(_winnum,5) : xsize=_Windows_Data(_winnum,4)
+      _red2=_Windows_Data(_winnum,09) : _green2=_Windows_Data(_winnum,10) : _blue2=_Windows_Data(_winnum,11)
+      _red=_Windows_Data(_winnum,14) : _green=_Windows_Data(_winnum,15) : _blue=_Windows_Data(_winnum,16)
+      yfont=_Windows_Data(_winnum,17) : ymax=ysize-yfont : ylines=ysize/yfont
+      if ypos>(ysize-yfont) then ypos=ysize-yfont
+      if ypos<0 then ypos=0
+      if xpos>xsize then xpos=xsize
+      if xpos<0 then xpos=0
+      set current bitmap 32-_winnum
+      if _Windows_Font$(0)<>_Windows_Font$(_winnum) then MW_Set_Text_Font_Sys(_Windows_Font$(_winnum))
+      MW_Set_text_size_Sys(_Windows_Data(_winnum,17))
+      _Windows_Font$(0)=_Windows_Font$(_winnum) : _Windows_Sys(26)=_Windows_Data(_Winnum,17)
+      if _Windows_Data(_Winnum,28)=0 then MW_Set_Text_Opaque_Sys() else MW_Set_Text_Transparent_Sys()
+      _typ=_Windows_Data(_Winnum,27) : if _typ=0 then MW_Set_Text_Normal_Sys()
+      if _typ=1 then MW_Set_Text_Italic_Sys()
+      if _typ=2 then MW_Set_Text_Bold_Sys()
+      if _Typ=3 then MW_Set_Text_BoldItalic_Sys()
+      ink rgb(_red,_green,_blue),rgb(_red2,_green2,_blue2)
+      Center Text xpos+2,ypos+12,_text$
+     _Windows_Data(_winnum,13)=ycurs
+     else
+      _ERROR=-4
+     endif
+   else
+    _ERROR=-1
+   endif
+ Endfunction _ERROR
+Rem ----------------------------------------------------------------------------------- MW TEXT FUNCTIONS ----------
+Rem MW_Set_Cursor(_Window,Xcurs,Ycurs)                       Redéfinit la position du curseur texte dans la fenêtre.
+Function MW_Set_Cursor(_winnum,xcurs,ycurs)
+  _ERROR=0
+  if _winnum>0 and _winnum<25
+    if _windows_Data(_winnum,1)=1
+      xsize=_Windows_Data(_winnum,4) : ysize=_Windows_Data(_winnum,5)
+      _fontsize=_Windows_Data(_winnum,17)
+      if xcurs>xsize-_fontsize
+        xcurs=0 : ycurs=ycurs+_fontsize
+       endif
+      if ycurs>ysize-_fontsize then ycurs=ysize-_fontsize
+      _Windows_Data(_winnum,12)=xcurs : _Windows_Data(_winnum,13)=ycurs
+     else
+      _ERROR=-4
+     endif
+   else
+    _ERROR=-1
+   endif
+ Endfunction _ERROR
+Rem ----------------------------------------------------------------------------------- MW TEXT FUNCTIONS ----------
+Rem MW_Set_Font_Size(_Window,_FontSize)                     Redéfinit la dimension des textes de la fenêtre choisie.
+Function MW_Set_Font_Size(_Winnum,_FontSize)
+  _ERROR=0
+  if _winnum>0 and _winnum<25
+    if _windows_Data(_winnum,1)=1
+      if _FontSize>4 and _FontSize<100 then _Windows_Data(_winnum,17)=_FontSize
+     else
+      _ERROR=-4
+     endif
+   else
+    _ERROR=-1
+   endif
+ EndFunction _ERROR
+Rem ----------------------------------------------------------------------------------- MW TEXT FUNCTIONS ----------
+Rem MW_Set_Font_Name(_Window,_fonte$)                 Définit quel type d'écriture utiliser dans la fanêtre choisie.
+Function MW_Set_Font_Name(_winnum,_font$)
+  _ERROR=0
+  if _winnum>0 and _winnum<25
+    if _windows_Data(_winnum,1)=1
+      if _font$<>"" then _Windows_Font$(_winnum)=_font$
+     else
+      _ERROR=-4
+     endif
+   else
+    _ERROR=-1
+   endif
+ EndFunction _ERROR
+Rem ----------------------------------------------------------------------------------- MW TEXT FUNCTIONS ----------
+Rem =MW_Input(_window,_texte$) [NEW]                                            équivalent d'un style INPUT de 3DGC.
+Function MW_Input(_winnum,_texte$)
+  _ERROR=0
+  if _winnum>0 and _winnum<25
+    if _windows_Data(_winnum,1)=1
+      xcurs=_Windows_Data(_winnum,12) : ycurs=_Windows_Data(_winnum,13) : yfont=_Windows_Data(_winnum,17)
+      _red=_Windows_Data(_winnum,14) : _green=_Windows_Data(_winnum,15) : _blue=_Windows_Data(_winnum,16)
+      _redb=_Windows_Data(_winnum,09) : _greenb=_Windows_Data(_winnum,10) : _blueb=_Windows_Data(_winnum,11)
+      _style=_Windows_Data(_winnum,27)
+      MW_Set_Text_Opaque(_winnum)
+      Repeat
+        MW_Background_Task()
+        d$=inkey$()
+        if d$<>""
+          repeat
+            _Windows_Data(_winnum,0)=1
+            MW_Sync(0) : sync : MW_Background_Task()
+           until inkey$()=""
+          if _text<32 and asc(d$)<>13 and asc(d$)<>8
+            inc _text,1
+            _Windows_Text$(_text)=d$
+           endif
+          if asc(d$)=8 and _text>0 then dec _text,1
+         endif
+        map$=""
+        if _text>0
+          for boucle=1 to _text
+            map$=map$+_Windows_Text$(boucle)
+           next boucle
+         endif
+        MW_Ink(_winnum,_red,_green,_blue)
+        MW_MPrint(_winnum,_texte$+map$+"_    ")
+        MW_Sync(0)
+        sync
+        xlen=(len(_texte$+map$)*yfont/2)
+        _Windows_Data(_winnum,13)=ycurs
+       Until asc(d$)=13 or MW_Window_Exist(_winnum)=0
+      ycurs=ycurs+yfont
+      _Windows_Data(_winnum,13)=ycurs
+     else
+      _ERROR=-4
+     endif
+   else
+    _ERROR=-1
+   endif
+  if _style=1 then MW_Set_Text_Transparent(_winnum)
+ EndFunction map$
+Rem ----------------------------------------------------------------------------------- MW TEXT FUNCTIONS ----------
+Rem MW_Set_Text_Normal(_Window) [NEW]                                            Define text as default DBv1 values.
+Function MW_Set_Text_Normal(_Winnum)
+  _ERROR=0
+  if _winnum>0 and _winnum<25
+    if _windows_Data(_Winnum,1)=1
+      _Windows_Data(_Winnum,28)=0
+      _Windows_Data(_Winnum,27)=0
+     else
+      _ERROR=-4
+     endif
+   else
+    _ERROR=-1
+   endif
+ EndFunction
+Rem ----------------------------------------------------------------------------------- MW TEXT FUNCTIONS ----------
+Rem MW_Set_Text_Opaque(_window) [NEW]                                                    Define text as opaque text.
+Function MW_Set_Text_Opaque(_Winnum)
+  _ERROR=0
+  if _winnum>0 and _winnum<25
+    if _windows_Data(_Winnum,1)=1
+      _Windows_Data(_Winnum,28)=0
+     else
+      _ERROR=-4
+     endif
+   else
+    _ERROR=-1
+   endif
+ EndFunction
+Rem ----------------------------------------------------------------------------------- MW TEXT FUNCTIONS ----------
+Rem MW_Set_Text_Transparent(_Window) [NEW]                                          Define text as transparent text.
+Function MW_Set_Text_Transparent(_Winnum)
+  _ERROR=0
+  if _winnum>0 and _winnum<25
+    if _windows_Data(_Winnum,1)=1
+      _Windows_Data(_Winnum,28)=1
+     else
+      _ERROR=-4
+     endif
+   else
+    _ERROR=-1
+   endif
+ EndFunction
+Rem ----------------------------------------------------------------------------------- MW TEXT FUNCTIONS ----------
+Rem MW_Set_Text_To_Italic(_Window) [NEW]                                                 Use Italic for text output.
+Function MW_Set_Text_To_Italic(_Winnum)
+  _ERROR=0
+  if _winnum>0 and _winnum<25
+    if _windows_Data(_Winnum,1)=1
+      _Windows_Data(_Winnum,27)=1
+     else
+      _ERROR=-4
+     endif
+   else
+    _ERROR=-1
+   endif
+ EndFunction
+Rem ----------------------------------------------------------------------------------- MW TEXT FUNCTIONS ----------
+Rem MW_Set_Text_To_Bold(_Window) [NEW]                                                     Use bold for text output.
+Function MW_Set_Text_To_Bold(_Winnum)
+  _ERROR=0
+  if _winnum>0 and _winnum<25
+    if _windows_Data(_Winnum,1)=1
+      _Windows_Data(_Winnum,27)=2
+     else
+      _ERROR=-4
+     endif
+   else
+    _ERROR=-1
+   endif
+ EndFunction
+Rem ----------------------------------------------------------------------------------- MW TEXT FUNCTIONS ----------
+Rem MW_Set_Text_To_BoldItalic(_Window) [NEW]                                    Use bold and italic for text output.
+Function MW_Set_Text_To_BoldItalic(_Winnum)
+  _ERROR=0
+  if _winnum>0 and _winnum<25
+    if _windows_Data(_Winnum,1)=1
+      _Windows_Data(_Winnum,27)=3
+     else
+      _ERROR=-4
+     endif
+   else
+    _ERROR=-1
+   endif
+ EndFunction
+Rem ----------------------------------------------------------------------------------- MW TEXT FUNCTIONS ----------
+Rem MW_Set_Text_Normal_Sys() [SYSTEM] [NEW]                           Check mode and active it if needed (speed up).
+Function MW_Set_Text_Normal_Sys()
+  if _Windows_sys(27)>0
+    Set Text to Normal : _Windows_sys(27)=0
+   Endif
+ EndFunction
+Rem ----------------------------------------------------------------------------------- MW TEXT FUNCTIONS ----------
+Rem MW_Set_Text_Italic_Sys() [SYSTEM] [NEW]                           Check mode and active it if needed (speed up).
+Function MW_Set_Text_Italic_Sys()
+  if _Windows_sys(27)<>1
+    Set Text to Italic : _Windows_sys(27)=1
+   Endif
+ EndFunction
+Rem ----------------------------------------------------------------------------------- MW TEXT FUNCTIONS ----------
+Rem MW_Set_Text_Bold_Sys() [SYSTEM] [NEW]                             Check mode and active it if needed (speed up).
+Function MW_Set_Text_Bold_Sys()
+  if _Windows_sys(27)<>2
+    Set Text to Bold : _Windows_sys(27)=2
+   Endif
+ EndFunction
+Rem ----------------------------------------------------------------------------------- MW TEXT FUNCTIONS ----------
+Rem MW_Set_Text_BoldItalic_Sys() [SYSTEM] [NEW]                       Check mode and active it if needed (speed up).
+Function MW_Set_Text_BoldItalic_Sys()
+  if _Windows_sys(27)<>3
+    Set Text to BoldItalic : _Windows_sys(27)=3
+   Endif
+ EndFunction
+Rem ----------------------------------------------------------------------------------- MW TEXT FUNCTIONS ----------
+Rem MW_Set_Text_Size_Sys() [SYSTEM] [NEW]                             Check mode and active it if needed (speed up).
+Function MW_Set_Text_Size_Sys(_Size)
+  if _Windows_sys(26)<>_Size
+    Set Text Size _Size : _Windows_sys(26)=_Size
+   Endif
+ EndFunction
+Rem ----------------------------------------------------------------------------------- MW TEXT FUNCTIONS ----------
+Rem MW_Set_Text_Opaque_Sys() [SYSTEM] [NEW]                           Check mode and active it if needed (speed up).
+Function MW_Set_Text_Opaque_Sys()
+  if _Windows_Sys(28)=0
+    Set Text Opaque : _Windows_Sys(28)=1
+   Endif
+ EndFunction
+Rem ----------------------------------------------------------------------------------- MW TEXT FUNCTIONS ----------
+Rem MW_Set_Text_Transparent_Sys() [SYSTEM] [NEW]                      Check mode and active it if needed (speed up).
+Function MW_Set_Text_Transparent_Sys()
+  if _Windows_Sys(28)=1
+    Set Text Transparent : _Windows_Sys(28)=0
+   Endif
+ EndFunction
+
+Function MW_Set_Text_Font_Sys(_font$)
+  if _Windows_Font$(0)<>_font$
+    _Windows_Font$(0)=_font$
+    Set text font _font$
+   endif
+ EndFunction
+Rem
+Rem
+Rem
+Rem ---------------------------------------------------------------------------------- MW SYSTEM FUNCTIONS ---------
+Rem MW_Initialize_Tiles(_firstimage)             Charge les images qui serviront à la partie graphique des fenêtres.
+Function MW_Initialize_Tiles(_firstimage)
+  _ERROR=0 : _INIT=1
+  _Windows_Sys(1)=_firstimage
+  _Windows_Title$(0)="Magic-Windows Ver1.2"
+  DBPro_Flag=_Windows_Sys(31)
+  if file exist("tiles\tiles.asc")=1
+    open to read 1,"tiles\tiles.asc"
+      Repeat
+        read string 1,_ImageName$
+        if file exist("tiles\"+_ImageName$)=1 then load image "tiles\"+_ImageName$,_firstimage,DBPro_Flag else _INIT=0
+        inc _firstimage,1
+       until _ImageName$="[ENDTILES]"
+     close file 1
+    Rem Prepare background for title.
+    create bitmap 1,bitmap width(0),bitmap height(0)
+    Set Current Bitmap 1
+    For boucle=0 to bitmap width(0) step 12
+      Paste Image _Windows_Sys(1)+1,boucle,0
+     next boucle
+    Paste Image _Windows_sys(1),0,0
+    Paste Image _windows_sys(1)+2,bitmap width(0)-12,0
+    Get Image _FirstImage,0,0,bitmap width(1)-1,12
+    Delete Bitmap 1 : Inc _FirstImage,1
+    _Windows_Sys(2)=_firstimage
+   else
+    _ERROR=-5 : _INIT=0
+   endif
+  _Windows_Sys(11)=1 : _Windows_Sys(12)=1 : _Windows_Sys(13)=1 : Rem Real-Time Activeds.
+  _Windows_Sys(14)=_INIT : Rem initialisé correctement ?
+  _Windows_Sys(15)=1 : Rem Défaut Auto-refresh pour gadgets actif.
+  if _Windows_Sys(30)=1 then MW_Load_Default_Positions()
+ EndFunction _ERROR
+Rem ---------------------------------------------------------------------------------- MW SYSTEM FUNCTIONS ---------
+Rem MW_Release_All()                                     Libère la mémoire utilisée par les graphiques des fenêtres.
+Function MW_Release_All()
+  Rem On ferme toutes les fenêter qui existent encore . . .
+  For boucle=1 to 16
+    if _Windows_Data(boucle,1)=1 then MW_Close_Window(boucle)
+   next boucle
+  if _Windows_Sys(30)=1 then MW_Save_Default_Positions()
+  _displaymode=_windows_sys(22)
+  if _displaymode=1
+    For boucle=1 to 16
+      _sprt=65536-boucle
+      if sprite exist(_sprt)=1 then delete sprite _sprt
+     next boucle
+   endif
+  Rem On libèrer tout les graphismes utilisés.
+  img1=_Windows_sys(1) :  img2=_Windows_sys(2)
+  if img1>0 and img2>img1
+    for boucle=img1 to img2
+      if image exist(boucle)=1 then delete image boucle
+     next boucle
+   endif
+  _Windows_Sys(14)=0
+ Endfunction
+Rem ---------------------------------------------------------------------------------- MW SYSTEM FUNCTIONS ---------
+Rem MW_Sync()                                     Réactualise toutes les fenêtres dans l'écran visible ( Bitmap 0 ).
+Function MW_Sync(_bmptarget)
+  if _Windows_Sys(23)=1
+    MW_Background_Task()
+   Endif
+  _DBPro_Flag=_Windows_Sys(31) : _img=_Windows_sys(1)
+  Rem Refresh Magic-Windows Screen Title if active !
+  if _Windows_sys(25)=1 and _Menu_Sys(2)=0
+    Set Current Bitmap _bmptarget
+    if image exist(_Windows_Sys(2)-1)=1 then Paste Image _Windows_Sys(2)-1,0,0
+    MW_Set_Text_Font_Sys("times new roman")
+    MW_Set_Text_Size_Sys(12)
+    MW_Set_Text_Transparent_Sys()
+    Ink 0,0 : Text 3,1,_Windows_Title$(0)
+    Ink rgb(255,255,255),0 : Text 2,0,_Windows_Title$(0)
+   Endif
+  _ERROR=0
+  _displaymode=_Windows_sys(22) : Rem check if displaymode is PASTE or SPRITE mode . . .
+  set current bitmap _bmptarget
+  xbmpsize=bitmap width(_bmptarget) : ybmpsize=bitmap height(_bmptarget)
+  if _Windows_Sys(21)=1 Then Get Image 65535,0,0,xbmpsize,ybmpsize,_DBPro_Flag
+  For boucle=1 to 16
+    mw_boucle=_Windows_Order(boucle)
+    if _windows_data(mw_boucle,1)=1
+      set current bitmap 32-mw_boucle
+    Rem On retrace les bandes verticales de la fenêtre si le mode rafraichissement est activé.
+      if _Windows_Sys(3)=1
+        _winnum=mw_boucle
+        set current bitmap 32-_winnum
+        xsize=_Windows_Data(_winnum,4) : ysize=_Windows_Data(_winnum,5)
+        _img=_Windows_sys(1)
+        Rem On Retrace les bords de la fenêtre.
+        _red1=_Windows_Data(_winnum,18) : _green1=_Windows_Data(_winnum,19) : _blue1=_Windows_Data(_winnum,20)
+        _red2=_Windows_Data(_winnum,21) : _green2=_Windows_Data(_winnum,22) : _blue2=_Windows_Data(_winnum,23)
+        ink rgb(_red1,_green1,_blue1),0 : line xsize+2,ysize+12,xsize+2,0
+        ink rgb(_red2,_green2,_blue2),0 : line xsize+3,ysize+13,xsize+3,1
+        Rem On affiche les gadgets demandés. RESIZE / BACK
+        if _Windows_Data(_winnum,7)=1 then paste image _img+4,xsize-8,ysize+2,1
+        if _Windows_Data(_winnum,8)=1 then paste image _img+5,xsize-8,0,1 else paste image _Img+2,xsize-8,0,1
+       Endif
+      Rem Re-actualisation des Gadgets si il en existe.
+      if _Windows_Sys(15)=1
+        For _gdg=1 to 32
+          if _Windows_Gadget(_winnum,_gdg,1)>0 then MW_Refresh_Gadget(_winnum,_gdg)
+         Next _gdg
+       Endif
+      Rem Copie de la fenêtre dans le bitmap choisi.
+      _winbmp=32-mw_boucle
+      xpos=_Windows_Data(mw_boucle,2) : ypos=_Windows_Data(mw_boucle,3)
+      xsize=_Windows_Data(mw_boucle,4)+4 : ysize=_Windows_Data(mw_boucle,5)+14
+      if xpos<0 then xpos=0
+      if ypos<0 then ypos=0
+      if _Windows_Sys(33)=1
+        xsize=xsize-4 : ysize=ysize-14
+       endif
+      if xsize>xbmpsize then xsize=xbmpsize
+      if ysize>ybmpsize then ysize=ybmpsize
+      if xpos+xsize>xbmpsize
+        xpos=xbmpsize-xsize
+        _Windows_Data(mw_boucle,2)=xpos
+       endif
+      if ypos+ysize>ybmpsize
+        ypos=ybmpsize-ysize
+        _Windows_Data(mw_boucle,3)=ypos
+       endif
+     endif
+   next boucle
+  if _displaymode=0
+    For mw_boucle=1 to 16
+      boucle=_Windows_Order(mw_boucle)
+      xpos=_Windows_Data(boucle,2) : ypos=_Windows_Data(boucle,3)
+      xsize=_Windows_Data(boucle,4)+4 : ysize=_Windows_Data(boucle,5)+14
+      if _Windows_Data(boucle,1)=1
+        if _Windows_Sys(33)=0
+          copy bitmap 32-boucle,0,0,xsize+_DBPro_Flag-1,ysize+_DBPro_Flag-1,_bmptarget,xpos,ypos,xpos+xsize+_DBPro_Flag-1,ypos+ysize+_DBPro_Flag-1
+         else
+          copy bitmap 32-boucle,2,12,xsize+_DBPro_Flag-3,ysize+_DBPro_Flag-3,_bmptarget,xpos,ypos,xpos+xsize+_DBPro_Flag-5,ypos+ysize+_DBPro_Flag-15
+         endif
+       Endif
+     next mw_boucle
+   else
+    For boucle=1 to 16
+      if _Windows_Data(boucle,0)=1 and _Windows_Data(boucle,1)=1
+        set current bitmap 32-boucle
+        _sprt=65536-boucle
+        xpos=_Windows_Data(boucle,2) : ypos=_Windows_Data(boucle,3)
+        xsize=_Windows_Data(boucle,4)+4 : ysize=_Windows_Data(boucle,5)+14
+        if _Windows_Sys(33)=0
+          get image _sprt,0,0,xsize,ysize,_DBPro_Flag
+         else
+          get image _sprt,2,12,xsize-2,ysize-2,_DBPro_Flag
+         endif
+       endif
+     next boucle
+    Set current bitmap _bmptarget
+    for boucle=1 to 16
+      _sprt=65536-boucle
+      xpos=_Windows_Data(boucle,2) : ypos=_Windows_Data(boucle,3)
+      xsize=_Windows_Data(boucle,4)+4 : ysize=_Windows_Data(boucle,5)+14
+      _alfa=_Windows_Data(boucle,26)
+      if _Windows_Data(boucle,1)=1
+        if sprite exist(_sprt)=0
+          sprite _sprt,xpos,ypos,_sprt
+          if _alfa>0 then set sprite alpha _sprt,_alfa
+         else
+          if _Windows_Data(boucle,0)>0 then sprite _sprt,xpos,ypos,_sprt
+         endif
+       endif
+      _Windows_Data(boucle,0)=0
+     Next boucle
+    For boucle=1 to 16
+      _win=_Windows_Order(boucle)
+      if sprite exist(65536-_win)=1 then set sprite priority 65536-_win,boucle
+     next boucle
+   endif
+  if _Windows_Sys(32)=0 then _ACTIF=MW_Check_Menu() else _ACTIF=0
+  _CURSOR=_Windows_Sys(29)
+  if _CURSOR>0
+    if image exist(_CURSOR)=1 then sprite 1,mousex(),mousey(),_CURSOR
+   endif
+  if bitmap exist(0)=1 then set current bitmap 0
+  _Windows_sys(23)=0
+ EndFunction _ERROR
+Rem ---------------------------------------------------------------------------------- MW SYSTEM FUNCTIONS ---------
+Rem MW_Auto_Refresh_On()                             Active le rafraichissement de bords de fenêtres à chaque frame.
+Function MW_Auto_Refresh_On()
+  _Windows_Sys(3)=1
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW SYSTEM FUNCTIONS ---------
+Rem MW_Auto_Refresh_Off()                        Désactive la fonctionalité ( peut permettre de gagner quelques FPS.
+Function MW_Auto_Refresh_Off()
+  _Windows_Sys(3)=0
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW SYSTEM FUNCTIONS ---------
+Rem MW_Retrace_Window(_Window)                                Retrace entièrement la fenêtre ( bordures , contenu ).
+Function MW_Retrace_Window(_winnum)
+  _ERROR=0
+  if _Windows_Sys(21)=1 and Image Exist(65535)=1
+    Paste Image 65535,0,0 : Delete image 65535
+   Endif
+  if _winnum>0 and _winnum<25
+    if _Windows_Data(_winnum,1)=1
+      _Windows_Data(_winnum,0)=1
+      set current bitmap 32-_winnum
+      xsize=_Windows_Data(_winnum,4) : ysize=_Windows_Data(_winnum,5)
+      _img=_Windows_sys(1)
+      Rem On trace le fond de l'image
+      _red0=_Windows_Data(_winnum,9) : _green0=_Windows_Data(_winnum,10) : _blue0=_Windows_Data(_winnum,11)
+      Cls Rgb(_red0,_green0,_blue0)
+      Rem On Retrace les bords de la fenêtre.
+      _red1=_Windows_Data(_winnum,18) : _green1=_Windows_Data(_winnum,19) : _blue1=_Windows_Data(_winnum,20)
+      _red2=_Windows_Data(_winnum,21) : _green2=_Windows_Data(_winnum,22) : _blue2=_Windows_Data(_winnum,23)
+      ink rgb(_red1,_green1,_blue1),0
+      line 0,0,0,ysize+12 : line 0,ysize+12,xsize+2,ysize+12 : line xsize+2,ysize+12,xsize+2,0
+      ink rgb(_red2,_green2,_blue2),0
+      line 1,0,1,ysize+13 : line 1,ysize+13,xsize+3,ysize+13 : line xsize+3,ysize+13,xsize+3,1
+      Rem On retrace maintenant les bandes horizontales de la fenêtre
+      xcases=(xsize/12)
+      for Xpos=0 to Xcases*12 step 12
+        paste image _img+1,xpos,0,1
+       next Xpos
+      Rem On affiche les gadgets demandés. CLOSE / RESIZE / FRONT-BACK
+      if _Windows_Data(_winnum,6)=1 then paste image _img+3,0,0,1 else paste image _Img,0,0,1
+      if _Windows_Data(_winnum,7)=1 then paste image _img+4,xsize-8,ysize+2,1
+      if _Windows_Data(_winnum,8)=1
+        paste image _img+6,xsize-20,0,1 : paste image _img+5,xsize-8,0,1
+       else
+        paste image _Img+2,xsize-8,0,1
+       Endif
+      Rem Maintenant on affiche le titre de la fenêtre.
+      ink rgb(255,255,255),0
+      MW_Set_Text_Font_Sys(_Windows_Font$(_winnum))
+      MW_Set_Text_Size_Sys(_Windows_Data(_winnum,17))
+      MW_Set_Text_Transparent_Sys()
+      ink rgb(16,16,16),0
+      if _Windows_Data(_winnum,6)=1 then text 15,1,_Windows_Title$(_winnum) else text 3,1,_Windows_Title$(_winnum)
+      ink rgb(255,255,255),0
+      if _Windows_Data(_winnum,6)=1 then text 14,0,_Windows_Title$(_winnum) else text 2,0,_Windows_Title$(_winnum)
+      Rem Maintenant , on vérifie si il existe des gadgets et on les rafraichit
+      For boucle=1 to 16
+        if _Windows_Gadget(_winnum,boucle,1)>0 then MW_Refresh_Gadget(_winnum,boucle)
+       Next Boucle
+     else
+      _ERROR=-4
+     endif
+   else
+    _ERROR=-1
+   endif
+ EndFunction _ERROR
+Rem ---------------------------------------------------------------------------------- MW SYSTEM FUNCTIONS ---------
+Rem MW_BackGround_Task()                        Permet les déplacement , dimensionnement , fermetures en temps réel.
+Function MW_Background_Task()
+  if MW_Get_Menu_State()=0
+    _Windows_sys(23)=1
+    if _Windows_Sys(20)=1 then Cls
+    _mc=mouseclick()
+    xm=mousex() : ym=mousey()
+  Rem Load Registers
+    oldxm=_Windows_Sys(5) : oldym=_Windows_Sys(6)
+    _gad=_Windows_Sys(7) : _win=_Windows_Sys(8)
+    Rem Calcul des gadgets actifs.
+    if _mc=1 and _win>0 and ( _gad>0 or _gad<0 )
+      if _gad=-1 then MW_Close_Window(_win)
+      if _gad=-2 and _Windows_Sys(11)=1
+        xpos=MW_Window_XPosition(_win) : ypos=MW_Window_YPosition(_win)
+        xdeca=xm-oldxm : ydeca=ym-oldym
+        xsup=oldxm-xpos : ysup=oldym-ypos
+        MW_Position_Window(_win,xpos+xdeca,ypos+ydeca)
+        oldxm=xm : oldym=ym : _movement=1
+       endif
+      if _gad=-3 and _Windows_Sys(13)=1 then MW_Window_To_Front(_win)
+      if _gad=-4 and _Windows_Sys(13)=1 then MW_Window_To_Back(_win)
+      if _gad=-5 and _Windows_Sys(12)=1
+        xpos=MW_Window_XPosition(_win) : ypos=MW_Window_YPosition(_win)
+        if xm<xpos+128 then xm=xpos+128
+        if ym<ypos+12 then ym=ypos+12
+        if _Windows_sys(33)=0
+          xsize=xm-(xpos+3) : ysize=ym-(ypos+13)
+         else
+          xsize=xm-(xpos-1) : ysize=ym-(ypos-1)
+         endif
+        MW_Resize_Window(_win,xsize,ysize)
+        oldmxm=xm : oldmym=ym : _movement=1
+       endif
+     else
+      oldxm=xm : oldym=ym : oldmxm=xm : oldmym=ym : _movement=0
+     Endif
+    _Windows_Sys(32)=_movement
+    Rem On Vérifie Quel était le dernier gadget activé et on le redéssine tel qu'il était inactif.
+    _winlight=_Windows_Sys(18) : _gadlight=_Windows_Sys(19)
+    if _winlight>0 and _gadlight>0
+      _gadtype=MW_Gadget_Type(_winlight,_gadlight)
+      if _gadtype=2 then MW_Refresh_Text_Gadget(_winlight,_gadlight)
+      if _gadtype=3 then MW_Refresh_Graphic_Gadget(_winlight,_gadlight)
+     endif
+    Rem On vérifie ici si le pointeur de la souris passe devand 1 des fenêtres.
+    if _movement=0
+      _newwin=MW_Window_Over()
+      if _newwin<>_win and _newwin>0 then _win=_newwin
+      if _newwin=0 and _win<>0 then _win=0
+      if _win>0
+        _newgad=MW_Window_Gadget(_win)
+       else
+        _newgad=0 : _gad=0
+       endif
+      if ( _newgad<0 or _newgad>0 ) and _newgad<>_gad then _gad=_newgad
+      if _newgad=0 then _gad=0
+     Endif
+    Rem Si un nouveau gadget est actif , on le met en surbrillance.
+    if _win>0 and _gad>0
+      _gadtype=MW_Gadget_Type(_win,_gad)
+      if _gadtype=2 then MW_Refresh_Text_Gadget_Light(_win,_gad)
+      if _gadtype=3 then MW_Refresh_Graphic_Gadget_Light(_win,_gad)
+     Endif
+    _Windows_sys(18)=_win : _windows_sys(19)=_gad
+    Rem On lit les positions de la souris dans la fenêtre en cours.
+     if _newwin>0
+        xpos=MW_Window_XPosition(_win) : ypos=MW_Window_YPosition(_win)
+        xwin=oldxm-(xpos+2) : ywin=oldym-(ypos+12)
+      endif
+     Rem Save Registers
+    _Windows_Sys(5)=oldxm : _Windows_Sys(6)=oldym
+    _Windows_Sys(7)=_gad : _Windows_Sys(8)=_win
+    _Windows_Sys(9)=_newgad : _Windows_Sys(10)=_newwin
+    _Windows_sys(16)=xwin : _Windows_sys(17)=ywin
+   Endif
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW SYSTEM FUNCTIONS ---------
+Rem MW_Enable_RealTime_Moving()                         Active le mode temps réel pour les déplacements de fenêtres.
+Function MW_Enable_RealTime_Moving()
+  _Windows_Sys(11)=1
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW SYSTEM FUNCTIONS ---------
+Rem MW_Disable_RealTime_Moving()                     Désactive le mode temps réel pour les déplacements de fenêtres.
+Function MW_Disable_RealTime_Moving()
+  _Windows_Sys(11)=0
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW SYSTEM FUNCTIONS ---------
+Rem MW_Enable_RealTime_Scaling()                   Active le mode temps réel pour les redimensionnement de fenêtres.
+Function MW_Enable_RealTime_Scaling()
+  _Windows_Sys(12)=1
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW SYSTEM FUNCTIONS ---------
+Rem MW_Dinable_RealTime_Scaling()               Désactive le mode temps réel pour les redimensionnement de fenêtres.
+Function MW_Disable_RealTime_Scaling()
+  _Windows_Sys(12)=0
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW SYSTEM FUNCTIONS ---------
+Rem MW_Enable_RealTime_DrawingPriority()      Active le mode temps réel pour les changement de priorité d'affichage.
+Function MW_Enable_RealTime_DrawingPriority()
+  _Windows_Sys(13)=1
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW SYSTEM FUNCTIONS ---------
+Rem MW_Dinable_RealTime_DrawingPriority()  Désactive le mode temps réel pour les changement de priorité d'affichage.
+Function MW_Disable_RealTime_DrawingPriority()
+  _Windows_Sys(13)=0
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW SYSTEM FUNCTIONS ---------
+Rem MW_AutoClearMode_On()                                            Active le mode CLS sur le bitmap 0 automatique.
+Function MW_AutoClearMode_On()
+  _Windows_Sys(20)=1
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW SYSTEM FUNCTIONS ---------
+Rem MW_AutoClearMode_Off()                              Désactive le mode CLS sur le bitmap 0 automatique (=défaut).
+Function MW_AutoClearMode_Off()
+  _Windows_Sys(20)=0
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW SYSTEM FUNCTIONS ---------
+Rem MW_BackgroundRefreshMode_On()                    Active le mode de rafraichissement automatique du fond d'image.
+Function MW_BackgroundRefreshMode_On()
+  _Windows_Sys(21)=1
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW SYSTEM FUNCTIONS ---------
+Rem MW_BackgroundRefreshMode_Off()       Désactive le mode de rafraichissement automatique du fond d'image(=defaut).
+Function MW_BackgroundRefreshMode_Off()
+  _Windows_Sys(21)=0
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW SYSTEM FUNCTIONS ---------
+Rem MW_Sprite_Mode_On() [NEW                                   Active le mode d'affichage des fenêtres par sprites.
+Function MW_Sprite_Mode_On()
+  _Windows_sys(22)=1
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW SYSTEM FUNCTIONS ---------
+Rem MW_Paste_Mode_On() [NEW]                               Active le mode d'affichage des fenêtres par paste images.
+Function MW_Paste_Mode_On()
+  _Windows_sys(22)=0
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW SYSTEM FUNCTIONS ---------
+Rem MW_DBPro_Mode_On() [NEW]                       Active le FLAG pour les images désactivant le mode BLUR de dbpro.
+Function MW_DBPro_Mode_On()
+  _Windows_Sys(31)=1
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW SYSTEM FUNCTIONS ---------
+Rem MW_Auto_Images_To_VideoRam() [NEW]     Load Automatically images to VideoRam (DBv1) equal to MW_DBPro_Mode_On().
+Function MW_Auto_Images_To_VideoRam()
+  _Windows_sys(24)=1
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW SYSTEM FUNCTIONS ---------
+Rem MW_Auto_Images_Compression_On() [NEW]          Load images to videoram and use texture compression if available.
+Function MW_Auto_Images_Compression_On()
+  _Windows_sys(24)=2
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW SYSTEM FUNCTIONS ---------
+Rem MW_Auto_Images_To_SystemRam() [NEW]          Load images to videoram and use texture compression if available.
+Function MW_Auto_Images_To_SystemRam()
+  _Windows_sys(24)=0
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW SYSTEM FUNCTIONS ---------
+Rem =MW_RequestBox1(_winnum,title$,_desc$,item$) [NEW]              Ouvre une fenêtre de requête et attend un choix.
+Function MW_RequestBox1(_winnum,_title$,_comment$,_item1$)
+  _gad=0
+  if MW_Window_Exist(_winnum)=1 then MW_Close_Window(_winnum)
+  MW_Open_New_Window(_winnum,_title$,320,64,0,0,0)
+  MW_Ink(_winnum,255,255,255) : MW_Text(_winnum,160,8,_comment$)
+  MW_Create_Text_Gadget(_winnum,1,_item1$,130,32,60,16)
+  MW_Position_Window(_winnum,(Bitmap Width(0)/2)-160,(Bitmap Height(0)/2)-32)
+  Repeat
+    MW_Background_task()
+    _Win=MW_Current_Window()
+    if _Win=_Winnum and mouseclick()=1 then _Gad=MW_Current_Gadget()
+    MW_Sync(0)
+    Sync
+   Until _gad>0
+  Repeat
+    MW_Background_Task() : MW_Sync(0) : Sync
+   Until mouseclick()=0
+  if MW_Window_Exist(_Winnum)=1 then MW_Close_Window(_Winnum)
+ EndFunction _gad
+Rem ---------------------------------------------------------------------------------- MW SYSTEM FUNCTIONS ---------
+Rem =MW_RequestBox2(_winnum,title$,_desc$,item1$,item2$) [NEW]      Ouvre une fenêtre de requête et attend un choix.
+Function MW_RequestBox2(_winnum,_title$,_comment$,_itm1$,_itm2$)
+  _gad=0
+  if MW_Window_Exist(_winnum)=1 then MW_Close_Window(_winnum)
+  MW_Open_New_Window(_winnum,_title$,320,64,0,0,0)
+  MW_Ink(_winnum,255,255,255) : MW_Text(_winnum,160,8,_comment$)
+  MW_Create_Text_Gadget(_winnum,1,_itm1$,50,32,60,16)
+  MW_Create_Text_Gadget(_winnum,2,_itm2$,210,32,60,16)
+  MW_Position_Window(_winnum,(Bitmap Width(0)/2)-160,(Bitmap Height(0)/2)-32)
+  Repeat
+    MW_Background_task()
+    _Win=MW_Current_Window()
+    if _Win=_Winnum and mouseclick()=1 then _Gad=MW_Current_Gadget()
+    MW_Sync(0)
+    Sync
+   Until _gad>0
+  Repeat
+    MW_Background_Task() : MW_Sync(0) : Sync
+   Until mouseclick()=0
+  if MW_Window_Exist(_Winnum)=1 then MW_Close_Window(_Winnum)
+ EndFunction _gad
+Rem ---------------------------------------------------------------------------------- MW SYSTEM FUNCTIONS ---------
+Rem =MW_RequestBox3(_winnum,title$,_desc$,itm1$,itm2$,_itm3$) [NEW] Ouvre une fenêtre de requête et attend un choix.
+Function MW_RequestBox3(_winnum,_title$,_comment$,_itm1$,_itm2$,_itm3$)
+  _gad=0
+  if MW_Window_Exist(_winnum)=1 then MW_Close_Window(_winnum)
+  MW_Open_New_Window(_winnum,_title$,320,64,0,0,0)
+  MW_Ink(_winnum,255,255,255) : MW_Text(_winnum,160,8,_comment$)
+  MW_Create_Text_Gadget(_winnum,1,_itm1$,50,32,60,16)
+  MW_Create_Text_Gadget(_winnum,2,_itm2$,130,32,60,16)
+  MW_Create_Text_Gadget(_winnum,3,_itm3$,210,32,60,16)
+  MW_Position_Window(_winnum,(Bitmap Width(0)/2)-160,(Bitmap Height(0)/2)-32)
+  Repeat
+    MW_Background_task()
+    _Win=MW_Current_Window()
+    if _Win=_Winnum and mouseclick()=1 then _Gad=MW_Current_Gadget()
+    MW_Sync(0)
+    Sync
+   Until _gad>0
+  Repeat
+    MW_Background_Task() : MW_Sync(0) : Sync
+   Until mouseclick()=0
+  if MW_Window_Exist(_Winnum)=1 then MW_Close_Window(_Winnum)
+ EndFunction _gad
+Rem ---------------------------------------------------------------------------------- MW SYSTEM FUNCTIONS ---------
+Rem MW_Auto_Position_Save_on()                                      Sauvegarde les dernières positions des fenêtres.
+Function MW_Auto_Position_Save_On()
+  _Windows_Sys(30)=1
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW SYSTEM FUNCTIONS ---------
+Rem MW_Auto_Position_Save_off()                              Ne sauvegarde pas les dernières positions des fenêtres.
+Function MW_Auto_Position_Save_Off()
+  _Windows_Sys(30)=0
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW SYSTEM FUNCTIONS ---------
+Rem MW_Set_Mouse_Pointer(_image) [NEW]                            Utilise un sprite pour faire le curseur graphique.
+Function MW_Set_Mouse_Pointer(_image)
+  if image exist(_image)=1 then _Windows_Sys(29)=_image
+  hide mouse
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW SYSTEM FUNCTIONS ---------
+Rem MW_Default_Mouse_Pointer() [NEW]                                             Remet le curseur de souris de DBv1.
+Function MW_Default_Mouse_Pointer()
+  _Windows_Sys(29)=0
+  show mouse
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW SYSTEM FUNCTIONS ---------
+Rem MW_Hide_Windows_Border() [NEW]                                          n'affiche pas les bordures des fenêtres.
+Function MW_Hide_Windows_Border()
+  _Windows_Sys(33)=1
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW SYSTEM FUNCTIONS ---------
+Rem MW_Show_Windows_Border() [NEW]                                      Affiche les bordures des fenêtres (=defaut).
+Function MW_Show_Windows_Border()
+  _Windows_Sys(33)=0
+ EndFunction
+Rem
+Rem
+Rem
+Rem ----------------------------------------------------------------------------------- MW DISK FUNCTIONS ----------
+Rem MW_Load_Bitmap2Window(_file$,_window)                            Charge une image .bmp ou .jpg dans une fenêtre.
+Function MW_Load_Bitmap2Window(_file$,_winnum)
+  _ERROR=0
+  if _winnum>0 and _winnum<25
+    _bmp=32
+    Repeat
+      dec _bmp,1
+     until _bmp=0 or bitmap exist(_bmp)=0
+    if _bmp>0
+      if file exist(_file$)=1
+        load bitmap _file$,_bmp
+        if MW_Window_Exist(_winnum)=1 then MW_close_Window(_winnum)
+        xsize=bitmap width(_bmp) : ysize=bitmap height(_bmp)
+        MW_Open_New_Window(_winnum,_file$,xsize,ysize,1,0,0)
+        MW_Copy_Bitmap2Window(_bmp,0,0,xsize-1,ysize-1,_winnum,0,0,xsize-1,ysize-1)
+        delete bitmap _bmp
+        _Windows_Data(_winnum,0)=1
+       endif
+     endif
+   else
+    _ERROR=-1
+   endif
+ EndFunction
+Rem ----------------------------------------------------------------------------------- MW DISK FUNCTIONS ----------
+Rem MW_Save_WindowImage(_windonw,_file$)                    Sauvegarde le contenu d'une fenêtre en image sur disque.
+Function MW_Save_WindowImage(_winnum,_file$)
+  _ERROR=0
+  if _winnum>0 and _winnum<25
+    _bmp=32
+    Repeat
+      dec _bmp,1
+     until _bmp=0 or bitmap exist(_bmp)=0
+    if _bmp>0
+      xsize=_Windows_Data(_winnum,04) : ysize=_Windows_Data(_winnum,05)
+      Create Bitmap _bmp,xsize,ysize
+      if file exist(_file$)=1 then delete file _file$
+      MW_Copy_Window2Bitmap(_winnum,0,0,xsize-1,ysize-1,_bmp,0,0,xsize-1,ysize-1)
+      save bitmap _file$,_bmp
+      delete bitmap _bmp
+     endif
+   else
+    _ERROR=-1
+   endif
+ EndFunction
+Rem
+Rem
+Rem
+Rem -------------------------------------------------------------------------------- MW DATA BACK FUNCTIONS --------
+Rem MW_Window_Exist(_window)                                       Renvoie 1 si la fenêtre demandée existe sinon 0.
+Function MW_Window_Exist(_winnum)
+  _EXIST=_Windows_Data(_winnum,01)
+ EndFunction _EXIST
+Rem -------------------------------------------------------------------------------- MW DATA BACK FUNCTIONS --------
+Rem MW_Window_XSize(_window)                      Renvoie la dimension sur X de la fenêtre demandée si elle existe.
+Function MW_Window_XSize(_winnum)
+  _SIZE=-1 : if _Windows_Data(_winnum,01)=1 then _SIZE=_Windows_Data(_winnum,04) else _SIZE=0
+ EndFunction _SIZE
+Rem -------------------------------------------------------------------------------- MW DATA BACK FUNCTIONS --------
+Rem MW_Window_YSize(_window)                      Renvoie la dimension sur Y de la fenêtre demandée si elle existe.
+Function MW_Window_YSize(_winnum)
+  _SIZE=-1 : if _Windows_Data(_winnum,01)=1 then _SIZE=_Windows_Data(_winnum,05) else _SIZE=0
+ EndFunction _SIZE
+Rem -------------------------------------------------------------------------------- MW DATA BACK FUNCTIONS --------
+Rem MW_Window_XPosition(_window)      Renvoie la position sur X dans l'écran de la fenêtre demandée si elle existe.
+Function MW_Window_XPosition(_winnum)
+  _POS=-1 : if _Windows_Data(_winnum,01)=1 then _POS=_Windows_Data(_winnum,02) else _POS=0
+ EndFunction _POS
+Rem -------------------------------------------------------------------------------- MW DATA BACK FUNCTIONS --------
+Rem MW_Window_YPosition(_window)      Renvoie la position sur Y dans l'écran de la fenêtre demandée si elle existe.
+Function MW_Window_YPosition(_winnum)
+  _POS=-1 : if _Windows_Data(_winnum,01)=1 then _POS=_Windows_Data(_winnum,03) else _POS=0
+ EndFunction _POS
+Rem -------------------------------------------------------------------------------- MW DATA BACK FUNCTIONS --------
+Rem =MW_Window_Over()                   Renvoie le numéro de la fenêtre devant laquelle le curseur de la souris est.
+Function MW_Window_Over()
+  _Current=0 : _TRUE=0
+  xm=mousex() : ym=mousey()
+  if _Windows_Sys(4)>0
+    _count=_Windows_sys(4)+1
+    Repeat
+      Dec _count,1
+      _winnum=_Windows_Order(_count)
+      xpos=_Windows_Data(_winnum,02) : ypos=_Windows_Data(_winnum,03)
+      xsize=_Windows_Data(_winnum,04) : ysize=_Windows_Data(_winnum,05)
+      if _Windows_Sys(33)=0
+        xsize=xsize+4 : ysize=ysize+14
+       endif
+      if xm>xpos-1 and ym>ypos-1
+        if xm<xpos+xsize and ym<ypos+ysize then _TRUE=1
+       Endif
+     until _TRUE=1 or _count=1
+    if _TRUE=1 then _Current=_winnum
+   Endif
+  _Windows_sys(10)=_Current
+ EndFunction _Current
+Rem -------------------------------------------------------------------------------- MW DATA BACK FUNCTIONS --------
+Rem =MW_Window_Gadget(_window)            Renvoie le numéro du gadget au dessus duquel le pointeur de la souris est.
+Function MW_Window_Gadget(_winnum)
+  _Gadget=0
+  if _Windows_Data(_winnum,1)=1
+    xm=mousex() : ym=mousey()
+    xpos=_Windows_Data(_winnum,02) : ypos=_Windows_Data(_winnum,03)
+    xsize=_Windows_Data(_winnum,04) : ysize=_Windows_Data(_winnum,05)
+    if _Windows_Sys(33)=0
+      xsize=xsize+4 : ysize=ysize+14
+     endif
+    if xm>xpos-1 and ym>ypos-1
+      if xm<xpos+xsize and ym<ypos+ysize
+        xc=xm-xpos : yc=ym-ypos : Rem xc,yc and mouse coordinates inside windows
+        Rem Si le curseur est dans la barre des titres.
+        if yc<13 and _Windows_Sys(33)=0 then _Gadget=-2
+        if yc<2 and _Windows_Sys(33)=1 then _Gadget=-2
+        Rem Si le curseur est en dessus du bouton de fermeture de fenêtre.
+        if xc<13 and yc<13 and _Windows_Data(_winnum,6)=1 then _Gadget=-1
+        Rem Si le curseur est en dessus du bouton de Window_To_Front ou Window_To_Back
+        if _Windows_Data(_winnum,8)=1
+          if xc>xsize-24 and xc<xsize-11 and yc<13 then _Gadget=-4
+          if xc>xsize-12 and xc<xsize and yc<13 then _Gadget=-3
+         Endif
+        Rem Si le curseur est en dessus du bouton de redimensionnement de fenêtre.
+        if _Windows_Data(_winnum,7)=1
+          if xc>xsize-12 and xc<xsize
+            if yc>ysize-12 and yc<ysize then _Gadget=-5
+           Endif
+         Endif
+        Rem Si le curseur est en dessus d'un gadget .
+        For _gdg=1 to 16
+          if _Windows_Gadget(_winnum,_gdg,1)>0 and _Windows_Gadget(_winnum,_gdg,3)=1
+            xp=_Windows_Gadget(_winnum,_gdg,4)+2 : yp=_Windows_Gadget(_winnum,_gdg,5)+12
+            xs=_Windows_Gadget(_winnum,_gdg,6) : ys=_Windows_Gadget(_winnum,_gdg,7)
+            if xc>xp-1 and yc>yp-1
+              if xc<xp+xs and yc<yp+ys then _Gadget=_gdg
+             endif
+           Endif
+         Next _gdg
+        Rem Si le curseur est en dessus
+       Endif
+     Endif
+   else
+    _Gadget=-6
+   endif
+  _Windows_sys(09)=_Gadget
+ EndFunction _Gadget
+Rem -------------------------------------------------------------------------------- MW DATA BACK FUNCTIONS --------
+Rem =MW_Current_Window()
+Function MW_Current_Window()
+  _VAL=_Windows_sys(10)
+ Endfunction _VAL
+Rem -------------------------------------------------------------------------------- MW DATA BACK FUNCTIONS --------
+Rem =MW_Current_Gadget()
+Function MW_Current_Gadget()
+  _VAL=_Windows_sys(09)
+ Endfunction _VAL
+Rem -------------------------------------------------------------------------------- MW DATA BACK FUNCTIONS --------
+Rem =MW_Realtime_Moving_State()
+Function MW_RealTime_Moving_State()
+  _VAL=_Windows_Sys(11)
+ EndFunction _VAL
+Rem -------------------------------------------------------------------------------- MW DATA BACK FUNCTIONS --------
+Rem =MW_Realtime_Scaling_State()
+Function MW_RealTime_Scaling_State()
+  _VAL=_Windows_Sys(12)
+ EndFunction _VAL
+Rem -------------------------------------------------------------------------------- MW DATA BACK FUNCTIONS --------
+Rem =MW_Realtime_Drawing_State()
+Function MW_RealTime_Drawing_State()
+  _VAL=_Windows_Sys(13)
+ EndFunction _VAL
+Rem -------------------------------------------------------------------------------- MW DATA BACK FUNCTIONS --------
+Rem =MW_MagicWindows_Initialized()
+Function MW_MagicWindows_Initialized()
+  _VAL=_Windows_Sys(13)
+ EndFunction _VAL
+Rem -------------------------------------------------------------------------------- MW DATA BACK FUNCTIONS --------
+Rem ...$=MW_Get_FileName()              Donne le nom du dernier fichier choisi avec le sélecteur de fichier intégré.
+Function MW_Get_FileName()
+  _fichierfinal$=fileselector$(9)
+ EndFunction _fichierfinal$
+Rem -------------------------------------------------------------------------------- MW DATA BACK FUNCTIONS --------
+Rem ...$=MW_Get_DrawerName()            Donne le nom du dernier dossier choisi avec le sélecteur de fichier intégré.
+Function MW_Get_DrawerName()
+  _dossierfinal$=fileselector$(8)
+ EndFunction _dossierfinal$
+Rem -------------------------------------------------------------------------------- MW DATA BACK FUNCTIONS --------
+Rem =MW_Windows_Opened() [NEW]                 Renvoie le nombre correspondant à la quantité de fenêtres existantes.
+Function MW_Windows_Opened()
+  _RESULT=_Windows_Sys(4)
+ EndFunction _RESULT
+ Rem ---------------------------------------------------------------------------------- MW GADGET FUNCTIONS ---------
+Rem MW_Create_Text_Gadget(_Window,_Gadget,_Text$,XPos,Ypos,Xsize,Ysize)                Crée un gadget de type texte.
+Function MW_Create_Text_Gadget(_win,_gad,_texte$,xp,yp,xs,ys)
+  _ERROR=0
+  if _win>0 and _win<17
+    if _Windows_Data(_win,1)=1
+      if _Windows_Gadget(_win,_gad,1)=0
+        _Windows_Data(_win,0)=1
+        _Windows_Gadget(_win,_gad,1)=2 : _Windows_Gadget(_win,_gad,3)=1
+        _Windows_Gadget(_win,_gad,4)=xp : _Windows_Gadget(_win,_gad,5)=yp
+        _Windows_Gadget(_win,_gad,6)=xs : _Windows_Gadget(_win,_gad,7)=ys
+        _Windows_Gadget_Text$(_win,_gad)=_texte$
+        MW_Refresh_Gadget(_win,_gad)
+       else
+        _ERROR=-8
+       EndIf
+     else
+      _ERROR=-4
+     endif
+   else
+    _ERROR=-1
+   endif
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW GADGET FUNCTIONS ---------
+Rem MW_Create_Graphical_Gadget(_Window,_Gadget,_Image,Xpos,Ypos,Xsize,Ysize)       Crée un gadget de type graphique.
+Function MW_Create_Graphical_Gadget(_winnum,_gadget,_Image,xp,yp,xs,ys)
+  _ERROR=0
+  if _winnum>0 and _winnum<25
+    if _Windows_Data(_winnum,1)=1
+      if _Windows_Gadget(_winnum,_gadget,1)=0
+        _Windows_Data(_winnum,0)=1
+        _Windows_Gadget(_winnum,_gadget,1)=3 : Rem Gadget de type GRAPHIQUE IMAGE UTILISATEUR
+        _Windows_Gadget(_winnum,_gadget,2)=_Image : Rem Numéro de l'image à utiliser pour le gadget.
+        _Windows_Gadget(_winnum,_gadget,3)=1 : Rem le gadget est actif par défaut.
+        _Windows_Gadget(_winnum,_gadget,4)=xp : _Windows_Gadget(_winnum,_gadget,5)=yp
+        _Windows_Gadget(_winnum,_gadget,6)=xs : _Windows_Gadget(_winnum,_gadget,7)=ys
+        _Windows_Gadget(_Winnum,_Gadget,8)=_Image
+        MW_Refresh_Gadget(_winnum,_gadget)
+       else
+        _ERROR=-8
+       EndIf
+     else
+      _ERROR=-4
+     endif
+   else
+    _ERROR=-1
+   endif
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW GADGET FUNCTIONS ---------
+Rem MW_Set_Alternate_Gadget_Image(_Window,_Gadget,_Image)                        Créer l'image alternée d'un gadget.
+Function MW_Set_Alternate_Gadget_Image(_Win,_Gad,_Image)
+  if image exist(_Image)=1 then _Windows_Gadget(_Win,_Gad,8)=_Image
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW GADGET FUNCTIONS ---------
+Rem MW_Delete_Gadget(_Window,_Gadget)                                                     Efface un gadget existant.
+Function MW_Delete_Gadget(_winnum,_gadget)
+  For boucle=1 to 7
+    _Windows_Gadget(_winnum,_gadget,boucle)=0
+   next boucle
+  _Windows_Gadget_Text$(_winnum,_gadget)=""
+ Endfunction
+Rem ---------------------------------------------------------------------------------- MW GADGET FUNCTIONS ---------
+Rem MW_Disable_Gadget(_Window,_Gadget)                                              Rend un gadget existant inactif.
+Function MW_Disable_Gadget(_winnum,_gadget)
+  _Windows_Gadget(_winnum,_gadget,2)=0
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW GADGET FUNCTIONS ---------
+Rem MW_Enable_Gadget(_Window,_Gadget)                                                 Rend un gadget existant actif.
+Function MW_Enable_Gadget(_winnum,_gadget)
+  _Windows_Gadget(_winnum,_gadget,2)=1
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW GADGET FUNCTIONS ---------
+Rem MW_Create_Gadget(_Window,_Gadget,_Type,Xpos,Ypos)                     Crée un gadget parmi une liste prédéfinié.
+Rem ---------------------------------------------------------------------------------- MW GADGET FUNCTIONS ---------
+Rem MW_Refresh_Gadget(_window,_gadget)                                         Redéssine un gadget dans une fenêtre.
+Function MW_Refresh_Gadget(_win,_gad)
+  _ERROR=0
+  if _win>0 and _win<25
+    if _Windows_Data(_win,1)=1
+      _gad_type=_Windows_Gadget(_win,_gad,1)
+      _Windows_Data(_win,0)=1
+      if _gad_type>0
+Rem        if _gadget_type=1 then MW_Refresh_Defined_Gadget(_win,_gad)
+        if _gad_type=2 then MW_Refresh_Text_Gadget(_win,_gad)
+        if _gad_type=3 then MW_Refresh_Graphic_Gadget(_win,_gad)
+       else
+        _ERROR=-9
+       EndIf
+     else
+      _ERROR=-4
+     endif
+   else
+    _ERROR=-1
+   endif
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW GADGET FUNCTIONS ---------
+Rem MW_Refresh_Text_Gadget(_window,_gadget)       [SYSTEM]      Rafraichit un gadget de type texte dans une fenetre.
+Function MW_Refresh_Text_Gadget(_winnum,_gadget)
+  _Windows_Data(_winnum,0)=1
+  xp=_Windows_Gadget(_winnum,_gadget,4) : yp=_Windows_Gadget(_winnum,_gadget,5)
+  xs=_Windows_Gadget(_winnum,_gadget,6) : ys=_Windows_Gadget(_winnum,_gadget,7)
+  _texte$=_Windows_Gadget_Text$(_winnum,_gadget)
+  set current bitmap 32-_winnum
+  Rem On redéssine le fond du gadget
+  _red1=_Windows_Data(_winnum,09) : _green1=_Windows_Data(_winnum,10) : _blue1=_Windows_Data(_winnum,11)
+  ink rgb(_red1,_green1,_blue1),0
+  box xp+2,yp+12,xp+xs+2,yp+ys+12
+  Rem On trace la partie claire du bouton.
+  _red2=_Windows_Data(_winnum,18) : _green2=_Windows_Data(_winnum,19) : _blue2=_Windows_Data(_winnum,20)
+  ink rgb(_red2,_green2,_blue2),0
+  line xp+2,yp+12,xp+xs+1,yp+12 : line xp+2,yp+12,xp+2,yp+ys+11
+  line xp+2,yp+ys+11,xp+xs+1,yp+ys+11 : line xp+xs+1,yp+12,xp+xs+1,yp+ys+11
+  Rem On trace la partie foncée du bouton.
+  _red3=_Windows_Data(_winnum,21) : _green3=_Windows_Data(_winnum,22) : _blue3=_Windows_Data(_winnum,23)
+  ink rgb(_red3,_green3,_blue3),0
+  line xp+3,yp+13,xp+xs+2,yp+13 : line xp+3,yp+13,xp+3,yp+ys+12
+  line xp+3,yp+ys+12,xp+xs+2,yp+ys+12 : line xp+xs+2,yp+13,xp+xs+2,yp+ys+12
+  Rem On trace le texte.
+  _red4=_Windows_Data(_winnum,14) : _green4=_Windows_Data(_winnum,15) : _blue4=_Windows_Data(_winnum,16)
+Rem  ink rgb(_red4,_green4,_blue4),0
+  Ink rgb(255,255,255),0
+  MW_Set_Text_Font_Sys(_Windows_Font$(_winnum))
+  MW_Set_Text_Size_Sys(_Windows_Data(_winnum,17))
+  MW_Set_Text_Transparent_Sys()
+  Center Text xp+2+(xs/2),yp+12,_texte$
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW GADGET FUNCTIONS ---------
+Rem MW_Refresh_Text_Gadget_Light(_window,_gadget)       [SYSTEM]      Rafraichit un gadget de type texte dans une fenetre.
+Function MW_Refresh_Text_Gadget_Light(_winnum,_gadget)
+  _Windows_Data(_winnum,0)=1
+  xp=_Windows_Gadget(_winnum,_gadget,4) : yp=_Windows_Gadget(_winnum,_gadget,5)
+  xs=_Windows_Gadget(_winnum,_gadget,6) : ys=_Windows_Gadget(_winnum,_gadget,7)
+  _texte$=_Windows_Gadget_Text$(_winnum,_gadget)
+  set current bitmap 32-_winnum
+  Rem On redéssine le fond du gadget
+  _red=_Windows_Data(_winnum,09)+32 : _green=_Windows_Data(_winnum,10)+32 : _blue=_Windows_Data(_winnum,11)+32
+  if _red>255 then _red=255
+  if _green>255 then _green=255
+  if _blue>255 then _blue=255
+  ink rgb(_red,_green,_blue),0
+  box xp+2,yp+12,xp+xs+2,yp+ys+12
+  Rem On trace la partie claire du bouton.
+  _red=_Windows_Data(_winnum,18)+32 : _green=_Windows_Data(_winnum,19)+32 : _blue=_Windows_Data(_winnum,20)+32
+  if _red>255 then _red=255
+  if _green>255 then _green=255
+  if _blue>255 then _blue=255
+  ink rgb(_red,_green,_blue),0
+  line xp+2,yp+12,xp+xs+1,yp+12 : line xp+2,yp+12,xp+2,yp+ys+11
+  line xp+2,yp+ys+11,xp+xs+1,yp+ys+11 : line xp+xs+1,yp+12,xp+xs+1,yp+ys+11
+  Rem On trace la partie foncée du bouton.
+  _red=_Windows_Data(_winnum,21)+32 : _green=_Windows_Data(_winnum,22)+32 : _blue=_Windows_Data(_winnum,23)+32
+  if _red>255 then _red=255
+  if _green>255 then _green=255
+  if _blue>255 then _blue=255
+  ink rgb(_red,_green,_blue),0
+  line xp+3,yp+13,xp+xs+2,yp+13 : line xp+3,yp+13,xp+3,yp+ys+12
+  line xp+3,yp+ys+12,xp+xs+2,yp+ys+12 : line xp+xs+2,yp+13,xp+xs+2,yp+ys+12
+  Rem On trace le texte.
+  _red=_Windows_Data(_winnum,14)+32 : _green=_Windows_Data(_winnum,15)+32 : _blue=_Windows_Data(_winnum,16)+32
+  if _red>255 then _red=255
+  if _green>255 then _green=255
+  if _blue>255 then _blue=255
+  ink rgb(_red,_green,_blue),rgb(_red2,_green2,_blue2)
+  MW_Set_Text_Font_Sys(_Windows_Font$(_winnum))
+  MW_Set_Text_Size_Sys(_Windows_Data(_winnum,17))
+  MW_Set_Text_Transparent_Sys()
+  Center Text xp+2+(xs/2),yp+12,_texte$
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW GADGET FUNCTIONS ---------
+Rem MW_Refresh_Graphic_Gadget(_window,_gadget)       [SYSTEM]   Rafraichit un gadget de type texte dans une fenetre.
+Function MW_Refresh_Graphic_Gadget(_winnum,_gadget)
+  _Windows_Data(_winnum,0)=1
+  _Image=_Windows_Gadget(_winnum,_gadget,2)
+  xp=_Windows_Gadget(_winnum,_gadget,4) : yp=_Windows_Gadget(_winnum,_gadget,5)
+  set current bitmap 32-_winnum
+  if _Image>0 then if image exist(_Image)=1 then paste image _Image,xp+2,yp+12
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW GADGET FUNCTIONS ---------
+Rem MW_Refresh_Graphic_Gadget(_window,_gadget)       [SYSTEM]   Rafraichit un gadget de type texte dans une fenetre.
+Function MW_Refresh_Graphic_Gadget_Light(_winnum,_gadget)
+  _Windows_Data(_winnum,0)=1
+  _Image=_Windows_Gadget(_winnum,_gadget,8)
+  xp=_Windows_Gadget(_winnum,_gadget,4) : yp=_Windows_Gadget(_winnum,_gadget,5)
+  set current bitmap 32-_winnum
+  if _Image>0 then if image exist(_Image)=1 then paste image _Image,xp+2,yp+12
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW GADGET FUNCTIONS ---------
+Rem MW_Auto_Gadget_Refresh_On()                    Active le rafraichissement automatique des gadgets à l'affichage.
+Function MW_Auto_Gadget_Refresh_On()
+  _Windows_Sys(15)=1
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW GADGET FUNCTIONS ---------
+Rem MW_Auto_Gadget_Refresh_Off()                Désactive le rafraichissement automatique des gadgets à l'affichage.
+Function MW_Auto_Gadget_Refresh_Off()
+  _Windows_Sys(15)=0
+ EndFunction
+Rem ---------------------------------------------------------------------------------- MW GADGET FUNCTIONS ---------
+Rem =MW_Gadget_Exist(_Window,_Gadget)                                                =1 si le gadget demandé existe.
+Function MW_Gadget_Exist(_winnum,_gadget)
+  _EXIST=0
+  _gad=_Windows_Gadget(_winnum,_gadget,1)
+  if _gad>0 then _EXIST=1
+ EndFunction _EXIST
+Rem ---------------------------------------------------------------------------------- MW GADGET FUNCTIONS ---------
+Rem =MW_Gadget_Type(_Window,_Gadget)                                             Renvoie quel type de gadget est-ce.
+Function MW_Gadget_Type(_winnum,_gadget)
+  _gad=_Windows_Gadget(_winnum,_gadget,1)
+ EndFunction _gad
+Rem ---------------------------------------------------------------------------------- MW GADGET FUNCTIONS ---------
+Rem =MW_Gadget_Active(_Window_Gadget)                                           =1 si le gadget existe et est actif.
+Function MW_Gadget_Active(_winnum,_gadget)
+  _gad=_Windows_Gadget(_winnum,_gadget,2)
+ EndFunction _gad
+Rem ---------------------------------------------------------------------------------- MW GADGET FUNCTIONS ---------
+Rem =MW_Window_Position_X()
+Function MW_Window_Position_X()
+  _xps=_Windows_Sys(16)
+ EndFunction _xps
+Rem ---------------------------------------------------------------------------------- MW GADGET FUNCTIONS ---------
+Rem =MW_Window_Position_Y()
+Function MW_Window_Position_Y()
+  _yps=_Windows_Sys(17)
+ EndFunction _yps
+Rem ----------------------------------------------------------------------------------- MW DISK FUNCTIONS ----------
+Rem MW_File_Selector_v2(_window,_loaderpath$,filter1$,filter2$)           Crée une fenêtre de sélecteur de fichiers.
+function MW_File_Selector_v2(_winnum,_loaderpath$,filter1$,filter2$)
+Rem Cette image est l'image de sélecteur de fichier.
+  fileselectordata(13)=_Winnum
+  fileselector$(5)=filter1$
+  fileselector$(6)=filter2$
+  If MW_Window_Exist(_winnum)=1 then MW_Close_Window(_winnum)
+  MW_Open_New_Window(_winnum,fileselector$(2),380,353,1,0,0)
+  MW_Sync(0) : sync
+  MW_Position_Window(_winnum,0,12)
+Rem  MW_Paste_Image(_winnum,6,0,0)
+  FS_File_Selector_Display()
+  Rem set dir path$
+  cd _loaderpath$
+  fileselector$(3)=fileselector$(1)
+  FS_refreshdrawercontent()
+  FS_displaydrawername()
+  FS_displayfilters()
+  fileselectordata(10)=0
+  repeat
+    MW_BackGround_Task()
+    if mouseclick()=1
+      _wnd=MW_Current_Window()
+      if _wnd=_winnum
+        _gad=MW_Current_Gadget()
+        xm=MW_Window_Position_X() : ym=MW_Window_Position_Y()
+       else
+        xm=0 : ym=0
+        _gad=0
+       endif
+      if _wnd=_Winnum
+      REM REMONTER DANS LA LISTE D'ITEMS
+        if _gad=1
+          fileselectordata(4)=fileselectordata(4)-1
+          fileselectordata(9)=1
+         endif
+        REM DESCENDRE DANS LA LISTE D'ITEMS
+        if _gad=2
+          fileselectordata(4)=fileselectordata(4)+1
+          fileselectordata(9)=1
+         endif
+       endif
+        REM OPTION "CANCEL"/"ANNULER" = fileselectordata(10)
+        if _gad=4
+          fileselectordata(10)=1
+          fileselector$(8)=""
+          fileselector$(9)=""
+         endif
+         REM OPTION "OUVRIR"
+        if _gad=3
+          if fileselectordata(8)>0
+            fileselectordata(10)=1
+            fileselector$(8)=fileselector$(3)
+            if right$(fileselector$(8),1)<>"\" then fileselector$(8)=fileselector$(8)+"\"
+            fileselector$(9)=_extpath$+_fichier$(fileselectordata(8))
+           endif
+         endif
+      REM CHOIX D'UN FICHIER DANS LA LISTE.
+      if xm>21 and xm<358 and ym>24 and ym<153
+        _num=(ym-24)/14
+        fileselectordata(8)=_num+fileselectordata(4)
+        if fileselectordata(8)>fileselectordata(5) then fileselectordata(8)=0
+        if fileselectordata(8)>0 then FS_displayselected()
+       endif
+     endif
+    if fileselectordata(4)>(fileselectordata(5)-9) then fileselectordata(4)=(fileselectordata(5)-9)
+    if fileselectordata(4)<1 then fileselectordata(4)=1
+    if fileselectordata(9)=1
+      FS_Display_all()
+      fileselectordata(9)=0
+     endif
+    if fileselectordata(8)>0
+      fileselector$(7)=_fichier$(fileselectordata(8))
+      if fileselector$(7)="[..]"
+        fileselector$(4)=".."
+        FS_changedrawer()
+        FS_displaydrawername()
+        FS_displayselected()
+       endif
+      if left$(fileselector$(7),1)="["
+        fileselector$(4)=""
+        for boucle=2 to (len(fileselector$(7))-1)
+          fileselector$(4)=fileselector$(4)+mid$(fileselector$(7),boucle)
+         next boucle
+        FS_changedrawer()
+        FS_displaydrawername()
+        FS_displayselected()
+       endif
+     endif
+    if MW_window_Exist(_winnum)=1 then MW_window_To_Front(_winnum)
+    if mouseclick()=1
+      Repeat
+        MW_Sync(0) : Sync
+        MW_BackGround_Task()
+       Until Mouseclick()=0
+     endif
+    MW_Sync(0) : Sync
+   until fileselectordata(10)=1 or MW_Window_Exist(_winnum)=0
+  fileselectordata(8)=0 : fileselector$(7)=""
+  fileselectordata(10)=0
+  cd fileselector$(1)
+  if fileselector$(8)<>"" then _selected=1
+  if bitmap exist(1)=1 then delete bitmap 1
+  MW_Background_Task()
+  if MW_Window_Exist(_winnum)=1 then MW_Close_Window(_winnum)
+  MW_sync(0) : sync
+ endfunction _selected
+REM                                             FONCTION POUR AFFICHER LA LISTE DES FICHIERS.
+function FS_Display_all()
+  _winnum=fileselectordata(13)
+  _Windows_Data(_winnum,0)=1
+  xpost=22 : ypost=24
+  MW_Ink(_winnum,60,60,60)
+  MW_box(_winnum,22,25,357,152)
+  REM AFFICHER LA LISTE DE FICHIERS.
+  MW_Ink(_winnum,255,255,255)
+  fileselectordata(3)=fileselectordata(4)+8
+  if fileselectordata(3)>fileselectordata(5) then fileselectordata(3)=fileselectordata(5)
+  for boucle=fileselectordata(4) to fileselectordata(3)
+    MW_Set_Cursor(_winnum,xpost+2,ypost)
+    inc ypost,14
+    MW_Print(_winnum,right$(_fichier$(boucle),40))
+   next boucle
+ endfunction
+REM                                             FONCTION POUR AFFICHER LE NOM DU FICHIER CHOISI.
+function FS_displayselected()
+  _winnum=fileselectordata(13)
+  _Windows_Data(_winnum,0)=1
+  Rem AFFICHER LE FICHIER CHOISI.
+  MW_Ink(_winnum,60,60,60)
+  MW_Box(_winnum,55,159,246,170)
+  MW_Ink(_winnum,255,255,255)
+  MW_Set_Cursor(_winnum,55,157)
+  if fileselectordata(8)>0
+    MW_Print(_winnum,_fichier$(fileselectordata(8)))
+    ext$=right$(_fichier$(fileselectordata(8)),4)
+    if file exist(_fichier$(fileselectordata(8))+".jpg")=1
+      Rem Display a preview of the texture you've selected.
+      load bitmap _fichier$(fileselectordata(8))+".jpg",1
+      xbitmap=bitmap width(1) : ybitmap=bitmap height(1)
+      MW_Copy_Bitmap2Window(1,0,0,xbitmap-1,ybitmap-1,_winnum,249,259,328,338)
+      MW_Ink(_winnum,32,32,32)
+      MW_Box(_winnum,102,264,242,345)
+      MW_Ink(_winnum,255,255,255)
+      MW_Sync(0) : sync
+      MW_BackGround_Task()
+     endif
+    if ext$=".jpg" or ext$=".bmp"
+      Rem Display a preview of the texture you've selected.
+      load bitmap _fichier$(fileselectordata(8)),1
+      xbitmap=bitmap width(1) : ybitmap=bitmap height(1)
+      MW_Copy_Bitmap2Window(1,0,0,xbitmap-1,ybitmap-1,_winnum,249,259,328,338)
+      MW_Ink(_winnum,32,32,32)
+      MW_Box(_winnum,102,264,242,345)
+      MW_Ink(_winnum,255,255,255)
+      MW_Set_Cursor(_winnum,102,270) : MW_Print(_winnum,str$(xbitmap)+" pixels")
+      MW_Set_Cursor(_winnum,102,298) : MW_Print(_winnum,str$(ybitmap)+" pixels")
+      MW_Sync(0) : sync
+      MW_BackGround_Task()
+     endif
+   else
+    MW_Ink(_winnum,64,64,64)
+    MW_Box(_winnum,249,259,328,338)
+    MW_Ink(_winnum,32,32,32)
+    MW_Box(_winnum,102,264,242,345)
+    MW_Sync(0) : Sync
+    MW_BackGround_Task()
+   endif
+  if bitmap exist(1)=1 then delete bitmap 1
+ endfunction
+REM                                             FONTION POUR AFFICHER LE CHEMIN COURANT.
+function FS_displaydrawername()
+  _winnum=fileselectordata(13)
+  _Windows_Data(_winnum,0)=1
+  Rem AFFICHER LE CHEMIN D'ACCES COURANT.
+  MW_Ink(_winnum,60,60,60)
+  MW_Box(_winnum,63,4,352,15)
+  MW_Ink(_winnum,255,255,255)
+  MW_Set_Cursor(_winnum,63,3)
+  MW_Print(_winnum,right$(fileselector$(3),40))
+ endfunction
+Rem                                             CHANGE LE DOSSIER COURANT.
+function FS_changedrawer()
+  cd fileselector$(4)
+  fileselector$(3)=get dir$()
+  FS_refreshdrawercontent()
+ endfunction
+REM                                             REACTUALISE LE CONTENU DU DOSSIER SELON LES FILTRES.
+function FS_refreshdrawercontent()
+  _winnum=fileselectordata(13)
+  _Windows_Data(_winnum,0)=1
+  fileselectordata(5)=1
+  perform checklist for files
+  fileselectordata(7)=checklist quantity()
+  for boucle=1 to fileselectordata(7)
+    _name$=checklist string$(boucle)
+    if checklist value a(boucle)=1
+      _fichier$(fileselectordata(5))=lower$("["+_name$+"]")
+      fileselectordata(5)=fileselectordata(5)+1
+     endif
+   next boucle
+  for boucle=1 to fileselectordata(7)
+    _name$=checklist string$(boucle)
+    if checklist value a(boucle)=0
+      if fileselector$(5)="" and fileselector$(6)=""
+        _fichier$(fileselectordata(5))=lower$(_name$)
+        fileselectordata(5)=fileselectordata(5)+1
+       endif
+     endif
+    Rem SI LE FILTRE 1 EST ACTIF , ON REGARDE SI L'EXTENSION DU FICHIER CORRESPOND
+    if fileselector$(5)<>""
+      ext$=lower$(right$(_name$,len(fileselector$(5))))
+      if ext$=fileselector$(5)
+        _fichier$(fileselectordata(5))=lower$(_name$)
+        fileselectordata(5)=fileselectordata(5)+1
+       endif
+     endif
+    Rem SI LE FILTRE 1 EST ACTIF , ON REGARDE SI L'EXTENSION DU FICHIER CORRESPOND
+    if fileselector$(6)<>""
+      ext$=lower$(right$(_name$,len(fileselector$(6))))
+      if ext$=fileselector$(6)
+        _fichier$(fileselectordata(5))=lower$(_name$)
+        fileselectordata(5)=fileselectordata(5)+1
+       endif
+     endif
+   next boucle
+  for boucle=fileselectordata(5) to 255 step 1
+    _fichier$(boucle)=""
+   next boucle
+  fileselector$(7)="" : fileselectordata(8)=0
+  fileselectordata(9)=1
+ endfunction
+REM                                             AFFICHE LES FILTRES DANS LA CASE CHOISIE.
+function FS_displayfilters()
+  _winnum=fileselectordata(13)
+  _Windows_Data(_winnum,0)=1
+  Rem AFFICHER LE FICHIER CHOISI.
+    MW_Ink(_winnum,60,60,60)
+    MW_Box(_winnum,55,187,246,197)
+    MW_Ink(_winnum,255,255,255)
+    MW_Set_Cursor(_winnum,55,186)
+  if fileselector$(5)<>"" and fileselector$(6)=""
+    MW_Print(_winnum,"*"+fileselector$(5))
+   endif
+  if fileselector$(5)<>"" and fileselector$(6)<>""
+    MW_Print(_winnum,"*"+fileselector$(5)+" / *"+fileselector$(6))
+   endif
+  if fileselector$(5)="" and fileselector$(6)<>""
+    MW_Print(_winnum,"*"+fileselector$(6))
+   endif
+  if fileselector$(5)="" and fileselector$(6)=""
+    MW_Print(_winnum,"*.*")
+   endif
+ endfunction
+Function FS_File_Selector_Display()
+  _winnum=fileselectordata(13)
+  _Windows_Data(_winnum,0)=1
+  MW_Cls(_Winnum,32,32,32)
+  MW_Ink(_Winnum,0,0,0)
+  MW_Box(_Winnum,63,4,352,15) : Rem Dossier
+  MW_Box(_Winnum,22,25,357,152) : Rem Liste des fichiers
+  MW_Box(_Winnum,360,39,373,136) : Rem barre à droite
+  MW_Box(_Winnum,55,159,247,170) : Rem Fichier choisi
+  MW_Box(_Winnum,55,187,247,198) : Rem Filtres
+  MW_Box(_Winnum,249,259,328,338) : Rem Thumbail
+  MW_Ink(_Winnum,183,183,183)
+  MW_Empty_Box(_Winnum,61,2,353,16) : Rem Dossier
+  MW_Empty_Box(_Winnum,20,23,358,153) : Rem Liste des fichiers
+  MW_Empty_Box(_Winnum,360,39,374,137) : Rem barre à droite
+  MW_Empty_Box(_Winnum,53,157,248,171) : Rem Fichier choisi
+  MW_Empty_Box(_Winnum,53,185,248,199) : Rem Filtres
+  MW_Empty_Box(_Winnum,247,257,329,339) : Rem Thumbail
+  MW_Ink(_Winnum,106,106,106)
+  MW_Empty_Box(_Winnum,62,3,354,17) : Rem Dossier
+  MW_Empty_Box(_Winnum,21,24,359,154) : Rem Liste des fichiers
+  MW_Empty_Box(_Winnum,361,40,375,138) : Rem barre à droite
+  MW_Empty_Box(_Winnum,54,158,249,172) : Rem Fichier choisi
+  MW_Empty_Box(_Winnum,54,186,249,200) : Rem Filtres
+  MW_Empty_Box(_Winnum,248,258,330,340) : Rem Thumbail
+  Rem Gadgets texte pour la fenêtre.
+  MW_Create_Text_Gadget(_Winnum,1,"+",360,23,15,15)
+  MW_Create_Text_Gadget(_Winnum,2,"-",360,139,15,15)
+  MW_Create_Text_Gadget(_Winnum,3,"Ouvrir",278,157,66,16)
+  MW_Create_Text_Gadget(_Winnum,4,"Annuler",278,185,66,16)
+  Rem Affichage des textes et commentaires.
+  MW_Ink(_Winnum,255,255,255)
+  MW_Set_Cursor(_Winnum,11,7) : MW_Print(_Winnum,"Dossier :")
+  MW_Set_Cursor(_Winnum,6,161) : MW_Print(_Winnum,"Fichier :")
+  MW_Set_Cursor(_Winnum,6,190) : MW_Print(_Winnum,"Type :")
+  MW_Set_Cursor(_Winnum,2,247) : MW_Print(_Winnum,"Informations Image :")
+  MW_Set_Cursor(_Winnum,2,271) : MW_Print(_Winnum,"Dimension X :")
+  MW_Set_Cursor(_Winnum,2,302) : MW_Print(_Winnum,"Dimension Y :")
+ EndFunction
+Rem
+Rem
+Rem
+Rem ------------------------------------------------------------------------------------- MENU SYSTEM --------------
+Rem MW_Get_Menu_State() [NEW]                                   Renvoie le nombre correspondant à l'option survolée.
+function MW_Get_Menu_State()
+  _ACTIF=_Menu_Sys(2)
+ EndFunction _ACTIF
+Rem ------------------------------------------------------------------------------------- MENU SYSTEM --------------
+Rem MW_Get_Choosen_Option()                                     Renvoie le nombre correspondant à l'option survolée.
+function MW_Get_Choosen_Menu()
+  _LASTMENU=_Menu_Sys(4)
+ EndFunction _LASTMENU
+Rem ------------------------------------------------------------------------------------- MENU SYSTEM --------------
+Rem MW_Get_Choosen_Option()                                     Renvoie le nombre correspondant à l'option survolée.
+Function MW_Get_Choosen_Option()
+  _LASTMENU=_Menu_Sys(4) : _LASTOPTION=_Menu_Sys(5)
+  if _Menu_State(_LASTMENU,_LASTOPTION)=3 then _LASTOPTION=0
+ EndFunction _LASTOPTION
+Rem ------------------------------------------------------------------------------------- MENU SYSTEM --------------
+Rem MW_Check_Menu()                                                       Redéssine le menu à l'écran si nécessaire.
+Function MW_Check_Menu()
+  if _Menu_Sys(6)>0 and _Menu_sys(1)=1
+    xm=mousex() : ym=mousey() : mc=mouseclick()
+    xmenu=(xm/128)+1
+    _ACTIVE=_Menu_sys(2) : _LASTMENU=_Menu_Sys(4) : _LASTOPTION=_Menu_Sys(5)
+     xmin=(_LASTMENU-1)*128
+    Rem ON réaffiche de couleur normale la dernière option surlignée.
+    Rem Si le menu était en mode TITRE SELECTIONNE.
+    if _ACTIVE=1
+      if ( xm<xmin or xm>(xmin+127) ) and ym>11
+        _ACTIVE=0
+        _windows_Sys(34)=1
+        if _LASTOPTION>0 then MW_Refresh_Menu_Option(_LASTMENU,_LASTOPTION,1)
+        if _LASTMENU>0 then MW_Refresh_Menu_Title(_LASTMENU,1)
+        _MENU=0 : _OPTION=0
+       else
+        ymax=(_Menu_State(xmenu,0)+1)*12
+        xpos=(_LASTMENU-1)*128
+        if xmenu<_Menu_Sys(3)+1 and ym<ymax
+          _OPTION=(ym/12) : _MENU=xmenu
+          if _OPTION=0
+            if _LASTOPTION>0
+              _windows_Sys(34)=1
+              MW_Refresh_Menu_Option(_LASTMENU,_LASTOPTION,1)
+             Endif
+            if _MENU<>_LASTMENU
+              _windows_Sys(34)=1
+              if _MENU>0 then MW_Refresh_Menu_Title(_MENU,2)
+              if _LASTMENU>0 then MW_Refresh_Menu_Title(_LASTMENU,1)
+             Endif
+           Else
+            if _OPTION<>_LASTOPTION
+              _windows_Sys(34)=1
+              if _OPTION>0 then MW_Refresh_Menu_Option(_MENU,_OPTION,2)
+              _windows_Sys(34)=1
+              if _LASTOPTION>0 then MW_Refresh_Menu_Option(_LASTMENU,_LASTOPTION,1)
+             Endif
+           Endif
+         Endif
+        MW_Show_Title_Bar()
+        MW_Show_Menu_Bar(_MENU)
+       endif
+      if ym>((_Menu_State(xmenu,0)+1)*12)-1
+        _ACTIVE=0
+        _windows_Sys(34)=1
+        if _LASTOPTION>0 then MW_Refresh_Menu_Option(_LASTMENU,_LASTOPTION,1)
+        if _LASTMENU>0 then MW_Refresh_Menu_Title(_LASTMENU,1)
+        _windows_Sys(34)=1
+        if _OPTION>0 then MW_Refresh_Menu_Option(_MENU,_OPTION,1)
+        if _MENU>0 then MW_Refresh_Menu_Title(_MENU,1)
+        _MENU=0 : _OPTION=0
+       endif
+     Else
+      _MENU=0 : _OPTION=0
+      Rem Si la souris est bien placée alors on active le menu choisi.
+      if ym<12
+Rem        MW_Show_Title_Bar()
+        _ACTIVE=1
+       else
+        if sprite exist(65536-17)=1 then delete sprite 65536-17
+       Endif
+     Endif
+    _Menu_Sys(2)=_ACTIVE
+    _Menu_Sys(4)=_MENU : _Menu_Sys(5)=_OPTION
+    Rem On stoque les coordonnées des dernièrs options/menus sélectionnés.
+   EndIf
+ EndFunction _ACTIVE
+Rem ------------------------------------------------------------------------------------- MENU SYSTEM --------------
+Rem MW_Show_Title_Bar() [SYSTEM]                                               Affiche la barre des menus à l'écran.
+Function MW_Show_Title_Bar()
+  _DBPFlag=_Windows_Sys(31) : _bitmap=_Menu_Sys(6)
+  xmax=bitmap width(_bitmap) : xmax2=bitmap width(0)
+  if xmax>xmax2 then xmax=xmax2
+  Copy Bitmap _bitmap,0,0,xmax-1+_DBPFlag,11+_DBPFlag,0,0,0,xmax-1+_DBPFlag,11+_DBPFlag
+ EndFunction
+Rem ------------------------------------------------------------------------------------- MENU SYSTEM --------------
+Rem MW_Show_Menu_Bar() [SYSTEM]                                                   Affiche un menu complet à l'écran.
+Function MW_Show_Menu_Bar(menu)
+  if _Menu_State(menu,0)>0
+    _DBPFlag=_Windows_Sys(31)-1
+    XStart=(menu-1)*128 : ymax=(_Menu_State(menu,0)+1)*12 : _bitmap=_Menu_Sys(6)
+    if _Windows_sys(22)=0
+      Copy Bitmap _bitmap,xstart,11,xstart+128+_DBPFlag,ymax+_DBPFlag,0,xstart,11,xstart+128+_DBPFlag,ymax+_DBPFlag
+     else
+      set current bitmap _bitmap
+      _sprt=65536-17
+      if _windows_Sys(34)=1 then get image _sprt,xstart,11,xstart+128+_DBPFlag,ymax+_DBPFlag,_DBPFlag+1
+      _windows_Sys(34)=0
+      Sprite _sprt,xstart,11,_sprt
+     endif
+   endif
+ EndFunction
+Rem ------------------------------------------------------------------------------------- MENU SYSTEM --------------
+Rem MW_Set_Menu_Title(menu,title$)                                                       Définir le titre d'un menu.
+Function MW_Set_Menu_Title(_menu,_name$)
+  _Menu_sys(1)=0
+  if _menu>0 and _menu<6
+    _menu_option$(_menu,0)=_name$ : _Menu_State(_menu,0)=1
+   endif
+ EndFunction
+Rem ------------------------------------------------------------------------------------- MENU SYSTEM --------------
+Rem MW_Set_Menu_Option(menu,option,title$)                                             Définir une option d'un menu.
+Function MW_Set_Menu_Option(_menu,_option,_name$)
+  _Menu_sys(1)=0
+  if _menu>0 and _menu<6
+    if _option>0 and _option<17
+      _menu_option$(_menu,_option)=_name$ : _Menu_State(_menu,_option)=1
+     endif
+   endif
+ EndFunction
+Rem ------------------------------------------------------------------------------------- MENU SYSTEM --------------
+Rem MW_Set_Menu_Image(_menu,_option,_image)                                  Définir l'image miniature d'une option.
+Function MW_Set_Menu_Image(_menu,_option,_image)
+  if _image>0 and _image<65536
+    if image exist(_image)=1
+      _Menu_Logo(_menu,_option)=_image
+     endif
+   endif
+ EndFunction
+Rem ------------------------------------------------------------------------------------- MENU SYSTEM --------------
+Rem MW_Set_Menu_Transition(menu,option)                                   Définir une option en tant que transition.
+Function MW_Set_Menu_Transition(_menu,_option)
+  _Menu_sys(1)=0
+  _Menu_State(_menu,_option)=3 : _Menu_Logo(_menu,_option)=0 : _menu_option$(_menu,_option)=""
+ EndFunction
+Rem ------------------------------------------------------------------------------------- MENU SYSTEM --------------
+Rem MW_Prepare_Menu_v3()                                                         Créer le menu selon les paramètres.
+Function MW_Prepare_Menu_v3()
+  _Menu_sys(1)=1
+  MW_Set_Text_Font_Sys("times new roman")
+  MW_Set_text_size_Sys(12)
+  MW_Set_Text_Normal_sys()
+  MW_Set_Text_Transparent_Sys()
+  Rem We look for a free bitmap to store menu graphics.
+  if _Menu_Sys(6)=0
+    _bitmap=16
+    Repeat
+      dec _bitmap,1
+     until bitmap exist(_bitmap)=0 or _bitmap=0
+    if _bitmap>0
+      create bitmap _bitmap,bitmap width(0),bitmap height(0)
+      _Menu_Sys(6)=_bitmap
+     endif
+    Set Current Bitmap _bitmap
+   Else
+    _bitmap=_Menu_Sys(6)
+    Set current bitmap _bitmap
+    Cls
+   Endif
+  Rem ON réalise les 5 menus en commençant par les titres . . .
+  _Menu_Sys(3)=0 : _DBPFlag=_Windows_Sys(31)
+  ink rgb(216,208,200),0
+  box 0,0,bitmap width(_bitmap)-1+_DBPFlag,12
+  for xmenu=1 to 5
+    Rem Si le menu à un titre alors on crée le menu
+    if _menu_state(xmenu,0)<>0 then _Menu_Sys(3)=xmenu
+    MW_Refresh_Menu_Title(xmenu,1)
+    Rem On vérifie le contenu des menus . . .
+    for ymenu=1 to 16
+      MW_Refresh_Menu_Option(xmenu,ymenu,1)
+     next ymenu
+   next xmenu
+ EndFunction
+Rem ------------------------------------------------------------------------------------- MENU SYSTEM --------------
+Rem MW_Refresh_Menu_Option(xmenu,ymenu,state) [SYSTEM]                              Rafraîchit une option d'un menu.
+Function MW_Refresh_Menu_Option(xmenu,ymenu,state)
+  set current bitmap _Menu_Sys(6)
+  Rem Si le menu contient un texte alors on le crée.
+  if _Menu_State(xmenu,ymenu)>0
+    _DBPFlag=_Windows_Sys(31)
+    xpos=((xmenu-1)*128)+64 : xm=(xmenu-1)*128 : ym=(ymenu)*12
+    Rem On affiche le contenu de la boite de menu.
+    if state=1 or _Menu_State(xmenu,ymenu)=3 then ink rgb(216,208,200),0 else ink rgb(0,36,104),0
+    box xm,ym,xm+127 + _DBPFlag,ym+11 + _DBPFlag
+    Rem Si le menu n'est pas une transition et qu'il possède un THUMBAIL , on l'affiche.
+    if _Menu_State(xmenu,ymenu)<3
+      Rem Affichage de l'image
+      _img=_Menu_Logo(xmenu,ymenu)
+      if _img>0 then If Image exist(_img)=1 then paste image _img,xm+1,ym
+     Else
+      Rem Affichage de la transition . . .
+      Ink rgb(128,128,128),0 : line xm+4,ym+5,xm+124,ym+5
+      Ink rgb(255,255,255),0 : line xm+4,ym+6,xm+124,ym+6
+     Endif
+    if ymenu=1
+      ink rgb(255,255,255),0 : line xm,ym,xm+127+_DBPFlag,ym
+     Endif
+    Rem On affiche alors le contour du menu
+    ink rgb(255,255,255),0 : line xm,ym,xm,ym+11+_DBPFlag
+    if state=1 then ink 0,0 else ink rgb(255,255,255),0
+    MW_Set_Text_Transparent_Sys()
+    _texte$ = _menu_option$(xmenu,ymenu)
+    Text xm+18 , ym , _texte$
+    ink rgb(128,128,128),0 : line xm+127,ym,xm+127,ym+11+_DBPFlag
+    Rem Si le menu suivant ne contient rien alors on affiche la barre sombre du bas.
+    if _Menu_State(xmenu,ymenu+1)=0 and _Menu_State(xmenu,ymenu)<>0
+      _Menu_State(xmenu,0)=ymenu
+      line xm+127,ym,xm+127,ym+11 : line xm+127,ym+11,xm,ym+11
+     endif
+   Endif
+  _windows_Sys(34)=1
+ EndFunction
+Rem ------------------------------------------------------------------------------------- MENU SYSTEM --------------
+Rem MW_Refresh_Menu_Title(xmenu,state) [SYSTEM]                                          Rafraîchit 1 titre de menu.
+Function MW_Refresh_Menu_Title(xmenu,state)
+  _DBPFlag=_Windows_Sys(31)
+  if xmenu>_Menu_Sys(3) then state=1
+  set current bitmap _Menu_Sys(6)
+  xm=(xmenu-1)*128
+  Rem Affichage du titre du menu
+  if state=1 then ink rgb(216,208,200),0 else ink rgb(0,36,104),0
+  box xm,0,xm+127+_DBPFlag,11+_DBPFlag
+  if state=1 then ink 0,0 else ink rgb(255,255,255),0
+  MW_Set_Text_Transparent_Sys()
+  _texte$ = _menu_option$(xmenu,0)
+  Text xm+2,0,_texte$
+ EndFunction
+Rem
+Rem
+Rem
+Rem ------------------------------------------------------------------------ 3DMAPEDITOR SPECIAL FUNCTIONS ---------
+Rem MW_Save_Default_Positions() [NEW]                   Sauvegarde les dernières positions des fenêtres sur fichier.
+Function MW_Save_Default_Positions()
+  mw_config$=get dir$()+"\tiles\mw_config.dat"
+  Rem On efface le fichier sauvegarde si il existe.
+  if file exist(mw_config$)=1 then delete file mw_config$
+  Rem On sauvegarde les positions.
+  open to write 1,mw_config$
+  write string 1,"Magic-Windows Configuration File Ver1.3"
+  for boucle=1 to 24 step 1
+    write word 1,_Windows_Default(boucle,1)
+    write word 1,_Windows_Default(boucle,2)
+   next boucle
+  write string 1,"end_of_cfg"
+  close file 1
+    sync
+ EndFunction
+Rem ------------------------------------------------------------------------ 3DMAPEDITOR SPECIAL FUNCTIONS ---------
+Rem MW_Load_Default_Positions() [NEW]             Charge les dernières positions des fenêtres à partir d'un fichier.
+Function MW_Load_Default_Positions()
+  mw_config$=get dir$()+"\tiles\mw_config.dat"
+  Rem si la sauvegarde existe , on la charge.
+  if file exist(mw_config$)=1
+    Rem On sauvegarde les positions.
+    open to read 1,mw_config$
+    read string 1,_s$
+    for boucle=1 to 24 step 1
+      read word 1,_Windows_Default(boucle,1)
+      read word 1,_Windows_Default(boucle,2)
+     next boucle
+    read string 1,_s$
+    close file 1
+    sync
+   endif
+ endfunction
+Rem
+Rem
+Rem
+Rem
+Rem ----------------------------------------------------------------------------------------------------------------
+Rem
+REMSTART
+  Tiles Order :
+`    #00 : top_left     #03 : Close_Gadget     #06 : Back_Gadget
+`    #01 : top          #04 : Resize_Gadget    #07 : ...
+`    #02 : top_right    #05 : Front_Gadget     #08 : ...
+
+Windows gadgets data : xx=window number(1-16) , yy=gadget number(1,32)
+    _Windows_Gadget(xx,yy,1) : Type de gadget ( =1 graphique , =2 texte , =3 direct IMAGE )
+    _Windows_Gadget(xx,yy,2) : Image ou graphique à utiliser pour le gadget.
+    _Windows_Gadget(xx,yy,3) : Gadget actif ?
+    _Windows_Gadget(xx,yy,4) : Gadget x position.
+    _Windows_Gadget(xx,yy,5) : Gadget y position.
+    _Windows_Gadget(xx,yy,6) : Gadget x size.
+    _Windows_Gadget(xx,yy,7) : Gadget y size.
+    _Windows_Gadget(xx,yy,8) : Image Alternée graphique à utiliser.
+    _Windows_Gadget_Text$(xx,yy) : Text à mettre dans le gadget si c'est un gadget texte.
+
+  _Windows_sys(xx) values :
+    _Windows_sys(1)=First tile image
+    _Windows_Sys(2)=Last tile image
+    _Windows_Sys(3)=Refresh windows when trace to screen.
+    _Windows_Sys(4)=Nombre de fenêtres existantes.
+    _Windows_Sys(5)=old x mouse
+    _Windows_Sys(6)=old y mouse
+    _Windows_Sys(7)=Last active gadget
+    _Windows_Sys(8)=Last active window
+    _Windows_Sys(9)=Second Gadget value checking.
+    _Windows_sys(10)=Second window value checking
+    _Windows_Sys(11)=Real Time Windows move enabled ?
+    _Windows_Sys(12)=Real Time Windows Scaling enabled ?
+    _Windows_Sys(13)=Real Time Windows drawing priority enabled ?
+    _Windows_Sys(14)=Initialisation
+    _Windows_Sys(15)=Refresh Gadgets when trace to screen.
+    _Windows_Sys(16)=XWin Temp
+    _Windows_Sys(17)=YWin Temp
+    _Windows_Sys(18)=Current Windows
+    _Windows_Sys(19)=Current Gadget
+    _Windows_Sys(20)=AutoClsMode
+    _Windows_Sys(21)=RefreshBackGround Mode
+    _windows_sys(22)=Display mode ( 0=CopyBitmap/Paste , 1=Sprites )
+    _Windows_sys(23)=1 if MW_Background_Task() was called . MW_sync(x) set it to 0.
+    _Windows_sys(24)=Texture mode ( 0=System Ram , 1=VideoRam , 2=Compressed )
+    _Windows_sys(25)=Affichage du titre actif (=1) ou inactif (=0)
+    _Windows_Sys(26)=Last used font size
+    _Windows_Sys(27)=Last Text Style Used ( 0=normal 1=italic 2=bold 3=italicbold )
+    _Windows_Sys(28)=Text de type transparent ou opaque.
+    _Windows_Sys(29)=Default Mouse cursor
+    _Windows_Sys(30)=Auto Windows Position save
+    _Windows_Sys(31)=DBPro Mode Flag ( 1=DBPro 0=DBv1 )
+    _Windows_Sys(32)=Window movement active
+    _Windows_Sys(33)=Tracé du contour des fenêtres ou pas . . .
+
+
+  _Windows_Data(xx,yy) : xx=window number(1-16)
+    _Windows_Data(xx,01) : La fenetre existe ou pas
+    _Windows_Data(xx,02) : position X
+    _Windows_Data(xx,03) : position Y
+    _Windows_Data(xx,04) : dimension X
+    _Windows_Data(xx,05) : dimension Y
+    _Windows_Data(xx,06) : Close_Gadget Actif ?
+    _Windows_Data(xx,07) : Resize_Gadget Actif ?
+    _Windows_Data(xx,08) : Front_Gadget & Back_Gadget Actifs ?
+    _Windows_Data(xx,09) : RGB Red value    \
+    _Windows_Data(xx,10) : RGB Green value   > ink for BGD default color
+    _Windows_Data(xx,11) : RGB Blue value   /
+    _Windows_Data(xx,12) : Cursor X position
+    _Windows_Data(xx,13) : Cursor Y position
+    _Windows_Data(xx,14) : RGB Red value   \
+    _Windows_Data(xx,15) : RGB Green value  > ink for text
+    _Windows_Data(xx,16) : RGB Blue value  /
+    _Windows_Data(xx,17) : Font Size
+    _Windows_Data(xx,18) : RGB Red value   \
+    _Windows_Data(xx,19) : RGB Green value  > ink for border , lighest values
+    _Windows_Data(xx,20) : RGB Blue value  /
+    _Windows_Data(xx,21) : RGB Red value   \
+    _Windows_Data(xx,22) : RGB Green value  > ink for border , darkest values
+    _Windows_Data(xx,23) : RGB Blue value  /
+    _Windows_Data(xx,24) : Title Bar active ?
+    _Windows_Data(xx,25) : Window border Actif ?
+    _Windows_Data(xx,26) : Use Alpha channel for transparent sprites .
+    _Windows_Data(xx,27) : Text Format ( 0=Normal , 1=Italic , 2=Bold , 3=Italic+Bold )
+    _Windows_Data(xx,28) : Text Opaque (=0) or transparent (=1)
+
+  Messages d'erreur :
+     -1 : Les valeurs entrées pour la fenêtre sont invalides.
+     -2 : La fenêtre demandée existe deja.
+     -3 : Le bitmap nécessaire à la fabrication de la fenêtre est deja utilisé !
+     -4 : La fenêtre demandée n'existe pas.
+     -5 : Le fichier contenant les données pour les graphiques n'a pas pu être chargé !
+     -6 : Les coordonnées demandées sortent de la fenêtre
+     -7 : Le bitmap demandé n'existe pas.
+     -8 : Le bouton existe deja.
+     -9 : Le bouton demandé n'existe pas.
+
+  Valeurs des gadgets systèmes aux fenêtres :
+     -1 : Close window gadget
+     -2 : title bar
+     -3 : window to front gadget
+     -4 : window to back gadget
+     -5 : resize gadget
+     -6 : MESSAGE D'ERREUR : La fenêtre spécifiée n'existe pas.
+
+REMEND

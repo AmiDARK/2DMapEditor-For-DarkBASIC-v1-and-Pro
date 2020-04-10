@@ -1,0 +1,16 @@
+Rem
+Rem My Synchro Function for _3DMEEditor
+Rem
+Function Fct_WaitSynchro(_sync)
+  movespeed=16
+  movespeedneg=0-movespeed
+  cx#=camera angle x()
+  cy#=camera angle y()
+  for boucle=1 to _Sync
+    position mouse 320,240
+    MW_Background_Task()
+    MW_Sync(0)
+    sync
+   next boucle
+ EndFunction
+

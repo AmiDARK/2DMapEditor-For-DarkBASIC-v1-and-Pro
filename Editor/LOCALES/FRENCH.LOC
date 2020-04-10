@@ -1,0 +1,99 @@
+Configuration chargée avec succès!
+Fichier de configuration corrompu ou non trouvé.
+Utilisation des paramètres par défaut.
+!!! Cette copie de 3DMapEditor n'est pas enregistrée !!!
+elle subira donc les limitations suivantes :
+ - Vous ne pourrez pas sauver plus de 128 objets dans votre carte !!!
+Si vous désirez vous enregistrer,consultez le fichier ENREGISTREMENT.TXT
+fourni dans l'archive.
+(Ce message n'apparait pas dans la version enregistrée)
+Cette copie de 3DMapEditor est enregistrée à :
+Charger une carte depuis un fichier
+Effacer la carte utilisée
+Ajouter une nouvelle texture à la carte
+Effacer une texture
+Charger un objet 3D Direct X
+Selectionner un object 3D Direct X
+Effacer un object 3D Direct X
+Modifier la couleur et l'amplitude de la lumière
+Ajouter une source de lumière
+Ajouter un objet 3D Direct X à la carte
+Ajouter un son 3D dans la carte
+Ajouter une sphère
+Ajouter un cube
+Ajouter une boite
+Ajouter un cylindre
+Ajouter un cone
+Ajouter un plan
+Redimensionner manuellement la texture appliquée à un objet
+Appliquer la texture précédente à un objet
+Appliquer la texture suivante à un objet
+Sauvegarder une carte sur disque
+Quitter 3DMapEditor
+Sauvegarder la caméra
+Echanger les modes NORMAL et PREVIEW
+Charger un son 3D
+Selectionner un son 3D
+Effacer un son 3D
+Modifier la couleur et l'amplitude lumière ambiante
+Modifier la direction de la lumière ambiante
+Effacer l'objet en cours
+Changer d'objet courant
+Faire une copie de l'objet en cours
+Déplacer l'objet en cours
+Redimensionner l'objet en cours
+Faire pivoter l'objet en cours
+Définir le paramètres de l'objet en cours
+Optimiser les objets 3D par comparaison des distances
+Echanger le mode d'apparence de l'objet : normal , transparent , sombre
+Faire défiler les textures vers le haut
+Faire défiler les textures vers le bas
+Sélectionner la texture à effacer
+Charger une carte sur disque
+nom du fichier .MAP à sauver :
+Etes-vous sur de vouloir effacer la carte en cours ( o/n ) ?
+Charger une texture sur disque
+Pas:
+Position:
+Zoom:
+Rotation:
+Objet:
+Ambiant:
+Lumière:
+Charger un objet 3D
+Entrer le facteur de zoom de l'objet ( en % ) :
+Optimisation des objets en cours ...
+Charger un son 3D
+Détruire une texture
+Détruire un objet DirectX
+Détruire un son 3D
+Sélectionner un objet DirectX
+Sélectionner un son 3D
+Textures et Icones chargées dans la mémoire vive
+Textures et Icones chargées dans la mémoire graphique
+Compression de textures activée (si disponible)
+Informations sur la configuration de l'éditeur
+zone pos:
+zone size:
+Ajouter une nouvelle zone d'action
+Déplacer la zone active
+Redimensionner la zone active
+Choisir une autre zone
+Modifier les propriétés de la zone active
+Détruire la zone active
+-----------------
+Ajouter une nouvelle matrice
+Déplacer la matrice active
+Editer la hauteur des points de la matrice courante
+Editer les textures appliquées à la matrice courante
+Choisir une autre matrice
+Modifier les propriétés de la matrice active
+Détruire la matrice active
+Définir aléatoirement les hauteurs d'une matrice
+Utiliser une image .bmp ou .jpg pour créer les hauteurs de la matrice
+Donne accès à l'aide interne
+Montre les informations relatives au logiciel
+Montre les informations relatives au site internet
+Propriétés Matrices
+Matrice num:
+END_LOC

@@ -1,0 +1,289 @@
+Rem *****************************************
+Rem *                                       *
+Rem * SELECTEUR DE FICHIER VER 1.0 Function *
+Rem *                                       *
+Rem *****************************************
+Rem
+Rem NEEDED VALRIABLES LIST :
+Rem dim fileselector$(9)
+Rem dim fileselectordata(12)
+Rem dim _fichier$(256)
+Rem fileselector$(1)=get dir$()
+Rem fileselector$(2)="Window title"
+Rem fileselectordata(1)=150
+Rem fileselectordata(2)=50
+Rem fileselectordata(11)=1
+Rem fileselectordata(12)=2
+Rem _FilesPath$(1)=_edpath$
+Rem _FilesPath$(2)=_mappath$
+Rem _FilesPath$(3)=_TexturePath$
+Rem _FilesPath$(4)=_3DObjectPath$
+Rem _FilesPath$(5)=_3DSoundPath$
+Rem
+Rem _File_Selector_v1(_loaderpath$,filter1$,filter2$)
+Rem -------------------------------------------------
+Rem _loaderpath$=chemin ou aller chercher le fichier par défaut
+Rem filter1$=filtre d'extension 1 ( ex : filter1$=".jpg" )
+Rem filter2$=filtre d'extension 2 ( ex : filter2$=".bmp" )
+Rem
+function Fct_File_Selector_v1(_loaderpath$,filter1$,filter2$)
+Rem Cette image est l'image de sélecteur de fichier.
+  fileselector$(5)=filter1$
+  fileselector$(6)=filter2$
+  If MW_Window_Exist(16)=1 then MW_Close_Window(16)
+  MW_Open_New_Window(16,fileselector$(2),380,353,1,0,0)
+  MW_Sync(0) : sync
+Rem  MW_Position_Window(16,0,12)
+  MW_Paste_Image(16,6,0,0)
+  Rem set dir path$
+  cd _loaderpath$
+  fileselector$(3)=fileselector$(1)
+  _refreshdrawercontent()
+  _displaydrawername()
+  _displayfilters()
+  fileselectordata(10)=0
+  repeat
+    MW_BackGround_Task()
+    if mouseclick()=1
+      _wnd=MW_Current_Window()
+      if _wnd=16
+        xm=MW_Window_Position_X() : ym=MW_Window_Position_Y()
+       else
+        xm=0 : ym=0
+       endif
+      REM REMONTER DANS LA LISTE D'ITEMS
+      if xm>359 and xm<376
+        if ym>22 and ym<39
+          fileselectordata(4)=fileselectordata(4)-1
+          fileselectordata(9)=1
+         endif
+        REM DESCENDRE DANS LA LISTE D'ITEMS
+        if ym>138 and ym<155
+          fileselectordata(4)=fileselectordata(4)+1
+          fileselectordata(9)=1
+         endif
+       endif
+      REM CHOIX D'UN FICHIER DANS LA LISTE.
+      if xm>21 and xm<358 and ym>24 and ym<153
+        _num=(ym-24)/14
+        fileselectordata(8)=_num+fileselectordata(4)
+        if fileselectordata(8)>fileselectordata(5) then fileselectordata(8)=0
+        if fileselectordata(8)>0 then _displayselected()
+       endif
+      if xm>277 and xm<343
+        REM OPTION "CANCEL"/"ANNULER" = fileselectordata(10)
+        if ym>184 and ym<201
+          fileselectordata(10)=1
+          fileselector$(8)=""
+          fileselector$(9)=""
+         endif
+         REM OPTION "OUVRIR"
+        if ym>156 and ym<173
+          if fileselectordata(8)>0
+            fileselectordata(10)=1
+            fileselector$(8)=fileselector$(3)
+            if right$(fileselector$(8),1)<>"\" then fileselector$(8)=fileselector$(8)+"\"
+            fileselector$(9)=_extpath$+_fichier$(fileselectordata(8))
+           endif
+         endif
+       endif
+     endif
+    if fileselectordata(4)>(fileselectordata(5)-9) then fileselectordata(4)=(fileselectordata(5)-9)
+    if fileselectordata(4)<1 then fileselectordata(4)=1
+    if fileselectordata(9)=1
+      _Display_all()
+      fileselectordata(9)=0
+     endif
+    if fileselectordata(8)>0
+      fileselector$(7)=_fichier$(fileselectordata(8))
+      if fileselector$(7)="[..]"
+        fileselector$(4)=".."
+        _changedrawer()
+        _displaydrawername()
+        _displayselected()
+       endif
+      if left$(fileselector$(7),1)="["
+        fileselector$(4)=""
+        for boucle=2 to (len(fileselector$(7))-1)
+          fileselector$(4)=fileselector$(4)+mid$(fileselector$(7),boucle)
+         next boucle
+        _changedrawer()
+        _displaydrawername()
+        _displayselected()
+       endif
+     endif
+    ycurs=mousey() : xcurs=mousex()
+    sprite 2,xcurs,ycurs,3
+    MW_Sync(0)
+    if upkey()=1 then move camera 10
+    if downkey()=1 then move camera 0-10
+    xc#=camera position x()
+    zc#=camera position z()
+    x=xc#/64 : z=zc#/64
+    position object 1,-1.75+(x*64),-1,-1.75+(z*64)
+    if MW_window_Exist(16)=1 then MW_window_To_Front(16)
+    sync
+   until fileselectordata(10)=1 or MW_Window_Exist(16)=0
+  fileselectordata(8)=0 : fileselector$(7)=""
+  fileselectordata(10)=0
+  cd fileselector$(1)
+  if fileselector$(8)<>"" then _selected=1
+  if bitmap exist(1)=1 then delete bitmap 1
+  if MW_Window_Exist(16)=1 then MW_Close_Window(16)
+ endfunction _selected
+REM                                             FONCTION POUR AFFICHER LA LISTE DES FICHIERS.
+function _Display_all
+  xpost=22 : ypost=24
+  MW_Ink(16,60,60,60)
+  MW_box(16,22,25,357,152)
+  REM AFFICHER LA LISTE DE FICHIERS.
+  MW_Ink(16,255,255,255)
+  fileselectordata(3)=fileselectordata(4)+8
+  if fileselectordata(3)>fileselectordata(5) then fileselectordata(3)=fileselectordata(5)
+  for boucle=fileselectordata(4) to fileselectordata(3)
+    MW_Set_Cursor(16,xpost,ypost)
+    inc ypost,14
+    MW_Print(16,right$(_fichier$(boucle),40))
+   next boucle
+ endfunction
+REM                                             FONCTION POUR AFFICHER LE NOM DU FICHIER CHOISI.
+function _displayselected
+  Rem AFFICHER LE FICHIER CHOISI.
+  MW_Ink(16,60,60,60)
+  MW_Box(16,55,159,246,170)
+  MW_Ink(16,255,255,255)
+  MW_Set_Cursor(16,55,157)
+  if fileselectordata(8)>0
+    MW_Print(16,_fichier$(fileselectordata(8)))
+    ext$=right$(_fichier$(fileselectordata(8)),4)
+    if file exist(_fichier$(fileselectordata(8))+".jpg")=1
+      Rem Display a preview of the texture you've selected.
+      load bitmap _fichier$(fileselectordata(8))+".jpg",1
+      MW_Sync(0) : sync
+      xbitmap=bitmap width(1) : ybitmap=bitmap height(1)
+      MW_Copy_Bitmap2Window(1,0,0,xbitmap-1,ybitmap-1,16,249,259,328,338)
+      MW_Ink(16,64,64,64)
+      MW_Box(16,102,264,242,345)
+      MW_Ink(16,255,255,255)
+     endif
+    if ext$=".jpg" or ext$=".bmp"
+      Rem Display a preview of the texture you've selected.
+      load bitmap _fichier$(fileselectordata(8)),1
+      MW_Sync(0) : sync
+      xbitmap=bitmap width(1) : ybitmap=bitmap height(1)
+      MW_Copy_Bitmap2Window(1,0,0,xbitmap-1,ybitmap-1,16,249,259,328,338)
+      MW_Ink(16,64,64,64)
+      MW_Box(16,102,264,242,345)
+      MW_Ink(16,255,255,255)
+      MW_Set_Cursor(16,102,270) : MW_Print(16,str$(xbitmap)+" pixels")
+      MW_Set_Cursor(16,102,298) : MW_Print(16,str$(ybitmap)+" pixels")
+     endif
+   else
+    MW_Ink(16,64,64,64)
+    MW_Box(16,249,259,328,338)
+    MW_Ink(16,119,115,104)
+    MW_Box(16,102,264,242,345)
+   endif
+ endfunction
+REM                                             FONTION POUR AFFICHER LE CHEMIN COURANT.
+function _displaydrawername
+  Rem AFFICHER LE CHEMIN D'ACCES COURANT.
+  MW_Ink(16,60,60,60)
+  MW_Box(16,63,4,352,15)
+  MW_Ink(16,255,255,255)
+  MW_Set_Cursor(16,63,3)
+  MW_Print(16,right$(fileselector$(3),40))
+ endfunction
+Rem                                             CHANGE LE DOSSIER COURANT.
+function _changedrawer
+  cd fileselector$(4)
+  fileselector$(3)=get dir$()
+  _refreshdrawercontent()
+ endfunction
+REM                                             REACTUALISE LE CONTENU DU DOSSIER SELON LES FILTRES.
+function _refreshdrawercontent
+  fileselectordata(5)=1
+  perform checklist for files
+  fileselectordata(7)=checklist quantity()
+  for boucle=1 to fileselectordata(7)
+    _name$=checklist string$(boucle)
+    if checklist value a(boucle)=1
+      _fichier$(fileselectordata(5))=lower$("["+_name$+"]")
+      fileselectordata(5)=fileselectordata(5)+1
+     endif
+   next boucle
+  for boucle=1 to fileselectordata(7)
+    _name$=checklist string$(boucle)
+    if checklist value a(boucle)=0
+      if fileselector$(5)="" and fileselector$(6)=""
+        _fichier$(fileselectordata(5))=lower$(_name$)
+        fileselectordata(5)=fileselectordata(5)+1
+       endif
+     endif
+    Rem SI LE FILTRE 1 EST ACTIF , ON REGARDE SI L'EXTENSION DU FICHIER CORRESPOND
+    if fileselector$(5)<>""
+      ext$=lower$(right$(_name$,len(fileselector$(5))))
+      if ext$=fileselector$(5)
+        _fichier$(fileselectordata(5))=lower$(_name$)
+        fileselectordata(5)=fileselectordata(5)+1
+       endif
+     endif
+    Rem SI LE FILTRE 1 EST ACTIF , ON REGARDE SI L'EXTENSION DU FICHIER CORRESPOND
+    if fileselector$(6)<>""
+      ext$=lower$(right$(_name$,len(fileselector$(6))))
+      if ext$=fileselector$(6)
+        _fichier$(fileselectordata(5))=lower$(_name$)
+        fileselectordata(5)=fileselectordata(5)+1
+       endif
+     endif
+   next boucle
+  for boucle=fileselectordata(5) to 255 step 1
+    _fichier$(boucle)=""
+   next boucle
+  fileselector$(7)="" : fileselectordata(8)=0
+  fileselectordata(9)=1
+  repeat
+    MW_Sync(0) : Sync
+    until mouseclick()=0
+ endfunction
+REM                                             AFFICHE LES FILTRES DANS LA CASE CHOISIE.
+function _displayfilters
+  Rem AFFICHER LE FICHIER CHOISI.
+    MW_Ink(16,60,60,60)
+    MW_Box(16,55,187,246,197)
+    MW_Ink(16,255,255,255)
+    MW_Set_Cursor(16,55,186)
+  if fileselector$(5)<>"" and fileselector$(6)=""
+    MW_Print(16,"*"+fileselector$(5))
+   endif
+  if fileselector$(5)<>"" and fileselector$(6)<>""
+    MW_Print(16,"*"+fileselector$(5)+" / *"+fileselector$(6))
+   endif
+  if fileselector$(5)="" and fileselector$(6)<>""
+    MW_Print(16,"*"+fileselector$(6))
+   endif
+  if fileselector$(5)="" and fileselector$(6)=""
+    MW_Print(16,"*.*")
+   endif
+ endfunction
+REMSTART
+Rem fileselector$(1)=get dir$()
+Rem fileselector$(2)=Window Title$
+Rem fileselector$(3)=_path$
+Rem fileselector$(4)=_fileselect$
+Rem fileselector$(5)=filter1$
+Rem fileselector$(6)=filter2$
+Rem fileselector$(7)=_file$
+Rem fileselector$(8)=_dossierfinal$
+Rem fileselector$(9)=_fichierfinal$
+Rem
+Rem fileselectordata(3)=_lastitem
+Rem fileselectordata(4)=_firstitem
+Rem fileselectordata(5)=_numfichier
+Rem fileselectordata(6)=fileselectordata(8)
+Rem fileselectordata(7)=total_fiches
+Rem fileselectordata(8)=fileselectordata(8)
+Rem fileselectordata(9)=_itemdisplay
+Rem fileselectordata(10)=quit
+Rem fileselectordata(11)=loaderimagenumber
+REMEND

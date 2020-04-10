@@ -1,0 +1,149 @@
+set display mode 1024,768,16
+sync rate 60 : sync on
+
+Rem Gestion des matrices Ver 1.0
+Dim _Matrix(16,16) : Rem Variables système aux matrices.
+Dim _Matrix_Height(16,256,256) : Rem Store all points heigth
+Dim _Matrix_Tile(16,256,256) : Rem Store which texture are used on matrix
+Dim _Matrix_RealTile(16,256,256) : Rem Store which texture-tile will really be used on matrix.
+Dim _matrix_tilelist(64)
+_CurrentMatrix=1 : _LastMatrix=1
+restore _donnees
+For boucle=1 to 7
+  read _matrix(1,boucle)
+ next boucle
+restore _donnees2
+for zbcl=1 to 5
+  for xbcl=1 to 5
+    read _matrix_tile(1,xbcl,zbcl)
+   next xbcl
+ next zbcl
+
+load image "textures\t01.jpg",1
+load image "textures\t02.jpg",2
+
+  _refresh_matrix(1)
+  position camera 100,30,-200
+repeat
+
+  sync
+ until spacekey()=1
+
+delete image 1
+delete image 2
+end
+
+
+
+
+
+Function _Refresh_Matrix(_MATRIX)
+Rem On met au point la liste des textures à utiliser pour les tiles.
+  _how_many=0
+  for xbcl=0 to _Matrix(_MATRIX,4)
+    for zbcl=0 to _Matrix(_MATRIX,5)
+      _image=_Matrix_Tile(_MATRIX,xbcl,zbcl)
+      if _image>0
+        if _how_many=0
+          inc _how_many,1
+          _matrix_tilelist(_how_many)=_image
+          _matrix_realtile(_Matrix,xbcl,zbcl)=_how_many
+         else
+          _exist=0
+          for boucle=1 to _how_many
+            if _matrix_tilelist(boucle)=_image
+              _exist=1
+              _matrix_realtile(_Matrix,xbcl,zbcl)=boucle
+             EndIf
+           next boucle
+          if _exist=0
+            inc _how_many,1
+            _matrix_tilelist(_how_many)=_image
+            _matrix_realtile(_Matrix,xbcl,zbcl)=_how_many
+           endif
+         endif
+       endif
+     next zbcl
+   next xbcl
+Rem On crée maintenant l'image qui servira à faire les tiles pour la matrice
+  if _how_many=1 then _mode=1
+  if _how_many>1 and _how_many<5 then _mode=2
+  if _how_many>4 and _how_many<10 then _mode=3
+  if _how_many>9 and _how_many<17 then _mode=4
+  if sprite exist(65535)=1 then delete sprite 65535
+Rem  create bitmap 2,640,480
+  if _mode=1 or _mode=2
+    if _matrix_tilelist(1)>0 then paste image _matrix_tilelist(1),0,0
+   endif
+  if _mode=2
+    if _matrix_tilelist(2)>0 then paste image _matrix_tilelist(2),64,0
+    if _matrix_tilelist(3)>0 then paste image _matrix_tilelist(3),0,64
+    if _matrix_tilelist(4)>0 then paste image _matrix_tilelist(4),64,64
+   endif
+  if _mode=3
+    xpos=0 : ypos=0
+    for _til=1 to 9
+      if _matrix_tilelist(_til)>0 then paste image _matrix_tilelist(_til),xpos,ypos
+      inc xpos,64 : if xpos=192 then xpos=0 : inc ypos,64
+     next _til
+   endif
+  if _mode=4
+    xpos=0 : ypos=0
+    for _til=1 to 16
+      if _matrix_tilelist(_til)>0 then paste image _matrix_tilelist(_til),xpos,ypos
+      inc xpos,64 : if xpos=256 then xpos=0 : inc ypos,64
+     next _til
+   endif
+  _img=1
+  repeat
+    inc _img,1
+   until image exist(_img)=0
+  if _mode=1 then get image _img,0,0,64,64
+  if _mode=2 then get image _img,0,0,128,128
+  if _mode=3 then get image _img,0,0,192,192
+  if _mode=4 then get image _img,0,0,256,256
+  print _img
+Rem On va crée l'image qui servira aux tiles .
+  if matrix exist(_MATRIX)=1 then delete matrix _MATRIX
+  xt=_Matrix(_MATRIX,4) : zt=_Matrix(_MATRIX,5) : xs=_Matrix(_MATRIX,6) : zs=_Matrix(_MATRIX,7)
+  make matrix _MATRIX,xs*xt,zs*zt,xt,zt
+  position matrix _MATRIX,_Matrix(_MATRIX,1),_Matrix(_MATRIX,2),_Matrix(_MATRIX,3)
+  prepare matrix texture _MATRIX,_img,_mode,_mode
+  for zbcl=1 to 5
+    for xbcl=1 to 5
+      if _matrix_realtile(_Matrix,xbcl,zbcl)>0 then set matrix tile 1,xbcl-1,zbcl-1,_matrix_realtile(_Matrix,xbcl,zbcl)
+     next xbcl
+   next zbcl
+  update matrix _MATRIX
+  delete image _IMG
+ EndFunction
+
+
+_donnees:
+  data 0,0,0
+  data 5,5
+  data 16,16
+_donnees2:
+  data 2,1,1,1,2
+  data 1,1,1,2,1
+  data 1,1,2,1,1
+  data 1,2,1,1,1
+  data 2,1,1,1,2
+
+
+
+REMSTART
+  _CurrentMatrix
+  _LastMatrix
+  _Matrix(_MATRIX,1)=Matrix X Position
+  _Matrix(_MATRIX,2)=Matrix Y Position
+  _Matrix(_MATRIX,3)=Matrix Z Position
+  _Matrix(_MATRIX,4)=X Number of tiles
+  _Matrix(_MATRIX,5)=Z Number of tiles
+  _Matrix(_MATRIX,6)=X tiles size
+  _Matrix(_MATRIX,7)=Z tiles size
+  _Matrix_Heigth(_MATRIX,X,Z)=Height of the point X,Z of the matrix _MATRIX
+  _Matrix_Tile(_MATRIX,X,Z)=Texture used for the tile X,Z of the matrix _MATRIX
+  _matrix_realtile(_Matrix,x,z)
+  _matrix_tilelist(255)
+  REMEND

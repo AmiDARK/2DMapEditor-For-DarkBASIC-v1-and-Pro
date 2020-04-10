@@ -1,0 +1,366 @@
+Rem ************************************************
+Rem *                                              *
+Rem * 3DMapEditor Maps Load/Save/Refresh Functions *
+Rem *                                              *
+Rem ************************************************
+
+Rem VARIABLES UTILISES PAR 3DMapEditor Ver 2.29+
+Rem Dim _obj(16383,27)
+Rem Dim _Textures$(256)
+Rem dim _Lights(256,16)
+Rem dim _LightActive(8)
+Rem Dim _DirectXObject$(256)
+Rem Dim _3DSound$(256)
+Rem dim _fichier$(256)
+Rem Dim _FilesPath$(16)
+Rem dim _zone_info(256,16) : Rem ZONES
+Rem dim _zone_filename$(256) : Rem FILENAMES FOR TEXTURES FOR SOME ZONES.
+
+
+Rem FUNCTIONS LIST :
+Rem _Load_Map(_mapfile$,_FirstTextureImage,_TextureType)
+Rem _initialize_camera
+Rem _initialize_ambient_light
+Rem _checkFor7Lights(_forceautoclear,_fogdistance,_LightNum)
+Rem _Refresh_Object(refobj,_FirstTextureImage,_FADEOBJECT)
+Rem
+Rem _initialize_skybox
+Rem _initialize_skybox
+Rem
+function _Load_Map(_mapfile$,_FirstTextureImage)
+  _loadpath$=_FilesPath$(1)
+  _mappath$=_FilesPath$(2)
+  _TexturePath$=_FilesPath$(3)
+  _3DObjectPath$=_FilesPath$(4)
+  _3DSoundPath$=_FilesPath$(5)
+  fichier$=_mappath$+_mapfile$
+  if file exist(fichier$)=1
+    _loaded=1
+    if _fichier$="" then _loaded=0 else _loaded=1
+    print _fichier$
+    Open to read 1,_fichier$
+Rem Définition de carte et de versions de l'éditeur.
+    read string 1,file1$
+    read byte 1,MapVersionFile
+    read byte 1,MapRevisionFile
+    read string 1,file2$
+Rem définition de la carte.
+    For boucle=1 to 16
+      read file 1,_obj(1,boucle)
+     next boucle
+Rem Debut header
+    read string 1,file3$
+Rem Définition des objets.
+    newobj=_obj(1,1)
+    lastobject=newobj
+    for boucle=2 to newobj
+      for sousboucle=1 to 16
+        read file 1,_obj(boucle,sousboucle)
+       next sousboucle
+      If MapVersionFile>0 and MapRevisionFile>4
+        read file 1,_obj(boucle,17)
+        read file 1,_obj(boucle,18)
+       endif
+      If MapVersionFile>0 and MapRevisionFile>6
+        for sousboucle=19 to 25
+          read file 1,_obj(boucle,sousboucle)
+         next sousboucle
+       else
+        _obj(boucle,19)=1 : Rem WIREFRAME
+        _obj(boucle,20)=1 : Rem ACTIVE BLACK IS TRANSPARENCY OR NOT
+        _obj(boucle,21)=0 : Rem CULL ( SHOW HIDDEN FACES )
+        _obj(boucle,22)=1 : Rem TEXTURE FILTERING
+        _obj(boucle,23)=1 : Rem SENSITIVE TO LIGHTS
+        _obj(boucle,24)=1 : Rem SENSITIVE TO FOG
+        _obj(boucle,25)=1 : Rem SENSITIVE TO AMBIENT LIGHT
+       endif
+Rem AJOUT DES DEUX DERNIERES OPTIONS DES ATTRIBUTS DES OBJETS 3D.
+      if MapVersionFile>0 and MapRevisionFile>7
+        read file 1,_Obj(boucle,26)
+        read file 1,_Obj(boucle,27)
+       else
+        _Obj(boucle,26)=0 : Rem OBJET CACHE = FALSE
+        _Obj(boucle,27)=1 : Rem OBJET COLLISIONS = TRUE
+       endif
+     next boucle
+Rem 2ème version de la carte , GESTION DES TEXTURES.
+    If MapVersionFile>0 and MapRevisionFile>1
+      read string 1,file4$
+      _TextureNum=_obj(1,8)
+      For bouclet=1 to _TextureNum
+        read string 1,_Textures$(bouclet)
+       next bouclet
+     endif
+Rem Ver 1.3 Gestion des lumières
+    If MapVersionFile>0 and MapRevisionFile>2
+      read string 1,file5$
+      _LightNum=_Obj(1,16)
+      if _LightNum>0
+        For boucle=1 to _LightNum
+          for sousboucle=1 to 16
+            read file 1,_Lights(boucle,sousboucle)
+           next sousboucle
+         next boucle
+       endif
+     endif
+Rem Ver 1.4 Gestion des objets 3D Direct X ( .x )
+    If MapVersionFile>0 and MapRevisionFile>3
+      read string 1,file6$
+      read file 1,_DirectXObject
+      if _DirectXObject>0
+        For boucle=1 to _DirectXObject
+          read string 1,_DirectXObject$(boucle)
+         next boucle
+       endif
+     endif
+Rem Ver 1.6 Gestion des sons 3D.
+    If MapVersionFile>0 and MapRevisionFile>5
+      read string 1,file7$
+      read file 1,_3DSoundObject
+      if _3DSoundObject>0
+        For boucle=1 to _3DSoundObject
+          read string 1,_3DSound$(boucle)
+         next boucle
+       endif
+     endif
+Rem Ver 1.9 Gestions des zones d'action.
+    if MapVersionFile>0 and MapRevisionFile>8
+      read string 1,file8$
+      read file 1,_last_zone
+      _zone_data(1)=_last_zone
+      _current_zone=_last_zone
+      if _last_zone>0
+        for boucle=1 to _last_zone
+          for sousboucle=1 to 16
+            read long 1,_Zone_Info(boucle,sousboucle)
+           next sousboucle
+          if MapVersionFile>0 and MapRevisionFile>9 then read long 1,_Zone_Info(boucle,17)
+          if MapVersionFile>0 and MapRevisionFile>10 then read string 1,_Zone_Filename$(boucle)
+         next boucle
+       endif
+     endif
+Rem END OF .MAP FILE
+    read string 1,file9$
+    close file 1
+    if _TextureNum>0
+      for bclt=1 to _TextureNum+1
+       fnl=_FirstTextureImage+bclt
+       file$=""
+       file1$=_texturepath$+_Textures$(bclt)
+       file2$="textures\"+_Textures$(bclt)
+       if file exist(file1$)=1 then file$=file1$
+       if file exist(file2$)=1 then file$=file2$
+       if file$<>"" then _my_load_image(file$,fnl)
+      next bouclet
+     endif
+   endif
+ endfunction _loaded
+
+function _initialize_camera
+  xcam=_obj(1,2)
+  ycam=_obj(1,3)
+  zcam=_obj(1,4)
+  xang=_obj(1,5)
+  yang=_obj(1,6)
+  zang=_obj(1,7)
+  position camera xcam,ycam,zcam
+  rotate camera xang,yang,zang
+ endfunction
+
+function _initialize_ambient_light
+  _AmbientRed=_Obj(1,9)
+  _AmbientGreen=_Obj(1,10)
+  _AmbientBlue=_Obj(1,11)
+  _AmbientLight=_Obj(1,12)
+  _AmbientX=_Obj(1,13)
+  _AmbientY=_Obj(1,14)
+  _AmbientZ=_Obj(1,15)
+  color ambient light Rgb(_AmbientRed,_AmbientGreen,_AmbientBlue)
+  set ambient light _AmbientLight
+  set directional light 0,_AmbientX,_AmbientY,_AmbientZ
+  _3dme_temp(4)=_AmbientRed : _3dme_temp(5)=_AmbienGreen : _3dme_temp(6)=_AmbientBlue
+  _3dme_temp(7)=_AmbientLight
+ endfunction
+
+function _checkFor7Lights(_forceautoclear,_fogdistance,_lightnum)
+  if _forceautoclear=0
+    Rem 1> On vérifie si aucune des 7 lumières existantes (?) ne sortent pas de la distance de vue.
+    For boucle=1 to 7
+      if light exist(boucle)
+        DistanceX=abs(camera position x()-light position x(boucle))
+        DistanceY=abs(camera position y()-light position y(boucle))
+        DistanceZ=abs(camera position z()-light position z(boucle))
+        Distance=Sqrt((Distancex^2)+(Distancey^2)+(distancez^2))
+        if Distance>_fogdistance+512
+          delete light boucle
+          _LightActive(boucle)=0
+         endif
+       endif
+     Next boucle
+   else
+    for boucle=1 to 7
+      if light exist(boucle) then delete light boucle
+      _LightActive(boucle)=0
+     next boucle
+   endif
+  Rem 2> On vérifie si aucune autre lumière n'est rentrée dans le champ de vue.
+  If _Lightnum>0
+    For boucle=1 to _LightNum
+      DistanceX=abs(camera position x()-_Lights(boucle,1))
+      DistanceY=abs(camera position y()-_lights(boucle,2))
+      DistanceZ=abs(camera position z()-_lights(boucle,3))
+      Distance=Sqrt((Distancex^2)+(Distancey^2)+(distancez^2))
+      lt=0
+      if Distance<2000
+        Rem On cherche la première lumière libre.
+        Repeat
+          inc lt
+          if _LightActive(lt)=boucle then lt=8 : Rem si cette lumière existe déja , ne pas dupliquer.
+         until _LightActive(lt)=0 or lt=8
+        Rem Si il existe un emplacement lumière de libre , on la crée.
+        if lt<8
+          _LightActive(lt)=boucle
+          make light lt
+          set point light lt,_Lights(boucle,1)+_Lights(boucle,9),_Lights(boucle,2)+_Lights(boucle,10),_Lights(boucle,3)+_Lights(boucle,11)
+          Color light lt,rgb(_Lights(boucle,4),_Lights(boucle,5),_Lights(boucle,6))
+          Set light range lt,_Lights(boucle,8)
+          Position light lt,_Lights(boucle,1),_Lights(boucle,2),_Lights(boucle,3)
+          Show Light lt
+         endif
+       endif
+     next boucle
+   endif
+ endfunction
+
+function _Refresh_Object(refobj,_FirstTextureImage,_FADEOBJECT)
+  _loadpath$=_FilesPath$(1)
+  _mappath$=_FilesPath$(2)
+  _TexturePath$=_FilesPath$(3)
+  _3DObjectPath$=_FilesPath$(4)
+  _3DSoundPath$=_FilesPath$(5)
+  lastobject=_obj(1,1)
+  newobj=lastobject
+  if lastobject=1 or refobj>lastobject then return
+  xpos=_obj(refobj,1)
+  ypos=_obj(refobj,2)
+  zpos=_obj(refobj,3)
+  xsize=_obj(refobj,4)
+  ysize=_obj(refobj,5)
+  zsize=_obj(refobj,6)
+  kind=_obj(refobj,7)
+  ObjRed=_Obj(refobj,8)
+  attrib=_obj(refobj,9)
+  textre=_obj(refobj,10)
+  xrot=_obj(refobj,11)
+  yrot=_obj(refobj,12)
+  zrot=_obj(refobj,13)
+  ObjGreen=_Obj(refobj,15)
+  ObjBlue=_Obj(refobj,16)
+  XScalet=_Obj(refobj,17)
+  YScalet=_Obj(refobj,18)
+  Rem Addition from version 2.23
+  _WireFrame=_Obj(refobj,19)
+  _Transparency=_Obj(refobj,20)
+  _Cull=_Obj(refobj,21)
+  _TextureFiltering=_Obj(refobj,22)
+  _LightSensitive=_Obj(refobj,23)
+  _FogSensitive=_Obj(refobj,24)
+  _AmbientSensitive=_Obj(refobj,25)
+  _HiddenObject=_Obj(refobj,26)
+  _ObjectCollisions=_Obj(refobj,27)
+  if object exist(refobj)
+    if sound exist(refobj) then stop sound refobj
+    delete object refobj
+   endif
+  if kind=1 then make object sphere refobj,xsize
+  if kind=2 then make object cube refobj,xsize
+  if kind=3 then make object box refobj,xsize,ysize,zsize
+  if kind=4 then make object cylinder refobj,xsize
+  if kind=5 then make object cone refobj,xsize
+  if kind=6 then make object plain refobj,xsize,ysize
+  if kind=8
+    make object plain refobj,8,8
+    hide object refobj
+   endif
+  if kind=9
+    make object plain refobj,8,8
+    hide object refobj
+    Rem     load 3dsound _3DSound$(_Obj(refobj,14)),_Obj(refobj,14)
+    _loaded=0
+    if file exist(_3DSoundpath$+_3DSound$(_Obj(refobj,14)))
+      load 3dsound _3DSoundpath$+_3DSound$(_Obj(refobj,14)),refobj
+      _loaded=1
+     else
+      if file exist(_3DSound$(_Obj(refobj,14)))
+        load 3dsound _3DSound$(_Obj(refobj,14)),refobj
+        _loaded=1
+       endif
+     endif
+    if _loaded=1
+      set sound volume refobj,32
+      position sound refobj,xpos,ypos,zpos
+      loop sound refobj
+      play sound refobj
+      loop sound refobj
+      _loaded=0
+     endif
+   endif
+  if kind>10
+    fichier$=_3DObjectPath$+_DirectXObject$(kind-10)
+    if file exist(fichier$)=1
+      load object fichier$,refobj
+     endif
+   endif
+  position object refobj,xpos,ypos,zpos
+  rotate object refobj,xrot,yrot,zrot
+  If xsize>0 and ysize>0 and zsize>0 and (kind=1 or kind=4 or kind=5 or kind>10)
+    Scale object refobj,xsize,ysize,zsize
+   endif
+  if kind<8 or kind=10 then color object refobj,rgb(ObjRed,ObjGreen,ObjBlue)
+  if attrib=1 or kind=8 then ghost object on refobj
+  if attrib=2 and kind<>8 then ghost object on refobj,1
+  if _HiddenObject=1 then ghost object on refobj
+  if textre>0 and textre<(_TextureNum+1)
+    texture object refobj,textre+_FirstTextureImage
+   endif
+  if kind=1
+    xscl#=(xsize/128.0)
+    yscl#=(zsize/128.0)
+   endif
+  if kind=2
+    yscl#=1
+    xscl#=(xsize/128.0)
+   endif
+  if kind=3
+    yscl#=(xsize/128.0)
+    xscl#=(zsize/128.0)
+   endif
+  if kind=4 or kind=5
+    xscl#=(xsize/128.0)
+    yscl#=xscl#
+   endif
+  if kind=6
+    xscl#=(xsize/128.0)
+    yscl#=(ysize/128.0)
+   endif
+  scale object texture refobj,xscl#,yscl#
+  if XScalet<>0 and YScalet<>0
+    if XScalet>0
+      XScalet_final#=XScalet
+     else
+      XScalet_final#=1.0+(XScalet*0.01)
+     endif
+    if YScalet>0
+      YScalet_final#=YScalet
+     else
+      YScalet_final#=1.0+(YScalet*0.01)
+     endif
+    scale object texture refobj,XScalet_final#,YScalet_final#
+   endif
+rem  SET OBJECT TEXTURE refobj,0,1
+  fade object refobj,_FADEOBJECT
+  if _ObjectCollisions=0 or kind=8 or kind=9 then set object collision off refobj
+  if _HiddenObject=1 or kind=8 or kind=9 then hide object refobj
+  set object refobj,_Wireframe,_Transparency,_Cull,_TextureFiltering,_LightSensitive,_FogSensitive,_AmbientSensitive
+rem  sync
+ endfunction

@@ -1,0 +1,71 @@
+5
+----------------
+DISK
+13
+Load A Map
+Save A Map
+Clear Map
+Load Texture
+Kill Texture
+Load 3D Object
+Select 3D Object
+Kill 3D Object
+Load 3D Sound
+Select 3D Sound
+Kill 3D Sound
+Preview Mode
+Quit Editor
+---------------
+OBJECTS
+17
+Add Light
+Add 3D Object
+Add 3D Sound
+Add Sphere
+Add Cube
+Add Box
+Add Cylinder
+Add Cone
+Add Plain
+Copy Object
+Move Object
+Scale Object
+Rotate Object
+Select Object
+Object Attribute
+Kill Object
+Optimize Objects
+--------------
+ENVIRONMENT
+3
+Ambiance Attribute
+Ambiance Direction
+Light Properties
+--------------
+EXTRAS 1 ZONE
+16
+Add Zone
+Move Zone
+Scale Zone
+Select Zone
+Zone Properties
+Kill Zone
+EXTRAS 2 MATRIX
+Add Matrix
+Move Matrix
+Edit Height
+Edit Tiles
+Select Matrix
+Matrix Properties
+Kill Matrix
+Matrix Rnd(y)
+MAtrix Terrain
+---------------
+HELP
+4
+Functions usage
+Infos
+Webpage
+registration
+---------------
+ENDMENU

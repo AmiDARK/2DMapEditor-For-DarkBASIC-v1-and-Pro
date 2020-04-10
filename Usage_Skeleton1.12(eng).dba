@@ -1,0 +1,158 @@
+Rem
+Rem *************************************************************************************
+Rem *                                                                                   *
+Rem * 3DMAPEDITOR : SKELETON EXAMPLE ON HOW TO USE A 3DMAPEDITOR MAP ON DBv1 :          *
+Rem *----------------------------------------------------------------                   *
+Rem * Editor Version  : VER 2.30                                                        *
+Rem * Maps Version    : VER 1.12                                                        *
+Rem * Example Version : VER 1.12                                                        *
+Rem * Langage :         ENGLISH                                                         *
+Rem *-----------------------------------------------------------------------------------*
+Rem *                                                                                   *
+Rem *************************************************************************************
+Rem Descriptive about the 5 different code sources zones to include in your program :
+Rem --------------------------------------------------------------------------------------------------------
+Rem   Zone 1 : Conatin all definition about 3DMapEditor's maps.
+Rem   Zone 2 : load and display the full map
+Rem   Zone 3 : calculate collision about matrixes
+Rem   Zone 4 : re-calculate light sources and action zones
+Rem   Zone 5 : free memory
+Rem
+Rem
+Rem                                                          <<<--- 1st zone to include in your source code
+Rem ************************************************************************************
+Rem 3DMAPEDITOR VER 2.30 files to include
+Rem ************************************************************************************
+#include "_fileselector_function.dba"
+#include "_3dmapeditor_functions.dba"
+#include "_editor_zones_functions.dba"
+Rem ************************************************************************************
+Rem 3DMAPEDITOR VER 2.30 INITIALIZE
+Rem ************************************************************************************
+Rem Default paths
+_defpath$=get dir$() : _edpath$=_defpath$ : _MapPath$=_EdPath$+"\Maps\"
+_TutorialMapPath$=_MapPath$+"Tutorials_Maps\" : _TexturePath$=_EdPath$+"\Textures\"
+_3DObjectPath$=_EdPath$+"\Objects_Library\" : _3DSoundPath$=_EdPath$+"\3DSound\"
+_muspath$=_edpath$+"\musics\" : _soundpath$=_edpath$+"\sounds\"
+Rem data definition
+Dim _obj(16383,27) : Dim _Textures$(256) : dim _Lights(256,16) : dim _LightActive(8)
+Dim _DirectXObject$(256) : Dim _3DSound$(256) : dim _fichier$(256) : Dim _FilesPath$(16)
+Rem action zone
+dim _zone_info(256,17) : dim _zone_filename$(256) : dim _zone_inside(256) : dim _zone_sortance(256)
+dim _zone_entrance(256) : dim _zone_active(256) : dim _zone_data(16) : dim _skybox_object(16)
+dim _3dme_temp(256)
+Rem matrixes support Ver 1.0 ( 3DMapEditor Ver 2.30+ )
+Dim _Matrix(256,16) : Dim _Matrix_Height(256,64,64) : Dim _Matrix_Tile(256,64,64)
+Dim _Matrix_RealTile(256,64,64) : Dim _matrix_tilelist(64)
+Dim _Image_X(65535) : Dim _Image_Y(65535)
+Rem 3DMAPEDITOR : initialize some values . . .
+_DirectXObject=0 : _LightsNum=0 : _TextureNum=0
+_FirstTexture=1 : _FirstTextureImage=1
+_FADEOBJECT=4000 : _foglength=1500
+newobj=1 : lastobject=newobj
+
+
+
+
+
+
+
+
+
+Rem
+Rem ************************************************************************************
+Rem 3DMAPEDITOR : Now we load and refresh the entire map !
+Rem ************************************************************************************
+Rem                                                          <<<--- 2nd zone to include
+_charge=_Load_Map(_dossierfinal$,_fichierfinal$,_FirstTextureImage)
+print _charge
+if _charge=0 then end
+lastobject=_obj(1,1) : newobj=lastobject
+for boucle=2 to lastobject
+  _Refresh_Object(boucle,_FirstTextureImage,_FADEOBJECT)
+ next boucle
+_LastMatrix=_Matrix(0,0) : _texturenum=_Obj(1,8)
+if _LastMatrix>0
+  for boucle=1 to _lastmatrix
+    3DMe_Refresh_Matrix(boucle,_FirstTextureImage,_texturenum)
+   next boucle
+ endif
+Rem Camera and ambient light definition
+_initialize_camera()
+_initialize_ambient_light()
+Rem Define fog and backdrop
+_set_fog(0,0,0,_foglength)
+color backdrop rgb(0,0,0)
+Rem Skybox initialization.
+_initialize_zones()
+Rem                                                          <<<--- 2nd zone ending
+
+
+
+
+
+
+Rem
+Rem **************************************************
+Rem *                                                *
+Rem * BEGINNING OF THE MAIN LOOP OF THE DEMO         *
+Rem *                                                *
+Rem **************************************************
+Rem
+repeat
+Rem                                                          <<<--- 3rd zone beginning
+Rem Calculate collision with matrices.
+  newy#=_Check_for_ground(x#,y#,z#,object size y(player))
+  if newy#<>y# then ground=1
+  y#=newy#
+  position object player,x#,y#,z#
+Rem                                                          <<<--- 3rd zone ending
+
+
+
+
+
+
+Rem                                                          <<<--- 4th zone beginning
+Rem Recalculate player speed depending on frame rate.
+  movespeed=4*course#
+  inc _lightcheck
+  if _lightcheck=16
+    _checkFor7Lights(0,_fogdistance,7)
+    _lightcheck=0
+   endif
+  _check_all_zones()
+Rem                                                          <<<--- 4th zone ending
+
+
+
+  sync
+ until spacekey()=1 or object position y(player)<-200
+Rem MAIN LOOP ENDING
+
+
+
+
+Rem
+Rem                                                          <<<--- 5th zone beginning
+  _quit_all_zones()
+Rem Ver 2.30+ delete matrixes
+    If _LastMatrix>0
+      for boucle=_lastmatrix to 1 step -1
+        delete matrix boucle
+       next boucle
+      _lastmatrix=0 : _currentmatrix=0
+     Endif
+    _Matrix(0,0)=_LastMatrix
+Rem delete textures
+for boucle=1 to _texturenum
+  if image exist(boucle)=1 then delete image boucle
+ next boucle
+Rem delete 3d objects
+for boucle=1 to newobj+4
+  if object exist(boucle)=1 then delete object boucle
+  if sound exist(boucle)=1 then delete sound boucle
+ next boucle
+Rem                                                          <<<--- 5th zone ending
+
+

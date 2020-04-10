@@ -1,0 +1,155 @@
+Rem
+Rem ****************************************************************************************
+Rem *                                                                                      *
+Rem * 3DMAPEDITOR : SQUELETTE DE PROGRAMME NE CONTENANT QUE LES ZONES DE CODES A INCLURE : *
+Rem *------------------------------------------------------------------                    *
+Rem * Version de l'éditeur : VER 2.30                                                      *
+Rem * Version de cartes :    VER 1.12                                                      *
+Rem * Version de l'exemple : VER 1.12                                                      *
+Rem * Langage :              FRANCAIS                                                      *
+Rem *--------------------------------------------------------------------------------------*
+Rem *                                                                                      *
+Rem ****************************************************************************************
+Rem Descriptif des zones de code sources à inclure dans vos programmes pour le bon fonctionnement des maps :
+Rem --------------------------------------------------------------------------------------------------------
+Rem   Zone 1 : Contient toute les définition des fichiers à inclure et des données utilisées
+Rem   Zone 2 : Chargement et mise en place de la map complète !
+Rem   Zone 3 : Gère les collisions entre le joueur et les matrices présentes dans la map.
+Rem   Zone 4 : Calcul des sources lumineuses à afficher et des zones d'action.
+Rem   Zone 5 : On libère toutes les mémoires utilisées par les maps 3Dme.
+Rem
+Rem                                                          <<<--- Début de zone 1 à insérer dans votre code source
+Rem 3DMAPEDITOR VER 2.30 FICHIER A INCLURE POUR L'UTILISATION DES MAPS
+Rem #include "_fileselector_function.dba"
+#include "_3dmapeditor_functions.dba"
+#include "_editor_zones_functions.dba"
+Rem 3DMAPEDITOR VER 2.29 INITIALISATION DES VARIABLES PRINCIPALES
+Rem Définition des chemins d'accès par défaut
+_defpath$=get dir$() : _edpath$=_defpath$ : _MapPath$=_EdPath$+"\Maps\"
+_TutorialMapPath$=_MapPath$+"Tutorials_Maps\" : _TexturePath$=_EdPath$+"\Textures\"
+_3DObjectPath$=_EdPath$+"\Objects_Library\" : _3DSoundPath$=_EdPath$+"\3DSound\"
+_muspath$=_edpath$+"\musics\" : _soundpath$=_edpath$+"\sounds\"
+Rem Variables utilisées par le format de .map de l'éditeur 3DME
+Dim _obj(16383,27) : Dim _Textures$(256) : dim _Lights(256,16) : dim _LightActive(8)
+Dim _DirectXObject$(256) : Dim _3DSound$(256) : dim _fichier$(256) : Dim _FilesPath$(16)
+Rem INFORMATIONS LIES A LA GESTION DES ZONES , nouveauté de la version 2.29
+dim _zone_info(256,17) : dim _zone_filename$(256) : dim _zone_inside(256) : dim _zone_sortance(256)
+dim _zone_entrance(256) : dim _zone_active(256) : dim _zone_data(16) : dim _skybox_object(16)
+dim _3dme_temp(256)
+Rem Gestion des matrices Ver 1.0 ( 3DMapEditor Ver 2.30+ )
+Dim _Matrix(256,16) : Dim _Matrix_Height(256,64,64) : Dim _Matrix_Tile(256,64,64)
+Dim _Matrix_RealTile(256,64,64) : Dim _matrix_tilelist(64)
+Dim _Image_X(65535) : Dim _Image_Y(65535)
+Rem 3DMAPEDITOR : MISE EN PLACE DE VALEURS INITIALES AVANT CHARGEMENT DE MAP
+_DirectXObject=0 : _LightsNum=0 : _TextureNum=0 : _FirstTexture=1 : _FirstTextureImage=1
+_FADEOBJECT=4000 : _foglength=1500 : newobj=1 : lastobject=newobj
+Rem                                                          <<<--- Fin de zone 1 à insérer dans votre code source
+
+
+Rem
+Rem Vous pouvez Insérer ici vos initialisations.
+Rem
+
+
+Rem
+Rem ************************************************************************************
+Rem 3DMAPEDITOR : ICI ON CHARGE UN FICHIER .MAP DE 3DMAPEDITOR ET ON RECREE LA CARTE ENTIERE.
+Rem ************************************************************************************
+Rem                                                          <<<--- Début de zone 2 à insérer dans votre code source
+Rem Vous devrez définir le chemin d'accès et le nom du fichier map à charger ici
+_charge=_Load_Map(_dossierfinal$,_fichierfinal$,_FirstTextureImage)
+print _charge
+if _charge=0 then end
+lastobject=_obj(1,1) : newobj=lastobject
+for boucle=2 to lastobject
+  _Refresh_Object(boucle,_FirstTextureImage,_FADEOBJECT)
+ next boucle
+_LastMatrix=_Matrix(0,0) : _texturenum=_Obj(1,8)
+if _LastMatrix>0
+  for boucle=1 to _lastmatrix
+    3DMe_Refresh_Matrix(boucle,_FirstTextureImage,_texturenum)
+   next boucle
+ endif
+Rem Initialisation de la position de la caméra puis des valeurs de la lumière ambiante.
+_initialize_camera()
+_initialize_ambient_light()
+Rem on met en place les effets standard de brouillard . . .
+_set_fog(0,0,0,_foglength)
+color backdrop rgb(0,0,0)
+Rem On initialise la SkyBox.
+_initialize_zones()
+Rem                                                          <<<--- Fin de zone 2 à insérer dans votre code source
+
+
+
+Rem
+Rem **************************************************
+Rem *                                                *
+Rem * DEBUT DE LA BOUCLE PRINCIPALE DU MOTEUR DE JEU *
+Rem *                                                *
+Rem **************************************************
+Rem
+repeat
+
+
+Rem Placez votre code source ici
+
+
+Rem                                                          <<<--- Début de zone 3 à insérer dans votre code source
+Rem Calcul de collision avec les matrices
+Rem Les valeurs X#,Y#,Z# et YSIZE# correpondent respectivement aux positions sur x,y,z et la dimension sur y
+Rem de l'objet utilisé pour les collisions du personnage avec le décor.
+  newy#=_Check_for_ground(x#,y#,z#,ysize#)
+  if newy#<>y# then ground=1
+  y#=newy#
+Rem  position object player,x#,y#,z#
+Rem                                                          <<<--- Fin de zone 3 à insérer dans votre code source
+
+
+Rem Placez votre code source ici
+
+
+Rem                                                          <<<--- Début de zone 4 à insérer dans votre code source
+Rem Important : Recalcul de la vitesse du joueur selon le nombre d'images par secondes.
+  movespeed=4*course#
+  inc _lightcheck
+  if _lightcheck=16
+    _checkFor7Lights(0,_fogdistance,7)
+    _lightcheck=0
+   endif
+  _check_all_zones()
+Rem                                                          <<<--- Fin de zone 4 à insérer dans votre code source
+
+
+Rem Placez votre code source ici
+
+
+  sync
+ until spacekey()=1
+Rem FIN DE LA BOUCLE PRINCIPALE DE VOTRE PROGRAMME
+
+ Rem
+Rem ************************************************************************************
+Rem 3DMAPEDITOR : ICI ON DESACTIVE TOUTE LES ZONES EN COURS D'UTILISATION
+Rem ************************************************************************************
+Rem                                                          <<<--- Début de zone 5 à insérer dans votre code source
+  _quit_all_zones()
+Rem Ver 2.30+ Suppression de toute les matrices crées.
+    If _LastMatrix>0
+      for boucle=_lastmatrix to 1 step -1
+        delete matrix boucle
+       next boucle
+      _lastmatrix=0 : _currentmatrix=0
+     Endif
+    _Matrix(0,0)=_LastMatrix
+Rem On efface les bitmaps utilisés.
+for boucle=1 to _texturenum
+  if image exist(boucle)=1 then delete image boucle
+ next boucle
+for boucle=1 to newobj+4
+  if object exist(boucle)=1 then delete object boucle
+  if sound exist(boucle)=1 then delete sound boucle
+ next boucle
+Rem                                                          <<<--- Fin de zone 5 à insérer dans votre code source
+
+Rem Vous pouvez placer ici vos fin de programme . . .

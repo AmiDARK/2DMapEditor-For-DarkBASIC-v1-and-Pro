@@ -1,0 +1,299 @@
+Rem
+Rem *************************************************************************************
+Rem *                                                                                   *
+Rem * 3DMAPEDITOR : EXAMPLE ON HOW TO USE A 3DMAPEDITOR MAP ON DBv1 :                   *
+Rem *----------------------------------------------------------------                   *
+Rem * Editor Version  : VER 2.30                                                        *
+Rem * Maps Version    : VER 1.12                                                        *
+Rem * Example Version : VER 1.12                                                        *
+Rem * Langage :         ENGLISH                                                        *
+Rem *-----------------------------------------------------------------------------------*
+Rem *                                                                                   *
+Rem *************************************************************************************
+Rem
+Rem
+Rem                                                          <<<--- 1st zone to include in your source code
+Rem ************************************************************************************
+Rem 3DMAPEDITOR VER 2.30 files to include
+Rem ************************************************************************************
+#include "_fileselector_function.dba"
+#include "_3dmapeditor_functions.dba"
+#include "_editor_zones_functions.dba"
+Rem ************************************************************************************
+Rem 3DMAPEDITOR VER 2.29 INITIALIZE
+Rem ************************************************************************************
+Rem Default paths
+_defpath$=get dir$() : _edpath$=_defpath$ : _MapPath$=_EdPath$+"\Maps\"
+_TutorialMapPath$=_MapPath$+"Tutorials_Maps\" : _TexturePath$=_EdPath$+"\Textures\"
+_3DObjectPath$=_EdPath$+"\Objects_Library\" : _3DSoundPath$=_EdPath$+"\3DSound\"
+_muspath$=_edpath$+"\musics\" : _soundpath$=_edpath$+"\sounds\"
+Rem data definition
+Dim _obj(16383,27) : Dim _Textures$(256) : dim _Lights(256,16) : dim _LightActive(8)
+Dim _DirectXObject$(256) : Dim _3DSound$(256) : dim _fichier$(256) : Dim _FilesPath$(16)
+Rem action zone
+dim _zone_info(256,17) : dim _zone_filename$(256) : dim _zone_inside(256) : dim _zone_sortance(256)
+dim _zone_entrance(256) : dim _zone_active(256) : dim _zone_data(16) : dim _skybox_object(16)
+dim _3dme_temp(256)
+Rem matrixes support Ver 1.0 ( 3DMapEditor Ver 2.30+ )
+Dim _Matrix(256,16) : Dim _Matrix_Height(256,64,64) : Dim _Matrix_Tile(256,64,64)
+Dim _Matrix_RealTile(256,64,64) : Dim _matrix_tilelist(64)
+Dim _Image_X(65535) : Dim _Image_Y(65535)
+Rem File selector Ver2.00
+dim fileselector$(9) : dim fileselectordata(12) : dim _filespath$(7) : dim _fichier$(256)
+fileselector$(1)=get dir$() : fileselector$(2)="Charger une map" : fileselectordata(1)=150
+fileselectordata(2)=50 : fileselectordata(11)=65535 : fileselectordata(12)=65534
+_FilesPath$(1)=_edpath$ : _FilesPath$(2)=_mappath$ : _FilesPath$(3)=_TexturePath$
+_FilesPath$(4)=_3DObjectPath$ : _FilesPath$(5)=_3DSoundPath$ : _FilesPath$(6)=_muspath$
+_FilesPath$(7)=_soundpath$
+fileselector$(1)=get dir$() : fileselector$(2)="Charger une map"
+fileselectordata(1)=150 : fileselectordata(2)=50
+fileselectordata(11)=1 : fileselectordata(12)=2
+_FilesPath$(1)=_edpath$ : _FilesPath$(2)=_MapPath$ : _FilesPath$(3)=_TexturePath$
+_FilesPath$(4)=_3DObjectPath$ : _FilesPath$(5)=_3DSoundPath$
+Rem 3DMAPEDITOR : initialize some values . . .
+_DirectXObject=0 : _LightsNum=0 : _TextureNum=0
+_FirstTexture=1 : _FirstTextureImage=1
+_FADEOBJECT=4000 : _foglength=1500
+newobj=1 : lastobject=newobj
+Rem                                                          <<<--- 1st zone ending
+Rem
+Rem ************************************************************************************
+Rem DEMO VALUES
+Rem ************************************************************************************
+movespeed=1
+movespeedneg=0-movespeed
+humanwalk=0
+walkspeed=10
+player=1
+Rem values are scancode() keyboards values.
+pageupkey=201
+pagedownkey=209
+inserkey=210
+supprkey=211
+defaultkey=199
+
+Rem Check for a specified screen mode . . .
+Perform Checklist For Display modes
+exist=check display mode(640,480,16)
+if exist=1
+  set display mode 640,480,16
+ endif
+acceleration=screen type()
+sync rate 75 : sync on
+autocam off
+set camera range 1,4000
+
+Rem Ask user for a file ( using file selector )
+repeat
+  filter1$=".map" : filter2$=""
+  _fichierchoisi=_File_Selector_v1(_mappath$,filter1$,filter2$)
+  if _fichierchoisi=1
+    _dossierfinal$=fileselector$(8)
+    _fichierfinal$=fileselector$(9)
+   endif
+ until _fichierchoisi=1
+cls 0 : sync : sync
+
+Rem load some sounds for the demo
+hide mouse
+Load Sound "viewsound/woodstep.wav",1
+Load Sound "viewsound/scream1.wav",2
+
+Rem
+Rem ************************************************************************************
+Rem 3DMAPEDITOR : Now we load and refresh the entire map !
+Rem ************************************************************************************
+Rem                                                          <<<--- 2nd zone to include
+_charge=_Load_Map(_dossierfinal$,_fichierfinal$,_FirstTextureImage)
+print _charge
+if _charge=0 then end
+lastobject=_obj(1,1) : newobj=lastobject
+for boucle=2 to lastobject
+  _Refresh_Object(boucle,_FirstTextureImage,_FADEOBJECT)
+ next boucle
+_LastMatrix=_Matrix(0,0) : _texturenum=_Obj(1,8)
+if _LastMatrix>0
+  for boucle=1 to _lastmatrix
+    3DMe_Refresh_Matrix(boucle,_FirstTextureImage,_texturenum)
+   next boucle
+ endif
+Rem Camera and ambient light definition
+_initialize_camera()
+_initialize_ambient_light()
+Rem Define fog and backdrop
+_set_fog(0,0,0,_foglength)
+color backdrop rgb(0,0,0)
+Rem Skybox initialization.
+_initialize_zones()
+Rem                                                          <<<--- 2nd zone ending
+Rem play the music !
+load music "musics\default.mid",1
+play music 1
+loop music 1
+Rem Create the player object ( used for collisions )
+make object box player,6,80,6
+set object collision on player
+position object player,_obj(1,2),_obj(1,3)-32,_obj(1,4)
+hide object player
+position camera object position x(player),object position y(player),object position z(player)
+make object collision box player,-16,-40,-16,16,40,16,0
+Rem
+Rem **************************************************
+Rem *                                                *
+Rem * BEGINNING OF THE MAIN LOOP OF THE DEMO         *
+Rem *                                                *
+Rem **************************************************
+Rem
+repeat
+oldx#=object position x(player)
+oldy#=object position y(player)
+oldz#=object position z(player)
+Rem Change view depending on mouse moves . . .
+  position mouse 320,240
+  cx#=wrapvalue(cx#+(mousemovey()/2))
+  cy#=wrapvalue(cy#+(mousemovex()/2))
+rem go forward , backward and strafe
+  course#=(shiftkey()/2.0)+1.0
+  player_walk=upkey()-downkey()
+  if player_walk<>0
+    move object player,movespeed*player_walk
+    humanwalk=wrapvalue(humanwalk+(walkspeed*course#))
+  endif
+  strafe=rightkey()-leftkey()
+  if strafe<>0
+    cy2#=wrapvalue(cy#+(90*strafe))
+    rotate object player,0,cy2#,0
+    move object player,movespeed
+    rotate object player,0,cy#,0
+   endif
+  x#=object position x(player)
+  y#=oldy#
+  z#=object position z(player)
+  position object player,x#,y#,z#
+Rem collisions with walls
+set object collision on player
+x#=object position x(player)
+y#=object position y(player)
+z#=object position z(player)
+Rem escalator ?
+if object collision(player,0)>0
+  position object player,x#,y#+16,z#
+  if object collision(player,0)=0
+    inc y#,16
+    for boucle=1 to 4
+      position object player,x#,y#-4,z#
+      if object collision(player,0)=0 then y#=y#-4
+     next boucle
+   endif
+ endif
+    position object player,x#,y#,z#
+Rem ground collision 2
+if object collision(player,0)>0
+   x#=x#-get object collision x()
+   z#=z#-get object collision z()
+endif
+  position object player,x#,y#,z#
+Rem check collision 2 if walls aren't 0°,90°,180°,270°
+  if object collision(player,0)>0
+    x#=oldx#
+    z#=oldz#
+    position object player,x#,y#,z#
+   endif
+  ground=0
+  Rem height calculation
+if jump<1 and ground=0
+  position object player,x#,y#-4,z#
+  if object collision(player,0)=0
+    y#=(y#-4)
+   else
+    position object player,x#,y#,z#
+    ground=1
+   endif
+ endif
+Rem                                                          <<<--- 3rd zone beginning
+Rem Calculate collision with matrices.
+  newy#=_Check_for_ground(x#,y#,z#,object size y(player))
+  if newy#<>y# then ground=1
+  y#=newy#
+  position object player,x#,y#,z#
+Rem                                                          <<<--- 3rd zone ending
+Rem player want to jump ?
+  if jump=0 and ground=1 and mouseclick()=2 then jump=16
+
+Rem make jump and stop if ceil is present
+  if jump>0
+    position object player,x#,y#+4,z#
+    if object collision(player,0)=0
+      dec jump
+      if jump=0 then jump=0
+      y#=(y#+4)
+     else
+      jump=0
+   endif
+ endif
+rem position object player,x#,y#,z#
+rem Object and Camera are linked for easy calculation of collisions !
+rotate object player,0,cy#,0
+rotate camera cx#,cy#,0
+humancalc=cos(humanwalk)*4
+position camera object position x(player),object position y(player)+32+humancalc,object position z(player)
+
+rem   scroll backdrop (cy#/4),(cx#/4)
+  if humanwalk>190 and humanwalk<211 and jump=0 and ground=1
+    play sound 1
+    humanwalk=humanwalk+10
+   endif
+
+  fps=screen fps()
+  set cursor 0,0
+  ink rgb(128,128,128),rgb(0,0,0)
+  print fps;"  "
+
+Rem                                                          <<<--- 4th zone beginning
+Rem Recalculate player speed depending on frame rate.
+  movespeed=4*course#
+  inc _lightcheck
+  if _lightcheck=16
+    _checkFor7Lights(0,_fogdistance,7)
+    _lightcheck=0
+   endif
+  _check_all_zones()
+Rem                                                          <<<--- 4th zone ending
+Rem
+  set cursor 0,0
+  ink rgb(255,255,255),rgb(0,0,0)
+  for boucle=1 to _zone_data(1)
+    if _zone_inside(boucle)=1 then print "inside zone #";boucle
+   next boucle
+
+  sync
+ until spacekey()=1 or object position y(player)<-200
+Rem MAIN LOOP ENDING
+ play sound 2
+ wait 1000
+Rem
+Rem                                                          <<<--- 5th zone beginning
+  _quit_all_zones()
+Rem Ver 2.30+ delete matrixes
+    If _LastMatrix>0
+      for boucle=_lastmatrix to 1 step -1
+        delete matrix boucle
+       next boucle
+      _lastmatrix=0 : _currentmatrix=0
+     Endif
+    _Matrix(0,0)=_LastMatrix
+Rem delete textures
+for boucle=1 to _texturenum
+  if image exist(boucle)=1 then delete image boucle
+ next boucle
+Rem delete 3d objects
+for boucle=1 to newobj+4
+  if object exist(boucle)=1 then delete object boucle
+  if sound exist(boucle)=1 then delete sound boucle
+ next boucle
+Rem                                                          <<<--- 6th zone ending
+cls
+undim _obj(16383,16)
+stop music 1
+delete music 1
+end

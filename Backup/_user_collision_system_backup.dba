@@ -1,0 +1,27 @@
+Rem
+Rem Functions to use MATRIXES with 3DMapEditor's maps .
+Rem
+Function _Check_for_ground(xpos#,ypos#,zpos#,ysize#)
+  _lastmatrix=_Matrix(0,0)
+  ysize#=ysize#/2.0
+  Rem On initialize les valeurs de l'objet en cours pour le calcul.
+  if _lastmatrix>0
+    for boucle=1 to _lastmatrix
+      xpm=_Matrix(boucle,1) : zpm=_Matrix(boucle,3)
+      xmax=xpm+(_Matrix(boucle,4)*_Matrix(boucle,6))
+      zmax=zpm+(_Matrix(boucle,5)*_Matrix(boucle,7))
+      Rem On vérifie si les coordonnées du joueur se trouvent sur la matrice
+      Rem et si les collisions de celle-ci sont activées.
+      if xpos#>xpm and xpos#<xmax and zpos#>zpm and zpos#<xmax and _Matrix(boucle,16)=1
+        _ymat#=get ground height(boucle,int(xpos#)-xpm,int(zpos#)-zpm)
+        if ypos#>_ymat
+          Rem Checking si la camera ou l'objet est en dessus de la matrice ( = SOL )
+          if int(ypos#-_ymat#)<ysize# then ypos#=_ymat#+ysize#
+         else
+          Rem Checking si la camera ou l'objet est en dessous de la matrice ( = PLAFOND )
+          if int(_ymat#-ypos#)<ysize# then ypos#=_ymat#-ysize#
+         endif
+       endif
+     Next boucle
+   EndIf
+ EndFunction ypos#

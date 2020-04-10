@@ -1,0 +1,99 @@
+Configuration successfully loaded
+Configuration file not found or corrupted
+Using default parameters
+!!! That copy of 3DMapEditor is not registered !!!
+Restrictions applies! :
+You cannot save more than 128 objects in map.
+If you want to register , please consult file REGISTERING.TXT
+given in archive
+(That message will not appear in registered version)
+That copy of 3DMapEditor is registered to :
+Load a previously saved map
+Clear the map
+Load a new texture
+Kill a texture
+Load a Direct X. 3D object
+Select a Direct X 3D Object
+Delete a Direct X 3D Object
+Modify colour and distance of light
+Adding a light source
+Adding a Direct X 3D Object to map
+Add a 3D Sound to the map
+Adding a sphere
+Adding a cube
+Adding a box
+Adding a cylinder
+Adding a cone
+Adding a plain
+scale object texture
+Apply previous texture to object
+Apply next texture to object
+Save a map to disk
+Quit 3DMapEditor
+Save camera states
+shift between NORMAL and PREVIEW mode
+Load a 3D Sound
+Select a 3D Sound
+Kill a 3D sound
+Modify colour , distance of ambient light
+Modify ambient light direction
+Kill current object
+Select another object
+Copy current object
+Move current object
+Scale current object
+Rotate current object
+Define all properties of current object
+Optimize 3D objects using distance comparison
+Object mode : Normal , ghost , black ghost
+scroll up texture preview
+scroll down texture preview
+Select texture to be killer
+Load a map from disk
+name to save your map on disk :
+Are you sure you want to clear the map (o=Yes/n=No) ?
+Load a new texture from disk
+Step
+Move:
+Scaling:
+Rotate:
+Object:
+Ambient:
+Light:
+Load a 3D Object
+Enter the scaling of the object ( using % ) :
+Optimising objects ...
+Load a 3D Sound
+Kill a texture
+Kill a DirectXObject
+Kill a 3Dsound
+Select a DirectXObject
+Select a 3Dsound
+Textures and Icons loaded in system memory
+Textures and Icons loaded in graphic memory
+Texture compression actived ( is available )
+Editor information :
+zone pos:
+zone size:
+Add a new action zone to the map
+Move the current zone
+Scale the current zone
+Select another zone
+Modify the current zone properties
+Kill the current zone
+---------------
+Add a new matrix to the map
+Move the current matrix
+Edit matrix point's height
+Edit the matrix tiles
+Select another matrix
+Modify the current matrix properties
+Kill the current matrix
+Define randomly current matrix heights
+Use a .bmp or .jpg file to change matrix height
+Show you the in build help.
+Display information about software
+Display website informations
+Matrix properties
+Matrix num:
+END_LOC

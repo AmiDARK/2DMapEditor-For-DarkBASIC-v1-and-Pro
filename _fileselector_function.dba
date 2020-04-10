@@ -1,0 +1,292 @@
+Rem *****************************************
+Rem *                                       *
+Rem * SELECTEUR DE FICHIER VER 1.0 Function *
+Rem *                                       *
+Rem *****************************************
+Rem
+Rem NEEDED VALRIABLES LIST :
+Rem dim fileselector$(9)
+Rem dim fileselectordata(12)
+Rem dim _fichier$(256)
+Rem fileselector$(1)=get dir$()
+Rem fileselector$(2)="Charger une map"
+Rem fileselectordata(1)=150
+Rem fileselectordata(2)=50
+Rem fileselectordata(11)=1
+Rem fileselectordata(12)=2
+Rem _FilesPath$(1)=_edpath$
+Rem _FilesPath$(2)=_mappath$
+Rem _FilesPath$(3)=_TexturePath$
+Rem _FilesPath$(4)=_3DObjectPath$
+Rem _FilesPath$(5)=_3DSoundPath$
+Rem
+Rem _File_Selector_v1(_loaderpath$,filter1$,filter2$)
+Rem -------------------------------------------------
+Rem _loaderpath$=chemin ou aller chercher le fichier par défaut
+Rem filter1$=filtre d'extension 1 ( ex : filter1$=".jpg" )
+Rem filter2$=filtre d'extension 2 ( ex : filter2$=".bmp" )
+Rem
+function _File_Selector_v1(_loaderpath$,filter1$,filter2$)
+Rem Cette image est l'image de sélecteur de fichier.
+  load image fileselector$(1)+"\editor\fileselector_v1_french.jpg",fileselectordata(11)
+  fileselector$(5)=filter1$
+  fileselector$(6)=filter2$
+  get image fileselectordata(12),fileselectordata(1),fileselectordata(2),fileselectordata(1)+384,fileselectordata(2)+366
+  paste image fileselectordata(11),fileselectordata(1),fileselectordata(2)
+  sync : sync
+  set text font "arial"
+  set text size 8
+  set cursor fileselectordata(1),fileselectordata(2)-1
+  ink rgb(0,0,0),rgb(60,60,60)
+  print fileselector$(2)
+  Rem set dir path$
+  cd _loaderpath$
+  fileselector$(3)=fileselector$(1)
+  _refreshdrawercontent()
+  _displaydrawername()
+  _displayfilters()
+  fileselectordata(10)=0
+  repeat
+    xm=mousex() : ym=mousey()
+    if mouseclick()=1
+      REM SELECTIONNER L'ICONE fileselectordata(10)TER
+      if xm>(371+fileselectordata(1)) and xm<(384+fileselectordata(1)) and ym>(fileselectordata(2)-1) and ym<(12+fileselectordata(2))
+        fileselectordata(10)=1
+        fileselector$(8)=""
+        fileselector$(9)=""
+       endif
+      REM REMONTER DANS LA LISTE D'ITEMS
+      if xm>(361+fileselectordata(1)) and xm<(378+fileselectordata(1)) and ym>(33+fileselectordata(2)) and ym<(50+fileselectordata(2))
+        fileselectordata(4)=fileselectordata(4)-1
+        fileselectordata(9)=1
+       endif
+      REM DESCENDRE DANS LA LISTE D'ITEMS
+      if xm>(361+fileselectordata(1)) and xm<(378+fileselectordata(1)) and ym>(149+fileselectordata(2)) and ym<(166+fileselectordata(2))
+        fileselectordata(4)=fileselectordata(4)+1
+        fileselectordata(9)=1
+       endif
+      REM CHOIX D'UN FICHIER DANS LA LISTE.
+      if xm>(23+fileselectordata(1)) and xm<(360+fileselectordata(1)) and ym>(35+fileselectordata(2)) and ym<(164+fileselectordata(2))
+        _num=(ym-(35+fileselectordata(2)))/14
+        fileselectordata(8)=_num+fileselectordata(4)
+        if fileselectordata(8)>fileselectordata(5) then fileselectordata(8)=0
+        if fileselectordata(8)>0 then _displayselected()
+       endif
+      REM OPTION "CANCEL"/"ANNULER" = fileselectordata(10)
+      if xm>(279+fileselectordata(1)) and xm<(345+fileselectordata(1)) and ym>(195+fileselectordata(2)) and ym<(212+fileselectordata(2))
+        fileselectordata(10)=1
+        fileselector$(8)=""
+        fileselector$(9)=""
+       endif
+       REM OPTION "OUVRIR"
+      if xm>(279+fileselectordata(1)) and xm<(345+fileselectordata(1)) and ym>(167+fileselectordata(2)) and ym<(184+fileselectordata(2))
+        if fileselectordata(8)>0
+          fileselectordata(10)=1
+          fileselector$(8)=fileselector$(3)
+          if right$(fileselector$(8),1)<>"\" then fileselector$(8)=fileselector$(8)+"\"
+          fileselector$(9)=_extpath$+_fichier$(fileselectordata(8))
+         endif
+       endif
+     endif
+    if fileselectordata(4)>(fileselectordata(5)-9) then fileselectordata(4)=(fileselectordata(5)-9)
+    if fileselectordata(4)<1 then fileselectordata(4)=1
+    if fileselectordata(9)=1
+      _Display_all()
+      fileselectordata(9)=0
+     endif
+    if fileselectordata(8)>0
+      fileselector$(7)=_fichier$(fileselectordata(8))
+      if fileselector$(7)="[..]"
+        fileselector$(4)=".."
+        _changedrawer()
+        _displaydrawername()
+        _displayselected()
+       endif
+      if left$(fileselector$(7),1)="["
+        fileselector$(4)=""
+        for boucle=2 to (len(fileselector$(7))-1)
+          fileselector$(4)=fileselector$(4)+mid$(fileselector$(7),boucle)
+         next boucle
+        _changedrawer()
+        _displaydrawername()
+        _displayselected()
+       endif
+     endif
+    ycurs=mousey() : xcurs=mousex()
+`    sprite 2,xcurs,ycurs,3
+    sync
+   until fileselectordata(10)=1
+  fileselectordata(8)=0 : fileselector$(7)=""
+  fileselectordata(10)=0
+`  delete sprite 2
+  cd fileselector$(1)
+  ink rgb(32,32,32),rgb(32,32,32)
+  box 1,457,574,478
+  if fileselector$(8)<>"" then _selected=1
+  sync : sync
+  paste image fileselectordata(12),fileselectordata(1),fileselectordata(2)
+  delete image fileselectordata(11)
+  delete image fileselectordata(12)
+  sync : sync
+ endfunction _selected
+REM                                             FONCTION POUR AFFICHER LA LISTE DES FICHIERS.
+function _Display_all()
+  xpost=24 : ypost=35
+  ink rgb(60,60,60),rgb(60,60,60)
+  box 24+fileselectordata(1),36+fileselectordata(2),359+fileselectordata(1),163+fileselectordata(2)
+  set text opaque
+  REM AFFICHER LA LISTE DE FICHIERS.
+  ink rgb(255,255,255),rgb(60,60,60)
+  fileselectordata(3)=fileselectordata(4)+8
+  if fileselectordata(3)>fileselectordata(5) then fileselectordata(3)=fileselectordata(5)
+  for boucle=fileselectordata(4) to fileselectordata(3)
+    set cursor xpost+fileselectordata(1),ypost+fileselectordata(2)
+    inc ypost,14
+    print right$(_fichier$(boucle),40)
+   next boucle
+ endfunction
+REM                                             FONCTION POUR AFFICHER LE NOM DU FICHIER CHOISI.
+function _displayselected()
+  Rem AFFICHER LE FICHIER CHOISI.
+  ink rgb(60,60,60),rgb(60,60,60)
+  box 57+fileselectordata(1),170+fileselectordata(2),248+fileselectordata(1),181+fileselectordata(2)
+  ink rgb(255,255,255),rgb(60,60,60)
+  set cursor 57+fileselectordata(1),167+fileselectordata(2)
+  if fileselectordata(8)>0
+    print _fichier$(fileselectordata(8))
+    ext$=right$(_fichier$(fileselectordata(8)),4)
+    if file exist(_fichier$(fileselectordata(8))+".jpg")=1
+      Rem Display a preview of the texture you've selected.
+      if bitmap exist(1)=1 then delete bitmap 1
+      load bitmap _fichier$(fileselectordata(8))+".jpg",1
+      xbitmap=bitmap width(1) : ybitmap=bitmap height(1)
+      copy bitmap 1,0,0,xbitmap-1,ybitmap-1,0,fileselectordata(1)+251,fileselectordata(2)+270,fileselectordata(1)+330,fileselectordata(2)+349
+      sync
+      delete bitmap 1
+      set current bitmap 0
+      ink rgb(119,115,104),rgb(190,115,104)
+      box fileselectordata(1)+104,fileselectordata(2)+275,fileselectordata(1)+244,fileselectordata(2)+356
+      ink rgb(255,255,255),rgb(125,119,105)
+     endif
+    if ext$=".jpg" or ext$=".bmp"
+      Rem Display a preview of the texture you've selected.
+      if bitmap exist(1)=1 then delete bitmap 1
+      load bitmap _fichier$(fileselectordata(8)),1
+      xbitmap=bitmap width(1) : ybitmap=bitmap height(1)
+      copy bitmap 1,0,0,xbitmap-1,ybitmap-1,0,fileselectordata(1)+251,fileselectordata(2)+270,fileselectordata(1)+330,fileselectordata(2)+349
+      sync
+      delete bitmap 1
+      set current bitmap 0
+      ink rgb(119,115,104),rgb(190,115,104)
+      box fileselectordata(1)+104,fileselectordata(2)+275,fileselectordata(1)+244,fileselectordata(2)+356
+      ink rgb(255,255,255),rgb(125,119,105)
+      set cursor fileselectordata(1)+104,fileselectordata(2)+281 : printc xbitmap : printc " pixels"
+      set cursor fileselectordata(1)+104,fileselectordata(2)+309 : printc ybitmap : printc " pixels"
+     endif
+   else
+    ink rgb(60,60,60),rgb(60,60,60)
+    box fileselectordata(1)+251,fileselectordata(2)+270,fileselectordata(1)+330,fileselectordata(2)+349
+    ink rgb(119,115,104),rgb(190,115,104)
+    box fileselectordata(1)+104,fileselectordata(2)+275,fileselectordata(1)+244,fileselectordata(2)+356
+   endif
+ endfunction
+REM                                             FONTION POUR AFFICHER LE CHEMIN COURANT.
+function _displaydrawername()
+  Rem AFFICHER LE CHEMIN D'ACCES COURANT.
+  ink rgb(60,60,60),rgb(60,60,60)
+  box 65+fileselectordata(1),15+fileselectordata(2),354+fileselectordata(1),26+fileselectordata(2)
+  ink rgb(255,255,255),rgb(60,60,60)
+  set cursor 65+fileselectordata(1),13+fileselectordata(2)
+  print right$(fileselector$(3),40)
+ endfunction
+Rem                                             CHANGE LE DOSSIER COURANT.
+function _changedrawer()
+  cd fileselector$(4)
+  fileselector$(3)=get dir$()
+  _refreshdrawercontent()
+ endfunction
+REM                                             REACTUALISE LE CONTENU DU DOSSIER SELON LES FILTRES.
+function _refreshdrawercontent()
+  fileselectordata(5)=1
+  perform checklist for files
+  fileselectordata(7)=checklist quantity()
+  for boucle=1 to fileselectordata(7)
+    _name$=checklist string$(boucle)
+    if checklist value a(boucle)=1
+      _fichier$(fileselectordata(5))=lower$("["+_name$+"]")
+      fileselectordata(5)=fileselectordata(5)+1
+     endif
+   next boucle
+  for boucle=1 to fileselectordata(7)
+    _name$=checklist string$(boucle)
+    if checklist value a(boucle)=0
+      if fileselector$(5)="" and fileselector$(6)=""
+        _fichier$(fileselectordata(5))=lower$(_name$)
+        fileselectordata(5)=fileselectordata(5)+1
+       endif
+     endif
+    Rem SI LE FILTRE 1 EST ACTIF , ON REGARDE SI L'EXTENSION DU FICHIER CORRESPOND
+    if fileselector$(5)<>""
+      ext$=lower$(right$(_name$,len(fileselector$(5))))
+      if ext$=fileselector$(5)
+        _fichier$(fileselectordata(5))=lower$(_name$)
+        fileselectordata(5)=fileselectordata(5)+1
+       endif
+     endif
+    Rem SI LE FILTRE 1 EST ACTIF , ON REGARDE SI L'EXTENSION DU FICHIER CORRESPOND
+    if fileselector$(6)<>""
+      ext$=lower$(right$(_name$,len(fileselector$(6))))
+      if ext$=fileselector$(6)
+        _fichier$(fileselectordata(5))=lower$(_name$)
+        fileselectordata(5)=fileselectordata(5)+1
+       endif
+     endif
+   next boucle
+  for boucle=fileselectordata(5) to 255 step 1
+    _fichier$(boucle)=""
+   next boucle
+  fileselector$(7)="" : fileselectordata(8)=0
+  fileselectordata(9)=1
+  repeat : until mouseclick()=0
+ endfunction
+REM                                             AFFICHE LES FILTRES DANS LA CASE CHOISIE.
+function _displayfilters()
+  Rem AFFICHER LE FICHIER CHOISI.
+    ink rgb(60,60,60),rgb(60,60,60)
+    box 57+fileselectordata(1),198+fileselectordata(2),248+fileselectordata(1),208+fileselectordata(2)
+    ink rgb(255,255,255),rgb(60,60,60)
+    set cursor 57+fileselectordata(1),196+fileselectordata(2)
+  if fileselector$(5)<>"" and fileselector$(6)=""
+    printc "*"+fileselector$(5)
+   endif
+  if fileselector$(5)<>"" and fileselector$(6)<>""
+    printc "*"+fileselector$(5)+" / *"+fileselector$(6)
+   endif
+  if fileselector$(5)="" and fileselector$(6)<>""
+    printc "*"+fileselector$(6)
+   endif
+  if fileselector$(5)="" and fileselector$(6)=""
+    printc "*.*"
+   endif
+ endfunction
+REMSTART
+Rem fileselector$(1)=get dir$()
+Rem fileselector$(2)=Window Title$
+Rem fileselector$(3)=_path$
+Rem fileselector$(4)=_fileselect$
+Rem fileselector$(5)=filter1$
+Rem fileselector$(6)=filter2$
+Rem fileselector$(7)=_file$
+Rem fileselector$(8)=_dossierfinal$
+Rem fileselector$(9)=_fichierfinal$
+Rem
+Rem fileselectordata(3)=_lastitem
+Rem fileselectordata(4)=_firstitem
+Rem fileselectordata(5)=_numfichier
+Rem fileselectordata(6)=fileselectordata(8)
+Rem fileselectordata(7)=total_fiches
+Rem fileselectordata(8)=fileselectordata(8)
+Rem fileselectordata(9)=_itemdisplay
+Rem fileselectordata(10)=quit
+Rem fileselectordata(11)=loaderimagenumber
+REMEND

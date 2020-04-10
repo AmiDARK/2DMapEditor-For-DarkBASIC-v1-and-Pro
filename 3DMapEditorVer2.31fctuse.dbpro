@@ -1,0 +1,53 @@
+; **** DarkBASIC Professional Project ****
+; Created by CodeSurge IDE
+version=DBP1.00
+project name=3DMapEditor Ver2.31
+
+; ****Source file information****
+main=3DMapEditorVer2.31fctuse.dba
+include1=_editor_language_functions.dba
+include2=_editor_objects_functions.dba
+include3=_editor_miscellaneous_functions.dba
+include4=_editor_fileselector_function.dba
+include5=_editor_zones_functions.dba
+include6=_menuv2_functions.dba
+include7=_editor_matrix_functions.dba
+include8=_user_collision_system.dba
+include9=_3DMe_Magic_Windows.dba
+include10=_editor_synchro_functions.dba
+include11=_MW_Functions.dba
+final source=_Temp.dbsource
+
+;***Executable filename***
+executable=3DMapEditorVer2.31fctuse.exe
+build type=exe
+
+compression=NO
+encryption=NO
+card options window=NO
+
+; Debugger
+CLI=NO
+
+; *****Display Settings*****
+app title=3DMapEditor Pro 2.31
+graphics mode=window
+fullscreen resolution=800x600x16
+window resolution=640x480
+
+
+;*****Media files, icons, cursors*****
+media root path=E:\Odyssey-Creators\Produits\DarkBASIC Professional Tool - 3DMapEDITOR\3d Map Editor Development [2.40]\
+icon1=3DMapEditor.ico
+
+;****Version Information****
+VerComments=-First DBProBeta Release -
+VerCompany=Freddix
+VerFileDesc=3DMapEditor DBPro
+VerFileNumber=
+VerInternal=3DMe2.31
+VerCopyright=Frederic.Cordier (c)2002-2003
+VerTrademark=/
+VerFilename=3dmapeditor2.31.exe
+VerProduct=3DMapEditor
+VerProductNumber=3DMapEditor DBPro

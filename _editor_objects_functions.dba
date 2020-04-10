@@ -1,0 +1,663 @@
+function fct_Create_Sphere(newobj,lastx,lasty,lastz,defaultsizex,defaultsizey,defaultsizez,defaulttexture)
+  _DefaultObjectValues(newobj,defaultsizex,defaultsizey,defaultsizez)
+  _obj(newobj,1)=lastx
+  _obj(newobj,2)=lasty
+  _obj(newobj,3)=lastz
+  _obj(newobj,7)=1
+  _obj(newobj,10)=defaulttexture
+  fct_refresh_object(newobj)
+ EndFunction
+Rem ****************************************************************************************************************
+function fct_Create_Cube(newobj,lastx,lasty,lastz,defaultsizex,defaultsizey,defaultsizez,defaulttexture)
+  _DefaultObjectValues(newobj,defaultsizex,defaultsizey,defaultsizez)
+  _obj(newobj,1)=lastx
+  _obj(newobj,2)=lasty
+  _obj(newobj,3)=lastz
+  _obj(newobj,7)=2
+  _obj(newobj,10)=defaulttexture
+  fct_refresh_object(newobj)
+ EndFunction
+Rem ****************************************************************************************************************
+Function fct_Create_Box(newobj,lastx,lasty,lastz,defaultsizex,defaultsizey,defaultsizez,defaulttexture)
+  _DefaultObjectValues(newobj,defaultsizex,defaultsizey,defaultsizez)
+  _obj(newobj,1)=lastx
+  _obj(newobj,2)=lasty
+  _obj(newobj,3)=lastz
+  _obj(newobj,7)=3
+  _obj(newobj,10)=defaulttexture
+  fct_refresh_object(newobj)
+ EndFunction
+Rem ****************************************************************************************************************
+Function fct_Create_Cylinder(newobj,lastx,lasty,lastz,defaultsizex,defaultsizey,defaultsizez,defaulttexture)
+  _DefaultObjectValues(newobj,defaultsizex,defaultsizey,defaultsizez)
+  _obj(newobj,1)=lastx
+  _obj(newobj,2)=lasty
+  _obj(newobj,3)=lastz
+  _obj(newobj,7)=4
+  _obj(newobj,10)=defaulttexture
+  fct_refresh_object(newobj)
+ EndFunction
+Rem ****************************************************************************************************************
+Function fct_Create_Cone(newobj,lastx,lasty,lastz,defaultsizex,defaultsizey,defaultsizez,defaulttexture)
+  _DefaultObjectValues(newobj,defaultsizex,defaultsizey,defaultsizez)
+  _obj(newobj,1)=lastx
+  _obj(newobj,2)=lasty
+  _obj(newobj,3)=lastz
+  _obj(newobj,7)=5
+  _obj(newobj,10)=defaulttexture
+  fct_refresh_object(newobj)
+ EndFunction
+Rem ****************************************************************************************************************
+Function fct_Create_Plain(newobj,lastx,lasty,lastz,defaultsizex,defaultsizey,defaultsizez,defaulttexture)
+  _DefaultObjectValues(newobj,defaultsizex,defaultsizey,defaultsizez)
+  _obj(newobj,1)=lastx
+  _obj(newobj,2)=lasty
+  _obj(newobj,3)=lastz
+  _obj(newobj,7)=6
+  _obj(newobj,10)=defaulttexture
+  fct_refresh_object(newobj)
+ EndFunction
+Rem ****************************************************************************************************************
+Function fct_create_light(newobj,_lightnum,lastx,lasty,lastz)
+  _obj(newobj,1)=lastx
+  _obj(newobj,2)=lasty
+  _obj(newobj,3)=lastz
+  _obj(newobj,4)=16
+  _obj(newobj,7)=8
+  _obj(newobj,8)=255
+  _obj(newobj,9)=0
+  _obj(newobj,10)=0
+  _Obj(newobj,14)=_LightNum
+  _Obj(newobj,15)=255
+  _Obj(newobj,16)=0
+  Rem 2> On crée la lumière proprement dite ( c'est à dire ses valeurs )
+  _Lights(_LightNum,1)=lastx
+  _Lights(_LightNum,2)=lasty
+  _Lights(_LightNum,3)=lastz
+  _Lights(_LightNum,4)=128
+  _Lights(_LightNum,5)=128
+  _Lights(_LightNum,6)=128
+  _Lights(_LightNum,7)=64
+  _Lights(_LightNum,8)=500
+  _Lights(_LightNum,9)=0
+  _Lights(_LightNum,10)=0
+  _Lights(_LightNum,11)=0
+  _Lights(_LightNum,12)=newobj
+  fct_refresh_object(newobj)
+ EndFunction
+Rem ****************************************************************************************************************
+Function fct_Create_3DSound(newobj,_3Dsoundobject,lastx,lasty,lastz)
+  if _3DSoundObject>0
+    _obj(newobj,1)=lastx
+    _obj(newobj,2)=lasty
+    _obj(newobj,3)=lastz
+    _obj(newobj,4)=1
+    _obj(newobj,5)=1
+    _obj(newobj,6)=0
+    _obj(newobj,7)=9
+    _obj(newobj,8)=128
+    _Obj(newobj,15)=128
+    _Obj(newobj,16)=128
+    _Obj(newobj,14)=_Current_3dsound
+    _obj(newobj,9)=0
+    _obj(newobj,10)=0
+    fct_refresh_object(newobj)
+   endif
+ EndFunction
+Rem ****************************************************************************************************************
+Rem
+Rem FONCTIONS DE MODIFICATION D'OBJETS.
+Rem
+Rem ****************************************************************************************************************
+Function Fct_Move_Object(newobj)
+  defaultstep=32
+  pageupkey=201
+  pagedownkey=209
+  inserkey=210
+  supprkey=211
+  defaultkey=199
+  xposinit=_obj(newobj,1)
+  yposinit=_obj(newobj,2)
+  zposinit=_obj(newobj,3)
+  repeat
+    MW_Background_Task()
+    xpos=_obj(newobj,1)
+    ypos=_obj(newobj,2)
+    zpos=_obj(newobj,3)
+    key=scancode()
+    if key=pageupkey then ypos=ypos+defaultstep
+    if key=pagedownkey then ypos=ypos-defaultstep
+    if upkey()=1 then zpos=zpos+defaultstep
+    if downkey()=1 then zpos=zpos-defaultstep
+    if leftkey()=1 then xpos=xpos-defaultstep
+    if rightkey()=1 then xpos=xpos+defaultstep
+    if key=inserkey then inc defaultstep,1
+    if key=supprkey then dec defaultstep,1
+    if defaultstep=0 then defaultstep=1
+    if defaultstep>128 then defaultstep=128
+    if key=defaultkey
+      xpos=xposinit
+      ypos=yposinit
+      zpos=zposinit
+     endif
+    _obj(newobj,1)=xpos
+    _obj(newobj,2)=ypos
+    _obj(newobj,3)=zpos
+    objkind=_obj(newobj,7)
+    if objkind=9 then position sound newobj,xpos,ypos,zpos
+    if mouseclick()=1 then _3DMEMW_Check_Mouse_View()
+    if objkind=8
+      _ObjLight=_obj(newobj,14)
+      _Lights(_ObjLight,1)=xpos
+      _Lights(_ObjLight,2)=ypos
+      _Lights(_ObjLight,3)=zpos
+      _checkFor7Lights()
+     endif
+    position object newobj,xpos,ypos,zpos
+    MW_Ink(12,128,128,128)
+    MW_Set_Cursor(12,0,0)
+    MW_Print(12,_Dialogue$(57))
+    MW_Print(12,"X="+str$(xpos))
+    MW_Print(12,"Y="+str$(ypos))
+    MW_Print(12,"Z="+str$(zpos))
+    MW_Print(12,_Dialogue$(56)+str$(defaultstep) )
+    Xm=mousex() : Ym=mousey()
+    Sprite 2,xm,ym,3
+    MW_sync(0)
+    sync
+    MW_Cls(12,32,32,32)
+   until spacekey()=1 or mouseclick()=2
+  repeat
+   until spacekey()=0 and mouseclick()=0
+ EndFunction
+Rem ****************************************************************************************************************
+Function Fct_Scale_Object(newobj)
+  defaultstep=32
+  pageupkey=201
+  pagedownkey=209
+  inserkey=210
+  supprkey=211
+  defaultkey=199
+  xsizeinit=_obj(newobj,4)
+  ysizeinit=_obj(newobj,5)
+  zsizeinit=_obj(newobj,6)
+  repeat
+    MW_Background_Task()
+    xc#=camera position x()
+    yc#=camera position y()
+    zc#=camera position z()
+    xsize=_obj(newobj,4)
+    ysize=_obj(newobj,5)
+    zsize=_obj(newobj,6)
+    key=scancode()
+    if key=pageupkey then ysize=ysize+defaultstep
+    if key=pagedownkey then ysize=ysize-defaultstep
+    if upkey()=1 then zsize=zsize+defaultstep
+    if downkey()=1 then zsize=zsize-defaultstep
+    if leftkey()=1 then xsize=xsize+defaultstep
+    if rightkey()=1 then xsize=xsize-defaultstep
+    if key=inserkey then inc defaultstep,1
+    if key=supprkey then dec defaultstep,1
+    if defaultstep=0 then defaultstep=1
+    if defaultstep>128 then defaultstep=128
+    if xsize<1 then xsize=1
+    if ysize<1 then ysize=1
+    if zsize<1 then zsize=1
+    if mouseclick()=1 then _3DMEMW_Check_Mouse_View()
+    if key=defaultkey
+      xsize=xsizeinit
+      ysize=ysizeinit
+      zsize=zsizeinit
+     endif
+    _obj(newobj,4)=xsize
+    _obj(newobj,5)=ysize
+    _obj(newobj,6)=zsize
+    Fct_Refresh_Object(newobj)
+    MW_Ink(12,128,128,128)
+    MW_Set_Cursor(12,0,0)
+    MW_Print(12,_Dialogue$(58))
+    MW_Print(12,"X="+str$(xsize) )
+    MW_Print(12,"Y="+str$(ysize) )
+    MW_Print(12,"Z="+str$(zsize) )
+    MW_Print(12,_Dialogue$(56)+str$(defaultstep) )
+    Xm=mousex() : Ym=mousey()
+    Sprite 2,xm,ym,3
+    MW_sync(0)
+    sync
+    MW_Cls(12,32,32,32)
+   until spacekey()=1 or mouseclick()=2
+  repeat
+   until spacekey()=0 and mouseclick()=0
+ EndFunction
+Rem ****************************************************************************************************************
+Function Fct_Rotate_Object(newobj)
+  defaultrot=45
+  pageupkey=201
+  pagedownkey=209
+  inserkey=210
+  supprkey=211
+  defaultkey=199
+  xrotinit=_obj(newobj,11)
+  yrotinit=_obj(newobj,12)
+  zrotinit=_obj(newobj,13)
+  repeat
+    MW_Background_Task()
+    xc#=camera position x()
+    yc#=camera position y()
+    zc#=camera position z()
+    xrot=_obj(newobj,11)
+    yrot=_obj(newobj,12)
+    zrot=_obj(newobj,13)
+    key=scancode()
+    if key=pageupkey then yrot=yrot+defaultrot
+    if key=pagedownkey then yrot=yrot-defaultrot
+    if upkey()=1 then zrot=zrot+defaultrot
+    if downkey()=1 then zrot=zrot-defaultrot
+    if leftkey()=1 then xrot=xrot+defaultrot
+    if rightkey()=1 then xrot=xrot-defaultrot
+    if key=inserkey then inc defaultrot,1
+    if key=supprkey then dec defaultrot,1
+    if defaultrot=0 then defaultrot=1
+    if defaultrot>90 then defaultrot=90
+    if xrot<0 then xrot=xrot+360
+    if yrot<0 then yrot=yrot+360
+    if zrot<0 then zrot=zrot+360
+    if xrot>360 then xrot=xrot-360
+    if yrot>360 then yrot=yrot-360
+    if zrot>360 then zrot=zrot-360
+    if mouseclick()=1 then _3DMEMW_Check_Mouse_View()
+    if key=defaultkey
+      xrot=xrotinit
+      yrot=yrotinit
+      zrot=zrotinit
+     endif
+    _obj(newobj,11)=xrot
+    _obj(newobj,12)=yrot
+    _obj(newobj,13)=zrot
+    Fct_Refresh_Object(newobj)
+    MW_Ink(12,128,128,128)
+    MW_Set_Cursor(12,0,0)
+    MW_Print(12,_Dialogue$(59))
+    MW_Print(12,"X="+str$(xrot) )
+    MW_Print(12,"Y="+str$(yrot) )
+    MW_Print(12,"Z="+str$(zrot) )
+    MW_Print(12,_Dialogue$(56)+str$(defaultrot) )
+    Xm=mousex() : Ym=mousey()
+    Sprite 2,xm,ym,3
+    MW_Sync(0)
+    Sync
+    MW_Cls(12,32,32,32)
+   until spacekey()=1 or mouseclick()=2
+  repeat
+   until spacekey()=0 and mouseclick()=0
+ EndFunction
+Rem ****************************************************************************************************************
+Function Fct_Ghost_Object(newobj)
+  attrib=_obj(newobj,9)
+  inc attrib,1
+  if attrib>2 then attrib=0
+  if attrib=0 then ghost object off newobj
+  if attrib=1 then ghost object on newobj
+  if attrib=2 then ghost object on newobj,1
+  _obj(newobj,9)=attrib
+  Fct_WaitSynchro(3)
+ EndFunction
+Rem ****************************************************************************************************************
+Function Fct_Select_Object(newobj,lastobject)
+  pageupkey=201
+  pagedownkey=209
+  inserkey=210
+  supprkey=211
+  defaultkey=199
+  _FirstTextureImage=70
+  repeat
+    MW_BackGround_Task()
+    key=scancode()
+    if key=inserkey
+      Fct_Refresh_Object(newobj)
+      inc newobj,1
+     endif
+    if key=supprkey
+      Fct_Refresh_Object(newobj)
+      dec newobj,1
+     endif
+    if newobj>lastobject then newobj=lastobject
+    if newobj<2 then newobj=2
+    if key=inserkey or key=supprkey
+      textre=_obj(newobj,10)
+      if textre>0
+        texture object newobj,textre+_FirstTextureImage
+       else
+        color object newobj,rgb(128,128,128)
+       endif
+     endif
+    if upkey()=1 then move camera 10
+    if downkey()=1 then move camera -10
+        xc#=camera position x()
+        zc#=camera position z()
+        x=xc#/64 : z=zc#/64
+        position object 1,-1.75+(x*64),-1,-1.75+(z*64)
+    if mouseclick()=1 then _3DMEMW_Check_Mouse_View()
+    MW_Ink(12,128,128,128)
+    MW_Set_Cursor(12,0,0)
+    MW_Print(12,_Dialogue$(60))
+    MW_Print(12,"  "+str$(newobj-1))
+    Xm=mousex() : Ym=mousey()
+    Sprite 2,xm,ym,3
+    MW_Sync(0)
+    Sync
+    MW_Cls(12,32,32,32)
+   until spacekey()=1 or mouseclick()=2
+  repeat
+   until spacekey()=0 and mouseclick()=0
+  Fct_Refresh_Object(newobj)
+ EndFunction newobj
+Rem ****************************************************************************************************************
+Function Fct_Optimize_Objects(lastobject)
+  MW_Cls(14,32,32,32)
+  MW_Print(14,_Dialogue$(65))
+  MW_Sync(0) : sync
+  Rem Objet dont on doit optimiser la position dans la liste.
+  for objecttooptimize=4 to lastobject step 1
+    distance=10000000 : objetproche=0
+    Rem Boucle des objets à vérifier par rapport à l'objet premier.
+    Rem on cherche à trouver à quel objet l'objet OBJECTOPTIMIZE est le plus près.
+    for secondobject=2 to (objecttooptimize-1) step 1
+      Rem Saisie de la distance entre les 2 objets
+      xo=_Obj(objecttooptimize,1) : yo=_Obj(objecttooptimize,2) : zo=_Obj(objecttooptimize,3)
+      xn=_Obj(secondobject,1) : yn=_Obj(secondobject,2) : zn=_Obj(secondobject,3)
+      xdist=abs(xn-xo) : ydist=abs(yn-yo) : zdist=abs(zn-zo)
+      newdistance=sqrt((xdist*xdist)+(ydist*ydist)+(zdist*zdist))
+      if newdistance<distance
+        distance=newdistance
+        objetproche=secondobject
+       endif
+     next secondobject
+    Rem si on a trouvé un objet à une distance < 1.000.000.000
+    if objetproche>0
+      Rem on sauvegarde l'objet à optimiser.
+      for boucle=1 to 25
+        _ObjTemp(boucle)=_Obj(objecttooptimize,boucle)
+       next boucle
+      Rem on décale tout les autres obets de 1.
+      for boucle=(objecttooptimize-1) to (objetproche+1) step -1
+        for sousboucle=1 to 25
+          _Obj(boucle+1,sousboucle)=_Obj(boucle,sousboucle)
+         next sousboucle
+       next boucle
+      Rem on insère l'objet à optimizer.
+      for boucle=1 to 25
+        _Obj(objetproche+1,boucle)=_ObjTemp(boucle)
+       next boucle
+     endif
+   next objecttooptimize
+  Rem fin de l'optimisation.
+  Rem on rafraichit tout les objets.
+  for boucle=2 to lastobject
+    Fct_Refresh_Object(boucle)
+   next boucle
+  MW_Cls(14,32,32,32)
+  MW_Sync(0)
+ EndFunction
+Rem ****************************************************************************************************************
+Function Fct_Object_Properties(newobj)
+  if object exist(newobj)=1 and newobj>1
+    if MW_Window_Exist(15)=0
+      MW_Open_New_Window(15,"Objets propriétés",196,242,1,1,0)
+      MW_Position_Window(15,128,16)
+      MW_Paste_Image(15,7,0,0)
+      _modif=1
+     else
+      _modif=0
+     Endif
+    Rem Addition from version 2.23
+    _ghostMode=_Obj(newobj,9)
+    _WireFrame=_Obj(newobj,19)
+    _Transparency=_Obj(newobj,20)
+    _Cull=_Obj(newobj,21)
+    _TextureFiltering=_Obj(newobj,22)
+    _LightSensitive=_Obj(newobj,23)
+    _FogSensitive=_Obj(newobj,24)
+    _AmbientSensitive=_Obj(newobj,25)
+    _HiddenObject=_Obj(newobj,26)
+    _ObjectCollisions=_Obj(newobj,27)
+    _refresh_cases(_ghostmode,_wireframe,_transparency,_cull,_texturefiltering,_lightsensitive,_fogsensitive,_ambientsensitive,_hiddenobject,_ObjectCollisions)
+    _wnd=MW_Current_Window()
+    if _wnd=15
+      xm=MW_Window_Position_X() : ym=MW_Window_Position_Y()
+      REM SELECTIONNER L'ICONE QUITTER
+      if mouseclick()=1 and ym>0
+        if xm>3 and xm<20
+          if ym>63 and ym<80
+            _modif=1 : inc _GhostMode,1 : if _GhostMode=2 then _GhostMode=0
+           endif
+          if ym>79 and ym<96
+            _modif=1 : inc _Wireframe,1 : if _WireFrame=2 then _WireFrame=0
+           endif
+          if ym>95 and ym<112
+            _modif=1 : inc _Transparency,1 : if _Transparency=2 then _Transparency=0
+           endif
+          if ym>111 and ym<128
+            _modif=1 : inc _Cull,1 : if _Cull=2 then _Cull=0
+           endif
+          if ym>127 and ym<144
+            _modif=1 : inc _TextureFiltering,1 : if _TextureFiltering=2 then _TextureFiltering=0
+           endif
+          if ym>143 and ym<160
+            _modif=1 : inc _LightSensitive,1 : if _LightSensitive=2 then _LightSensitive=0
+           endif
+          if ym>159 and ym<176
+            _modif=1 : inc _FogSensitive,1 : if _FogSensitive=2 then _FogSensitive=0
+           endif
+          if ym>175 and ym<192
+            _modif=1 : inc _AmbientSensitive,1 : if _AmbientSensitive=2 then _AmbientSensitive=0
+           endif
+          if ym>191 and ym<207
+            _modif=1 : inc _HiddenObject,1 : if _HiddenObject=2 then _HiddenObject=0
+           endif
+          if ym>207 and ym<225
+            _modif=1 : inc _ObjectCollisions,1 : if _ObjectCollisions=2 then _ObjectCollisions=0
+           endif
+         endif
+       REM ANTI Multi_click
+        repeat
+         until mouseclick()=0
+       endif
+     endif
+    if _modif=1
+      _Obj(newobj,9)=_ghostMode
+      _Obj(newobj,19)=_WireFrame
+      _Obj(newobj,20)=_Transparency
+      _Obj(newobj,21)=_Cull
+      _Obj(newobj,22)=_TextureFiltering
+      _Obj(newobj,23)=_LightSensitive
+      _Obj(newobj,24)=_FogSensitive
+      _Obj(newobj,25)=_AmbientSensitive
+      _Obj(newobj,26)=_HiddenObject
+      _Obj(newobj,27)=_ObjectCollisions
+      Fct_Refresh_Object(newobj)
+     endif
+   else
+    if MW_Window_Exist(15)=1 then MW_Close_Window(15)
+   Endif
+ EndFunction
+Rem ****************************************************************************************************************
+Function _refresh_cases(_ghostmode,_wireframe,_transparency,_cull,_texturefiltering,_lightsensitive,_fogsensitive,_ambientsensitive,_hiddenobject,_ObjectCollisions)
+  if _ghostmode=1 then MW_Paste_Image(15,9,4,64) else MW_Paste_Image(15,8,4,64)
+  if _wireframe=1 then MW_Paste_Image(15,8,4,80) else MW_Paste_Image(15,9,4,80)
+  if _Transparency=1 then MW_Paste_Image(15,8,4,96) else MW_Paste_Image(15,9,4,96)
+  if _Cull=1 then MW_Paste_Image(15,8,4,112) else MW_Paste_Image(15,9,4,112)
+  if _TextureFiltering=1 then MW_Paste_Image(15,9,4,128) else MW_Paste_Image(15,8,4,128)
+  if _LightSensitive=1 then MW_Paste_Image(15,9,4,144) else MW_Paste_Image(15,8,4,144)
+  if _FogSensitive=1 then MW_Paste_Image(15,9,4,160) else MW_Paste_Image(15,8,4,160)
+  if _AmbientSensitive=1 then MW_Paste_Image(15,9,4,176) else MW_Paste_Image(15,8,4,176)
+  if _HiddenObject=1 then MW_Paste_Image(15,9,4,192) else MW_Paste_Image(15,8,4,192)
+  if _ObjectCollisions=1 then MW_Paste_Image(15,9,4,208) else MW_Paste_Image(15,8,4,208)
+ EndFunction
+Rem ****************************************************************************************************************
+Function Fct_Refresh_Object(refobj)
+  _EdPath$=_EditorPath$(1)
+  _MapPath$=_EditorPath$(2)
+  _TutorialMapPath$=_EditorPath$(3)
+  _TexturePath$=_EditorPath$(4)
+  _3DObjectPath$=_EditorPath$(5)
+  _3DSoundPath$=_EditorPath$(6)
+  _muspath$=_EditorPath$(7)
+  _soundpath$=_EditorPath$(8)
+  _FirstTextureImage=200
+  xcp#=camera position x()
+  ycp#=camera position y()
+  zcp#=camera position z()
+  xpos=_obj(refobj,1)
+  ypos=_obj(refobj,2)
+  zpos=_obj(refobj,3)
+  xsize=_obj(refobj,4)
+  ysize=_obj(refobj,5)
+  zsize=_obj(refobj,6)
+  kind=_obj(refobj,7)
+  ObjRed=_Obj(refobj,8)
+  attrib=_obj(refobj,9)
+  textre=_obj(refobj,10)
+  xrot=_obj(refobj,11)
+  yrot=_obj(refobj,12)
+  zrot=_obj(refobj,13)
+  ObjGreen=_Obj(refobj,15)
+  ObjBlue=_Obj(refobj,16)
+  XScalet=_Obj(refobj,17)
+  YScalet=_Obj(refobj,18)
+  Rem Addition from version 2.23
+  _WireFrame=_Obj(refobj,19)
+  _Transparency=_Obj(refobj,20)
+  _Cull=_Obj(refobj,21)
+  _TextureFiltering=_Obj(refobj,22)
+  _LightSensitive=_Obj(refobj,23)
+  _FogSensitive=_Obj(refobj,24)
+  _AmbientSensitive=_Obj(refobj,25)
+  _HiddenObject=_Obj(refobj,26)
+  _ObjectCollisions=_Obj(refobj,27)
+  if object exist(refobj)=1
+    if sound exist(refobj)=1 then stop sound refobj
+    delete object refobj
+   endif
+  if kind=1 then make object sphere refobj,xsize
+  if kind=2 then make object cube refobj,xsize
+  if kind=3 then make object box refobj,xsize,ysize,zsize
+  if kind=4 then make object cylinder refobj,xsize
+  if kind=5 then make object cone refobj,xsize
+  if kind=6 then make object plain refobj,xsize,ysize
+  if kind=8
+    load object _edpath$+"\editor\lamp.x",refobj
+    scale object refobj,1600,1600,1600
+   endif
+  if kind=9
+    load object _edpath$+"\editor\sound.x",refobj
+    scale object refobj,1600,1600,1600
+    _loaded=0
+    if file exist(_3DSoundpath$+_3DSound$(_Obj(refobj,14)))=1
+      load 3dsound _3DSoundpath$+_3DSound$(_Obj(refobj,14)),refobj
+      _loaded=1
+     else
+      if file exist(_3DSound$(_Obj(refobj,14)))=1
+        load 3dsound _3DSound$(_Obj(refobj,14)),refobj
+        _loaded=1
+       endif
+     endif
+    if _loaded=1
+      set sound volume refobj,32
+      position sound refobj,xpos,ypos,zpos
+      loop sound refobj
+      play sound refobj
+      loop sound refobj
+      _loaded=0
+     endif
+   endif
+  if kind>10
+    if file exist(_3DObjectPath$+_DirectXObject$(kind-10))=1
+      load object _3DObjectPath$+_DirectXObject$(kind-10),refobj
+     else
+      if file exist(_DirectXObject$(kind-10))=1
+        load object _DirectXObject$(kind-10),refobj
+       endif
+     endif
+   endif
+  position object refobj,xpos,ypos,zpos
+  rotate object refobj,xrot,yrot,zrot
+  If xsize>0 and ysize>0 and zsize>0 and (kind=1 or kind=4 or kind=5 or kind>10)
+    Scale object refobj,xsize,ysize,zsize
+   endif
+  if kind<8 or kind=10 then color object refobj,rgb(ObjRed,ObjGreen,ObjBlue)
+  Rem  if attrib=0 then ghost object off boucle
+  if attrib=1 or kind=8 then ghost object on refobj
+  if attrib=2 and kind<>8 then ghost object on refobj,1
+  if _HiddenObject=1 then ghost object on refobj
+  if textre>0
+    texture object refobj,textre+_FirstTextureImage
+    if XScalet>0
+      XScalet_final#=XScalet
+     else
+      XScalet_final#=1.0+(XScalet*0.01)
+     endif
+    if YScalet>0
+      YScalet_final#=YScalet
+     else
+      YScalet_final#=1.0+(YScalet*0.01)
+     endif
+    if XScalet=0 then XSCalet_final#=xsize/128.0
+    if YScalet=0 then YSCalet_final#=ysize/128.0
+    if xscalet_final#=1.0 then xscalet_final#=1.0000000001
+    if yscalet_final#=1.0 then yscalet_final#=1.0000000001
+    scale object texture refobj,XScalet_final#,YScalet_final#
+   endif
+rem  SET OBJECT TEXTURE refobj,0,1
+  fade object refobj,3000
+  set object collision off refobj
+  set object texture refobj,0,1
+  _Cull=0
+  set object refobj,_Wireframe,_Transparency,_Cull,_TextureFiltering,_LightSensitive,_FogSensitive,_AmbientSensitive
+  position camera xcp#,ycp#,zcp#
+ EndFunction
+Rem ****************************************************************************************************************
+Function _DefaultObjectValues(newobj,defaultsizex,defaultsizey,defaultsizez)
+  _obj(newobj,4)=defaultsizex
+  _obj(newobj,5)=defaultsizey
+  _obj(newobj,6)=defaultsizez
+  _obj(newobj,8)=128
+  _Obj(newobj,15)=128
+  _Obj(newobj,16)=128
+  _obj(newobj,9)=0
+ EndFunction
+Rem ****************************************************************************************************************
+function _checkFor7Lights()
+  _LightNum=_Obj(1,16)
+  for boucle=1 to 7
+    if light exist(boucle)=1 then delete light boucle
+    _LightActive(boucle)=0
+   next boucle
+  If _LightNum>0
+    For boucle=1 to _LightNum
+      DistanceX=abs(camera position x()-_Lights(boucle,1))
+      DistanceY=abs(camera position y()-_lights(boucle,2))
+      DistanceZ=abs(camera position z()-_lights(boucle,3))
+      Distance=Sqrt((Distancex^2)+(Distancey^2)+(distancez^2))
+      lt=0
+      if Distance<1500
+        Rem On cherche la première lumière libre.
+        Repeat
+          inc lt,1
+          if _LightActive(lt)=boucle then lt=8
+         until _LightActive(lt)=0 or lt=8
+        Rem Si il existe un emplacement lumière de libre , on la crée.
+        if lt<8
+          _LightActive(lt)=boucle
+          make light lt
+          set point light lt,_Lights(boucle,1)+_Lights(boucle,9),_Lights(boucle,2)+_Lights(boucle,10),_Lights(boucle,3)+_Lights(boucle,11)
+          Color light lt,rgb(_Lights(boucle,4)*2,_Lights(boucle,5)*2,_Lights(boucle,6)*2)
+          Set light range lt,_Lights(boucle,8)*2
+Rem          Position light lt,_Lights(boucle,1),_Lights(boucle,2),_Lights(boucle,3)
+          Show Light lt
+         endif
+       endif
+     next boucle
+   endif
+ endfunction
+

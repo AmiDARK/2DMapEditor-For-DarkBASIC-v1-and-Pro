@@ -1,0 +1,49 @@
+Rem ******************************************
+Rem *                                        *
+Rem * GESTION DES TEXTES FRANÁAIS ET ANGLAIS *
+Rem *                                        *
+Rem ******************************************
+Function Fct_SetLanguage(_LANGUAGE$)
+  if _LANGUAGE$="ENGLISH"
+    open to read 1,"editor\locales\english.loc"
+   else
+    open to read 1,"editor\locales\french.loc"
+   endif
+  boucle=0
+  Repeat
+    boucle=boucle+1
+    Read string 1 , var$
+    _Dialogue$(boucle)=var$
+   until var$="END_LOC"
+  close file 1
+ EndFunction
+
+Function Fct_SetZoneLanguage(_LANGUAGE$)
+  if _LANGUAGE$="ENGLISH"
+    open to read 1,"editor\locales\english_zones.loc"
+   else
+    open to read 1,"editor\locales\french_zones.loc"
+   endif
+  for boucle=0 to 6
+    read string 1 , zone$
+   _zone_type$(boucle)=zone$
+   next boucle
+  for boucle2=0 to 2
+    read string 1 , zone2$
+    _zone_gravity$(boucle2)=zone2$
+   next boucle2
+  close file 1
+ EndFunction
+
+Function Fct_Windows_Title(_LANGUAGE$)
+  if _LANGUAGE$="ENGLISH"
+    open to read 1,"editor\locales\Windows(us).loc"
+   else
+    open to read 1,"editor\locales\Windows(fr).loc"
+   endif
+  For boucle=1 to 24
+    Read String 1 , var$
+    _Windows_Title$(boucle)=var$
+   next boucle
+  close file 1
+ EndFunction

@@ -1,0 +1,51 @@
+version=DBP1.00
+;****DarkBASIC Professional Project****
+;[Created by BLUE IDE - version 1.0.1]
+;Basic project details
+project name=
+project comments=
+;
+;Files
+final source=_Temp.dbsource
+main=3D_ViewVer1.12UseFunction(FRA).dba
+include1=D:\Felix Work\PC DarkBasic\Dark Basic Professional\3D\_3d Map Editor Development(2.31)\_fileselector_function.dba
+include2=D:\Felix Work\PC DarkBasic\Dark Basic Professional\3D\_3d Map Editor Development(2.31)\_3dmapeditor_functions.dba
+include3=D:\Felix Work\PC DarkBasic\Dark Basic Professional\3D\_3d Map Editor Development(2.31)\_editor_zones_functions.dba
+executable=temp.exe
+build type=exe
+ 
+;Debug Mode YES/NO
+CLI=NO
+ 
+;====Media Settings====
+compression=
+encryption=
+media root path=D:\Felix Work\PC DarkBasic\Dark Basic Professional\3D\_3d Map Editor Development(2.31)\
+ 
+;====Included Media====
+ 
+;> Cursors
+ 
+;> Icons
+ 
+;====Other Settings====
+app title=
+graphics mode=
+fullscreen resolution=
+window resolution=
+compression=
+encryption=
+ 
+;====Version Information====
+vercomments=
+vercompany=
+vercopyright=
+verfiledesc=
+verfilename=
+verfilenumber=
+verinternal=
+verproduct=
+verproductnumber=
+vertrademark=
+ 
+;====Project Organisation====

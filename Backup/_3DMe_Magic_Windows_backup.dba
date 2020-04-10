@@ -1,0 +1,175 @@
+Rem
+Rem _3DMEMW_Make_Icon_Graphics(_firstimage)         Charge tout les icones graphiques à partir d'un bitmap.
+Rem _3DMEMW_Clear_Icon_Graphics()                   Efface tout les icones graphiques utilisés.
+Rem _3DMEMW_Create_All_windows(_firstimage)         Crée toutes les fenêtres pour 3DMapEditor.
+Rem _3DMEMW_Check_Mouse_View()                      Gère la vue 3D si click en dehors des fenêtres MW.
+Rem
+Function _3DMeMW_Make_Icon_Graphics(_firstimage)
+  _ERROR=0 : _bmp=4
+  if bitmap exist(_bmp)=1 then delete bitmap _bmp : sync
+  if file exist("editor\icones_v3.jpg")=1
+    _buttons(1)=_firstimage
+    create bitmap _bmp,800,600
+    load bitmap "editor\icones_v3.jpg",_bmp : sync
+    set current bitmap _bmp
+    sync
+    Rem Saisie 1 : SYSTEM
+    xpos=0 : ypos=0
+    for boucle=1 to 12 step 1
+      get image _firstimage,xpos,ypos,xpos+32,ypos+32
+      inc xpos,32 : inc _firstimage,1 : wait 1
+     next boucle
+    Rem Saisie 2 : TEXTURES
+    xpos=0 : ypos=32
+    for boucle=1 to 14 step 1
+      get image _firstimage,xpos,ypos,xpos+32,ypos+32
+      inc xpos,32 : inc _firstimage,1 : wait 1
+     next boucle
+    Rem Saisie 3 : OBJECTS IMPORTATION
+    xpos=0 : ypos=32*2
+    for boucle=1 to 8 step 1
+      get image _firstimage,xpos,ypos,xpos+32,ypos+32
+      inc xpos,32 : inc _firstimage,1 : wait 1
+     next boucle
+    Rem Saisie 4 : 3D SOUNDS
+    xpos=0 : ypos=32*3
+    for boucle=1 to 8 step 1
+      get image _firstimage,xpos,ypos,xpos+32,ypos+32
+      inc xpos,32 : inc _firstimage,1 : wait 1
+     next boucle
+    Rem Saisie 5 : LIGHTS
+    xpos=0 : ypos=32*4
+    for boucle=1 to 8 step 1
+      get image _firstimage,xpos,ypos,xpos+32,ypos+32
+      inc xpos,32 : inc _firstimage,1 : wait 1
+     next boucle
+    Rem Saisie 6 : OBJECTS ADDING
+    xpos=0 : ypos=32*5
+    for boucle=1 to 12 step 1
+      get image _firstimage,xpos,ypos,xpos+32,ypos+32
+      inc xpos,32 : inc _firstimage,1 : wait 1
+     next boucle
+    Rem Saisie 7 : OBJECTS MODIFICATIONS
+    xpos=0 : ypos=32*6
+    for boucle=1 to 18 step 1
+      get image _firstimage,xpos,ypos,xpos+32,ypos+32
+      inc xpos,32 : inc _firstimage,1 : wait 1
+     next boucle
+    Rem Saisie 8 : ACTION ZONES
+    xpos=0 : ypos=32*7
+    for boucle=1 to 12 step 1
+      get image _firstimage,xpos,ypos,xpos+32,ypos+32
+      inc xpos,32 : inc _firstimage,1 : wait 1
+     next boucle
+    Rem Saisie 9 : MATRIXES
+    xpos=0 : ypos=32*8
+    for boucle=1 to 18 step 1
+      get image _firstimage,xpos,ypos,xpos+32,ypos+32
+      inc xpos,32 : inc _firstimage,1 : wait 1
+     next boucle
+   Endif
+  _buttons(2)=_firstimage : sync
+  if bitmap exist(_bmp)=1 then delete bitmap _bmp : sync
+ EndFunction
+Rem
+Function _3DMEMW_Clear_Icon_Graphics()
+  _first=_buttons(1)
+  _last=_buttons(2)
+  if _last>_first
+    for boucle=_first to _last
+      if image exist(boucle)=1 then delete image boucle
+     next boucle
+   endif
+ endfunction
+Rem
+Function _3DMEMW_Create_All_windows(_firstimage2)
+  Rem FENETRE #02 : Système
+  MW_Open_New_Window(2,"System",32*6,32,1,1,0)
+  For boucle=1 to 6
+    MW_Create_Graphical_Gadget(2,boucle,_firstimage2,(boucle-1)*32,0,32,32)
+    inc _firstimage2,1*2
+   Next boucle
+  Rem FENETRE #03 : TEXTURES
+  MW_Open_New_Window(3,"Textures",32*7,32,1,1,0)
+  For boucle=1 to 7
+    MW_Create_Graphical_Gadget(3,boucle,_firstimage2,(boucle-1)*32,0,32,32)
+    inc _firstimage2,1*2
+   Next boucle
+  Rem FENETRE #04 : OBJECTS IMPORTATION
+  MW_Open_New_Window(4,"Objects Importation",32*4,32,1,1,0)
+  For boucle=1 to 4
+    MW_Create_Graphical_Gadget(4,boucle,_firstimage2,(boucle-1)*32,0,32,32)
+    inc _firstimage2,1*2
+   Next boucle
+  Rem FENETRE #05 : 3D SOUNDS
+  MW_Open_New_Window(5,"3D Sound",32*4,32,1,1,0)
+  For boucle=1 to 4
+    MW_Create_Graphical_Gadget(5,boucle,_firstimage2,(boucle-1)*32,0,32,32)
+    inc _firstimage2,1*2
+   Next boucle
+  Rem FENETRE #06 : LIGHTS
+  MW_Open_New_Window(6,"Lights",32*4,32,1,1,0)
+  For boucle=1 to 4
+    MW_Create_Graphical_Gadget(6,boucle,_firstimage2,(boucle-1)*32,0,32,32)
+    inc _firstimage2,1*2
+   Next boucle
+  Rem FENETRE #07 : OBJECTS ADDING
+  MW_Open_New_Window(7,"Objects Adding",32*6,32,1,1,0)
+  For boucle=1 to 6
+    MW_Create_Graphical_Gadget(7,boucle,_firstimage2,(boucle-1)*32,0,32,32)
+    inc _firstimage2,1*2
+   Next boucle
+  Rem FENETRE #08 : OBJECTS MODIFICATIONS
+  MW_Open_New_Window(8,"Objects Modifications",32*9,32,1,1,0)
+  For boucle=1 to 9
+    MW_Create_Graphical_Gadget(8,boucle,_firstimage2,(boucle-1)*32,0,32,32)
+    inc _firstimage2,1*2
+   Next boucle
+  Rem FENETRE #09 : ACTION ZONES
+  MW_Open_New_Window(9,"Action Zones",32*6,32,1,1,0)
+  For boucle=1 to 6
+    MW_Create_Graphical_Gadget(9,boucle,_firstimage2,(boucle-1)*32,0,32,32)
+    inc _firstimage2,1*2
+   Next boucle
+  Rem FENETRE #10 : MATRIXES
+  MW_Open_New_Window(10,"Matrixes",32*9,32,1,1,0)
+  For boucle=1 to 9
+    MW_Create_Graphical_Gadget(10,boucle,_firstimage2,(boucle-1)*32,0,32,32)
+    inc _firstimage2,1*2
+   Next boucle
+  Rem FENETRE #11 : FENETRE DE MINIATURES DES TEXTURES
+  MW_Open_New_Window(24,"Texture",64,240,1,1,0)
+  Rem FENETRE #12 : ACTIONS
+  MW_Open_New_Window(12,"Actions",64,106,1,1,0)
+  Rem FENETRE #13 : DIALOGUES
+  MW_Open_New_Window(13,"Dialogues",572,16,1,1,0)
+  Rem FENETRE #14 : COUNTER
+  MW_Open_New_Window(14,"Count",64,16,1,1,0)
+ EndFunction
+
+Function _3DMEMW_Check_Mouse_View()
+    _window=MW_Current_Window()
+    _gadget=MW_Current_gadget()
+    if _window=0
+      xm=mousex() : ym=mousey()
+      hide sprite 2
+      Repeat
+        yadd=xm-mousex() : xadd=ym-mousey()
+        xangle=wrapvalue(camera angle x()-xadd)
+        yangle=wrapvalue(camera angle y()-yadd)
+        rotate camera xangle,yangle,0
+        position mouse xm,ym
+        if upkey()=1 then move camera 10
+        if downkey()=1 then move camera 0-10
+        xc#=camera position x()
+        zc#=camera position z()
+        x=xc#/64 : z=zc#/64
+        position object 1,-1.75+(x*64),-1,-1.75+(z*64)
+        _CheckFor7Lights()
+        MW_Sync(0)
+        sync
+       until mouseclick()=0
+      position mouse xm,ym
+      show sprite 2
+     endif
+ EndFunction

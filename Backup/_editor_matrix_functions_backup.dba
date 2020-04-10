@@ -1,0 +1,588 @@
+Rem 3DMapEditor 2.30+ Matrixes functions sets :
+Rem -------------------------------------------
+Rem
+Rem _3DME_Add_New8Matrix(_NewMatrix,XTiles,ZTiles,XSize,ZSize)
+Rem _3DME_Move_Matrix(_Matrix)
+Rem _3DME_Move_Matrix_Point(_CurrentMatrix)
+Rem
+Rem _3DME_Refresh_Matrix(_matrix) : Re-actualise complètement une matrice
+Rem
+Rem
+Rem
+Function _3DME_Add_New_Matrix(_matrix,posx,posy,posz,XTILES,ZTILES,XSIZE,ZSIZE)
+  if _matrix>0 and _matrix<257
+    _generated=1
+    Rem Re-initialize matrix system data.
+    _Matrix(_MATRIX,1)=posx
+    _Matrix(_MATRIX,2)=posy
+    _Matrix(_MATRIX,3)=posz
+    _Matrix(_MATRIX,4)=Xtiles
+    _Matrix(_MATRIX,5)=Ztiles
+    _Matrix(_MATRIX,6)=Xsize
+    _Matrix(_MATRIX,7)=Zsize
+    _Matrix(_MATRIX,10)=1 : Rem Black=Translucent false
+    _Matrix(_MATRIX,12)=1 : Rem Texture Filtering True
+    _Matrix(_MATRIX,11)=1 : Rem Face cachées True
+    _Matrix(_MATRIX,13)=1 : Rem Light True
+    _Matrix(_MATRIX,14)=1 : Rem Fog True
+    _Matrix(_MATRIX,15)=1 : Rem ambient True
+    _Matrix(_MATRIX,16)=1 : Rem Collisions True
+    Rem Re-initialise all matrix values to 0
+    for xm=0 to xtiles
+      for zm=0 to ztiles
+        _Matrix_Height(_MATRIX,xm,zm)=0
+        _Matrix_Tile(_MATRIX,xm,zm)=1
+       next zm
+     next xm
+   else
+    _generated=0
+   endif
+  _3DME_Refresh_Matrix(_matrix,0,0)
+ EndFunction _generated
+Rem
+Rem
+Rem
+Function _3DME_Delete_Matrix(_matrix)
+  if matrix exist(_matrix)=1 then delete matrix _matrix
+  For Boucle=1 to 16
+    _Matrix(_matrix,boucle)=0
+   next boucle
+  Rem Re-initialise all matrix values to 0
+  for xm=0 to _matrix(_matrix,4)
+    for zm=0 to _matrix(_matrix,5)
+      _Matrix_Height(_MATRIX,xm,zm)=0
+      _Matrix_Tile(_MATRIX,xm,zm)=0
+     next zm
+   next xm
+ EndFunction
+Rem
+Rem
+Rem
+Function _3DME_Move_Matrix(_Matrix)
+  defaultstep=32
+  pageupkey=201
+  pagedownkey=209
+  inserkey=210
+  supprkey=211
+  defaultkey=199
+  xposinit=_matrix(_matrix,1)
+  yposinit=_matrix(_matrix,2)
+  zposinit=_matrix(_matrix,3)
+  repeat
+    MW_Background_Task()
+    ycurs=mousey() : xcurs=mousex()
+    sprite 2,xcurs,ycurs,3
+    xpos=_matrix(_matrix,1)
+    ypos=_matrix(_matrix,2)
+    zpos=_matrix(_matrix,3)
+    key=scancode()
+    if key=pageupkey then ypos=ypos+defaultstep
+    if key=pagedownkey then ypos=ypos-defaultstep
+    if upkey()=1 then zpos=zpos+defaultstep
+    if downkey()=1 then zpos=zpos-defaultstep
+    if leftkey()=1 then xpos=xpos-defaultstep
+    if rightkey()=1 then xpos=xpos+defaultstep
+    if key=inserkey then inc defaultstep,1
+    if key=supprkey then dec defaultstep,1
+    if defaultstep=0 then defaultstep=1
+    if defaultstep>128 then defaultstep=128
+    if key=defaultkey
+      xpos=xposinit
+      ypos=yposinit
+      zpos=zposinit
+     endif
+    if mouseclick()=1 then _3DMEMW_Check_Mouse_View()
+    _matrix(_matrix,1)=xpos
+    _matrix(_matrix,2)=ypos
+    _matrix(_matrix,3)=zpos
+    position matrix _matrix,xpos,ypos,zpos
+    MW_Ink(14,128,128,128)
+    MW_Set_Cursor(14,0,0)
+    MW_Print(14,"Matrix pos :")
+    MW_Print(14,"X="+str$(xpos))
+    MW_Print(14,"Y="+str$(ypos))
+    MW_Print(14,"Z="+str$(zpos))
+    MW_Print(14,_Dialogue$(56)+str$(defaultstep))
+Rem    fade object newobj,_FADEOBJECT
+    MW_Sync(0)
+    Sync
+    MW_Cls(14,32,32,32)
+   until spacekey()=1 or mouseclick()=2
+  repeat
+   until spacekey()=0 and mouseclick()=0
+ EndFunction
+Rem
+Rem
+Rem
+Function _3DME_Move_Matrix_Point(_Matrix)
+  autocam off
+  defaultstep=16
+  pageupkey=201
+  pagedownkey=209
+  inserkey=210
+  supprkey=211
+  defaultkey=199
+  xpnt=0 : zpnt=0 : _matrixpointer=65535-256
+  load object "editor\matrix_pointer.x",_matrixpointer
+  xsize=_Matrix(_MATRIX,6) : ysize=_Matrix(_MATRIX,7)
+  if xsize<ysize then defsize=xsize else defsize=ysize
+  percent#=(defsize/64.0)*100
+  scale object _matrixpointer,percent#,percent#,percent#
+  set object _matrixpointer,1,0,0,1,1,1,1
+  xposm=_matrix(_matrix,1) : yposm=_matrix(_matrix,2) : zposm=_matrix(_matrix,3)
+  Xtiles=_Matrix(_MATRIX,4)
+  Ztiles=_Matrix(_MATRIX,5)
+  Xsize=_Matrix(_MATRIX,6)
+  Zsize=_Matrix(_MATRIX,7)
+  repeat
+    MW_Background_Task()
+    ycurs=mousey() : xcurs=mousex()
+    sprite 2,xcurs,ycurs,3
+    key=scancode()
+    xposobj=(xpnt) : zposobj=(zpnt)
+    yposobj=get matrix height(_MATRIX,xposobj,zposobj)
+    position object _matrixpointer,(xposobj*xsize)+xposm,yposobj+yposm,(zposobj*zsize)+zposm
+    xpnt=xpnt+(rightkey() - leftkey() )
+    zpnt=zpnt+(upkey() - downkey() )
+    if xpnt<0 then xpnt=0
+    if xpnt>xtiles then xpnt=xtiles
+    if zpnt<0 then zpnt=0
+    if zpnt>ztiles then zpnt=ztiles
+    if key=inserkey then inc defaultstep,1
+    if key=supprkey then dec defaultstep,1
+    if defaultstep=0 then defaultstep=1
+    if defaultstep>128 then defaultstep=128
+    if key=pageupkey or key=pagedownkey
+      if key=pageupkey then _Matrix_Height(_MATRIX,Xpnt,Zpnt)=_Matrix_Height(_MATRIX,Xpnt,Zpnt)+defaultstep
+      if key=pagedownkey then _Matrix_Height(_MATRIX,Xpnt,Zpnt)=_Matrix_Height(_MATRIX,Xpnt,Zpnt)-defaultstep
+      set matrix height _matrix,xpnt,zpnt,_Matrix_Height(_MATRIX,Xpnt,Zpnt)
+      update matrix _matrix
+     Endif
+      if key=17
+        for boucle=0 to xtiles
+          _Matrix_Height(_MATRIX,boucle,Zpnt)=_Matrix_Height(_MATRIX,Xpnt,Zpnt)
+          set matrix height _matrix,boucle,zpnt,_Matrix_Height(_MATRIX,boucle,Zpnt)
+         next boucle
+       Endif
+      if key=45
+        for boucle=0 to ztiles
+          _Matrix_Height(_MATRIX,Xpnt,boucle)=_Matrix_Height(_MATRIX,Xpnt,Zpnt)
+          set matrix height _matrix,xpnt,boucle,_Matrix_Height(_MATRIX,xpnt,boucle)
+         next boucle
+       Endif
+    if mouseclick()=1 then _3DMEMW_Check_Mouse_View()
+    if key=17 or key=45 then update matrix _matrix
+    MW_Ink(14,128,128,128)
+    MW_Set_Cursor(14,0,0)
+    MW_Print(14,"Matrix tile :")
+    MW_Print(14,"X="+str$(xpnt))
+    MW_Print(14,"Y="+str$(ypnt))
+    MW_Print(14,"Z="+str$(zpnt))
+    MW_Print(14,"Y="+str$(_Matrix_height(_MATRIX,Xpnt,Zpnt)))
+    MW_Print(14,_Dialogue$(56)+str$(defaultstep))
+    MW_Sync(0)
+    Sync
+    MW_Cls(14,32,32,32)
+   until spacekey()=1 or mouseclick()=2
+   delete object _matrixpointer
+  repeat
+    until spacekey()=0 and mouseclick()=0
+ EndFunction
+Rem
+Rem
+Rem
+Function _3DME_Texture_Matrix_Tiles(_Matrix,_FirstTextureImage,_texturenum)
+  autocam off
+  defaultstep=1
+  pageupkey=201
+  pagedownkey=209
+  inserkey=210
+  supprkey=211
+  defaultkey=199
+  if _texturenum>0
+    xpnt=0 : zpnt=0 : _matrixpointer=65535-256
+    load object "editor\matrix_tiles.x",_matrixpointer
+    xsize=_Matrix(_MATRIX,6) : ysize=_Matrix(_MATRIX,7)
+    if xsize<ysize then defsize=xsize else defsize=ysize
+    percent#=(defsize/128.0)*100
+    scale object _matrixpointer,percent#,percent#,percent#
+    set object _matrixpointer,1,0,0,1,1,1,1
+    xposm=_matrix(_matrix,1) : yposm=_matrix(_matrix,2) : zposm=_matrix(_matrix,3)
+    Xtiles=_Matrix(_MATRIX,4)
+    Ztiles=_Matrix(_MATRIX,5)
+    Xsize=_Matrix(_MATRIX,6)
+    Zsize=_Matrix(_MATRIX,7)
+    repeat
+      ycurs=mousey() : xcurs=mousex()
+      sprite 2,xcurs,ycurs,3
+      MW_Background_Task()
+      key=scancode()
+      xposobj=xpnt : zposobj=zpnt
+      yposobj=get matrix height(_MATRIX,xposobj,zposobj)
+      position object _matrixpointer,(xposobj*xsize)+(xsize/2)+xposm,yposobj+yposm,(zposobj*zsize)+(zsize/2)+zposm
+      xpnt=xpnt+(rightkey() - leftkey() )
+      zpnt=zpnt+(upkey() - downkey() )
+      if xpnt<0 then xpnt=0
+      if xpnt>xtiles-1 then xpnt=xtiles-1
+      if zpnt<0 then zpnt=0
+      if zpnt>ztiles-1 then zpnt=ztiles-1
+      _tile=_Matrix_Tile(_MATRIX,Xpnt,Zpnt)
+      if key=pageupkey then inc _tile,1
+      if key=pagedownkey then dec _tile,1
+      if _tile>_texturenum then _tile=_texturenum
+      if _tile<1 then _tile=1
+      _Matrix_Tile(_MATRIX,Xpnt,Zpnt)=_tile
+      if key=17
+        for boucle=0 to xtiles-1
+          _Matrix_Tile(_MATRIX,boucle,zpnt)=_tile
+         next boucle
+       Endif
+      if key=45
+        for boucle=0 to ztiles-1
+          _Matrix_Tile(_MATRIX,xpnt,boucle)=_tile
+         next boucle
+       Endif
+      if key=16
+        for zbcl=0 to ztiles-1
+          for xbcl=0 to xtiles-1
+            _Matrix_Tile(_MATRIX,xbcl,zbcl)=_tile
+           next xbcl
+         next zbcl
+       endif
+      if key=pageupkey or key=pagedownkey then _3DME_Refresh_Matrix(_matrix,_FirstTextureImage,_texturenum)
+      if key=17 or key=45 or key=16 then _3DME_Refresh_Matrix(_matrix,_FirstTextureImage,_texturenum)
+      if mouseclick()=1 then _3DMEMW_Check_Mouse_View()
+      MW_Ink(14,128,128,128)
+      MW_Set_Cursor(14,0,0)
+      MW_Print(14,"Mtx point :")
+      MW_Print(14,"X="+str$(xpnt))
+      MW_Print(14,"Z="+str$(zpnt))
+      MW_Print(14,"Y="+str$(_Matrix_Tile(_MATRIX,Xpnt,Zpnt)))
+      MW_Print(14,_Dialogue$(56)+str$(defaultstep))
+      MW_Sync(0)
+      Sync
+      MW_Cls(14,32,32,32)
+     until spacekey()=1 or mouseclick()=2
+     delete object _matrixpointer
+    repeat
+     until spacekey()=0 and mouseclick()=0
+   EndIf
+ EndFunction
+Rem ****************************************************************************************************************
+Function _3DME_Refresh_Matrix(_matrix,_FirstTextureImage,_texturenum)
+Rem On met au point la liste des textures à utiliser pour les tiles.
+  xc=camera position x() : yc=camera position y() : zc=camera position z()
+  xa=camera angle x() : ya=camera angle y() : za=camera angle z()
+  _how_many=0
+  xtiles=_matrix(_matrix,4) : ztiles=_matrix(_matrix,5)
+  xsize=_matrix(_matrix,6) : zsize=_matrix(_matrix,7)
+  for zbcl=0 to ztiles
+    for xbcl=0 to xtiles
+      img=_Matrix_Tile(_MATRIX,xbcl,zbcl)
+      if img>0
+        if _how_many=0
+          _how_many=1
+          _matrix_tilelist(_how_many)=img
+          _matrix_realtile(_Matrix,xbcl,zbcl)=1
+         else
+          _exist=0
+          for boucle=1 to _how_many
+            if _matrix_tilelist(boucle)=img
+              _exist=1
+              _matrix_realtile(_Matrix,xbcl,zbcl)=boucle
+             EndIf
+           next boucle
+          if _exist=0
+            inc _how_many,1
+            _matrix_tilelist(_how_many)=img
+            _matrix_realtile(_Matrix,xbcl,zbcl)=_how_many
+           endif
+         endif
+       endif
+     next xbcl
+   next zbcl
+Rem On crée maintenant l'image qui servira à faire les tiles pour la matrice
+  if _how_many=1 then _mode=1
+  if _how_many>1 and _how_many<5 then _mode=2
+  if _how_many>4 and _how_many<10 then _mode=3
+  if _how_many>9 and _how_many<17 then _mode=4
+  create bitmap 2,1024,768
+  MW_Sync(0) : sync
+  if _texturenum>0
+    if _mode=1 or _mode=2
+      if _matrix_tilelist(1)>0 then _Paste_scaled_Image(_matrix_tilelist(1)+_FirstTextureImage,0,0,xsize,zsize,2)
+     endif
+    if _mode=2
+      if _matrix_tilelist(2)>0 then _Paste_scaled_Image(_matrix_tilelist(2)+_FirstTextureImage,xsize,0,xsize*2,zsize,2)
+      if _matrix_tilelist(3)>0 then _Paste_scaled_Image(_matrix_tilelist(3)+_FirstTextureImage,0,zsize,xsize,zsize*2,2)
+      if _matrix_tilelist(4)>0 then _Paste_scaled_Image(_matrix_tilelist(4)+_FirstTextureImage,xsize,zsize,xsize*2,zsize*2,2)
+     endif
+    if _mode=3
+      xpos=0 : ypos=0
+      for _til=1 to 9
+        if _matrix_tilelist(_til)>0 then _Paste_scaled_Image(_matrix_tilelist(_til)+_FirstTextureImage,xpos,ypos,xpos+xsize,ypos+zsize,2)
+        inc xpos,xsize : if xpos=xsize*3 then xpos=0 : inc ypos,zsize
+       next _til
+     endif
+    if _mode=4
+      xpos=0 : ypos=0
+      for _til=1 to 16
+        if _matrix_tilelist(_til)>0 then _Paste_scaled_Image(_matrix_tilelist(_til)+_FirstTextureImage,xpos,ypos,xpos+xsize,ypos+zsize,2)
+        inc xpos,xsize : if xpos=xsize*4 then xpos=0 : inc ypos,zsize
+       next _til
+     endif
+   EndIf
+  _img=0 : set current bitmap 2
+  MW_Sync(0) : sync
+  repeat
+    inc _img,1
+   until image exist(_img)=0
+  if _mode=0 then _mode=1 : Rem Force à saisir l'image même vide pour les textures.
+  if _mode>0 then get image _img,0,0,xsize*_mode,zsize*_mode
+  delete bitmap 2
+  MW_Sync(0) : Sync
+Rem On va crée l'image qui servira aux tiles .
+Rem  if matrix exist(_MATRIX)=1 then delete matrix _MATRIX
+Rem  sync
+  xt=_Matrix(_MATRIX,4) : zt=_Matrix(_MATRIX,5) : xs=_Matrix(_MATRIX,6) : zs=_Matrix(_MATRIX,7)
+  if matrix exist(_matrix)=0
+    Rem Création de la matrice . . .
+    make matrix _MATRIX,(xt*xs),(zt*zs),xt,zt
+    Rem Positionnement . . .
+    position matrix _MATRIX,_Matrix(_MATRIX,1),_Matrix(_MATRIX,2),_Matrix(_MATRIX,3)
+   endif
+  Rem Addition from version 2.30
+  _ghostMode=_Matrix(_MATRIX,8)
+  _WireFrame=_Matrix(_MATRIX,9)
+  _Transparency=_Matrix(_MATRIX,10)
+  _Cull=_Matrix(_MATRIX,11)
+  _TextureFiltering=_Matrix(_MATRIX,12)
+  _LightSensitive=_Matrix(_MATRIX,13)
+  _FogSensitive=_Matrix(_MATRIX,14)
+  _AmbientSensitive=_Matrix(_MATRIX,15)
+  _ObjectCollisions=_Matrix(_MATRIX,16)
+  Rem Définition des hauteurs des points .
+  for xbcl=0 to xtiles
+    for zbcl=0 to ztiles
+      _ypos=_Matrix_Height(_matrix,xbcl,zbcl)
+      set matrix height _matrix,xbcl,zbcl,_ypos
+     next zbcl
+   next xbcl
+  Rem Mise en place des textures pour la matrice.
+  if _texturenum>0
+    if _mode>0
+      prepare matrix texture _MATRIX,_img,_mode,_mode
+      for xbcl=0 to (xtiles-1)
+        for zbcl=0 to (ztiles-1)
+          _tile=_matrix_realtile(_Matrix,xbcl,zbcl)
+          if _tile=0 then _tile=1
+          set matrix tile _Matrix,xbcl,zbcl,_tile
+         next zbcl
+       next xbcl
+      delete image _img
+     Endif
+   EndIf
+  update matrix _MATRIX
+  set matrix _MATRIX,_Wireframe,_Transparency,_Cull,_TextureFiltering,_LightSensitive,_FogSensitive,_AmbientSensitive
+  if _ghostmode=1 then ghost matrix on _MATRIX else ghost matrix off _MATRIX
+Rem  update matrix _MATRIX
+  position camera xc,yc,zc
+  rotate camera xa,ya,za
+  MW_Sync(0)
+  sync
+ EndFunction
+Rem ****************************************************************************************************************
+Function _Matrix_Properties(_matrix)
+  if _matrix>0
+    if matrix exist(_matrix)=1
+      If MW_window_Exist(17)=0
+        MW_Open_New_window(17,"--",196,182,1,1,0)
+        MW_Position_Window(17,128,16)
+        MW_paste_image(17,23,0,0)
+        _modif=1
+       else
+        _modif=0
+       Endif
+      Rem Addition from version 2.30
+      _ghostMode=_Matrix(_MATRIX,8)
+      _WireFrame=_Matrix(_MATRIX,9)
+      _Transparency=_Matrix(_MATRIX,10)
+      _Cull=_Matrix(_MATRIX,11)
+      _TextureFiltering=_Matrix(_MATRIX,12)
+      _LightSensitive=_Matrix(_MATRIX,13)
+      _FogSensitive=_Matrix(_MATRIX,14)
+      _AmbientSensitive=_Matrix(_MATRIX,15)
+      _ObjectCollisions=_Matrix(_MATRIX,16)
+      _refresh_cases_matrixes(xwindow,ywindow,_ghostmode,_wireframe,_transparency,_cull,_texturefiltering,_lightsensitive,_fogsensitive,_ambientsensitive,_hiddenobject,_ObjectCollisions)
+      _wnd=MW_Current_Window()
+      if _wnd=17
+        xm=MW_Window_Position_X() : ym=MW_Window_Position_Y()
+        REM SELECTIONNER L'ICONE QUITTER
+        if mouseclick()=1 and ym>0
+          if xm>1 and xm<18
+            if ym>19 and ym<36
+              _modif=1 : inc _GhostMode : if _GhostMode=2 then _GhostMode=0
+             endif
+            if ym>35 and ym<52
+              _modif=1 : inc _Wireframe : if _WireFrame=2 then _WireFrame=0
+             endif
+            if ym>51 and ym<78
+              _modif=1 : inc _Transparency : if _Transparency=2 then _Transparency=0
+             endif
+            if ym>67 and ym<84
+              _modif=1 : inc _Cull : if _Cull=2 then _Cull=0
+             endif
+            if ym>83 and ym<100
+              _modif=1 : inc _TextureFiltering : if _TextureFiltering=2 then _TextureFiltering=0
+             endif
+            if ym>99 and ym<116
+              _modif=1 : inc _LightSensitive : if _LightSensitive=2 then _LightSensitive=0
+             endif
+            if ym>115 and ym<132
+              _modif=1 : inc _FogSensitive : if _FogSensitive=2 then _FogSensitive=0
+             endif
+            if ym>131 and ym<158
+              _modif=1 : inc _AmbientSensitive : if _AmbientSensitive=2 then _AmbientSensitive=0
+             endif
+            if ym>147 and ym<164
+              _modif=1 : inc _HiddenObject : if _HiddenObject=2 then _HiddenObject=0
+             endif
+            if ym>163 and ym<180
+              _modif=1 : inc _ObjectCollisions : if _ObjectCollisions=2 then _ObjectCollisions=0
+             endif
+           endif
+          REM ANTI Multi_click
+          repeat
+           until mouseclick()=0
+         endif
+       endif
+      if _modif=1
+        _Matrix(_MATRIX,8)=_ghostMode
+        _Matrix(_MATRIX,9)=_WireFrame
+        _Matrix(_MATRIX,10)=_Transparency
+        _Matrix(_MATRIX,11)=_Cull
+        _Matrix(_MATRIX,12)=_TextureFiltering
+        _Matrix(_MATRIX,13)=_LightSensitive
+        _Matrix(_MATRIX,14)=_FogSensitive
+        _Matrix(_MATRIX,15)=_AmbientSensitive
+        _Matrix(_MATRIX,16)=_ObjectCollisions
+        _3DME_Refresh_Matrix(_matrix,_FirstTextureImage,_texturenum)
+       endif
+     Endif
+   else
+Rem    If MW_Window_Exist(17)=1 then MW_Close_window(17)
+   endif
+ EndFunction
+Rem ****************************************************************************************************************
+Function _refresh_cases_matrixes(xwindow,ywindow,_ghostmode,_wireframe,_transparency,_cull,_texturefiltering,_lightsensitive,_fogsensitive,_ambientsensitive,_hiddenobject,_ObjectCollisions)
+  if _ghostmode=1 then MW_Paste_Image(17,9,2,20) else MW_Paste_Image(17,8,2,20)
+  if _wireframe=1 then MW_Paste_Image(17,8,2,36) else MW_Paste_Image(17,9,2,36)
+  if _Transparency=1 then MW_Paste_Image(17,8,2,52) else MW_Paste_Image(17,9,2,52)
+  if _Cull=1 then MW_Paste_Image(17,8,2,68) else MW_Paste_Image(17,9,2,68)
+  if _TextureFiltering=1 then MW_Paste_Image(17,9,2,84) else MW_Paste_Image(17,8,2,84)
+  if _LightSensitive=1 then MW_Paste_Image(17,9,2,100) else MW_Paste_Image(17,8,2,100)
+  if _FogSensitive=1 then MW_Paste_Image(17,9,2,116) else MW_Paste_Image(17,8,2,116)
+  if _AmbientSensitive=1 then MW_Paste_Image(17,9,2,132) else MW_Paste_Image(17,8,2,132)
+  if _HiddenObject=1 then MW_Paste_Image(17,9,2,148) else MW_Paste_Image(17,8,2,148)
+  if _ObjectCollisions=1 then MW_Paste_Image(17,9,2,164) else MW_Paste_Image(17,8,2,164)
+ EndFunction
+Rem ****************************************************************************************************************
+Function Fct_Select_Matrix(newmatrix,_lastmatrix)
+  pageupkey=201
+  pagedownkey=209
+  inserkey=210
+  supprkey=211
+  defaultkey=199
+  _FirstTextureImage=70
+  repeat
+    MW_BackGround_Task()
+    key=scancode()
+    if key=inserkey then inc newmatrix
+    if key=supprkey then dec newmatrix
+    if newmatrix>_lastmatrix then newmatrix=_lastmatrix
+    if newmatrix<1 then newmatrix=1
+    if upkey()=1 then move camera 10
+    if downkey()=1 then move camera 0-10
+    xc#=camera position x()
+    zc#=camera position z()
+    x=xc#/64 : z=zc#/64
+    position object 1,-1.75+(x*64),-1,-1.75+(z*64)
+    if mouseclick()=1 then _3DMEMW_Check_Mouse_View()
+    MW_Ink(12,128,128,128)
+    MW_Set_Cursor(14,0,0)
+    MW_Print(12,"Matrix :")
+    MW_Print(12,"   "+str$(newmatrix))
+    ycurs=mousey() : xcurs=mousex()
+    sprite 2,xcurs,ycurs,3
+    if matrix exist(newmatrix)=1
+      xpos=matrix position x(newmatrix) : ypos=matrix position y(newmatrix) : zpos=matrix position z(newmatrix)
+      point camera xpos,ypos,zpos
+     endif
+    MW_sync(0)
+    sync
+    MW_Cls(12,32,32,32)
+   until spacekey()=1 or mouseclick()=2
+  repeat
+   until spacekey()=0 and mouseclick()=0
+ EndFunction newmatrix
+Rem ****************************************************************************************************************
+Function _3DME_Random_Height(_matrix,ymax,ymin,y0,alfa)
+  if matrix exist(_matrix)=1
+    xtiles=_Matrix(_matrix,4) : Rem X
+    ztiles=_Matrix(_matrix,5) : Rem Z
+    _Matrix_Height(_matrix,0,0)=y0
+    Rem D'abord on définit la première verticale et horizontale.
+    for boucle=1 to xtiles
+      Rem pour X
+      ypos=_Matrix_Height(_MATRIX,boucle-1,0)
+      deca=rnd(alfa)-(alfa/2) : ypos=ypos+deca
+      if ypos>ymax then ypos=ymax
+      if ypox<ymin then ypos=ymin
+      _Matrix_Height(_MATRIX,boucle,0)=ypos
+      set matrix height _matrix,boucle,0,ypos
+     next boucle
+    for boucle=1 to ztiles
+      Rem pour Z
+      ypos=_Matrix_Height(_MATRIX,0,boucle-1)
+      deca=rnd(alfa)-(alfa/2) : ypos=ypos+deca
+      if ypos>ymax then ypos=ymax
+      if ypox<ymin then ypos=ymin
+      _Matrix_Height(_MATRIX,0,boucle)=ypos
+      set matrix height _matrix,0,boucle,ypos
+     next boucle
+    Rem Maintenant on définit tout les autres points.
+    for xpnt=1 to xtiles
+      for zpnt=1 to ztiles
+        ypos1=_Matrix_Height(_MATRIX,xpnt-1,zpnt)
+        ypos2=_Matrix_Height(_MATRIX,xpnt,zpnt-1)
+        ypos=(ypos1+ypos2)/2
+        deca=rnd(alfa)-(alfa/2) : ypos=ypos+deca
+        if ypos>ymax then ypos=ymax
+        if ypox<ymin then ypos=ymin
+        _Matrix_Height(_MATRIX,xpnt,zpnt)=ypos
+        set matrix height _matrix,xpnt,zpnt,ypos
+       next zpnt
+     next xpnt
+    Update matrix _matrix
+   endif
+ Endfunction
+REMSTART
+  _Matrix(_MATRIX,1)=Matrix X Position
+  _Matrix(_MATRIX,2)=Matrix Y Position
+  _Matrix(_MATRIX,3)=Matrix Z Position
+  _Matrix(_MATRIX,4)=X Number of tiles
+  _Matrix(_MATRIX,5)=Z Number of tiles
+  _Matrix(_MATRIX,6)=X tiles size
+  _Matrix(_MATRIX,7)=Z tiles size
+  _Matrix(_MATRIX,8)=Mode GHOST
+  _Matrix(_MATRIX,9)=Fil De Fer
+  _Matrix(_MATRIX,10)=Transparence
+  _Matrix(_MATRIX,11)=faces cachées
+  _Matrix(_MATRIX,12)=filtrage de textures
+  _Matrix(_MATRIX,13)=sensible à la lumière
+  _Matrix(_MATRIX,14)=sensible au brouillard
+  _Matrix(_MATRIX,15)=sensebile à la lumière ambiante
+  _Matrix(_MATRIX,16)=collisions actives.
+  _Matrix_Heigth(_MATRIX,X,Z)=Height of the point X,Z of the matrix _MATRIX
+  _Matrix_Tile(_MATRIX,X,Z)=Texture used for the tile X,Z of the matrix _MATRIX
+REMEND
